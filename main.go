@@ -21,7 +21,21 @@ package main
 import (
     "fmt"
     "flag"
+    "golang.org/x/sys/windows/registry"
 )
+
+func mark_status(is_active bool) {
+    key, _, err := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Security Without Borders\\", registry.WRITE)
+    if err != nil {
+        panic(err)
+    }
+
+    if is_active {
+        key.SetDWordValue("Harden", 1)
+    } else {
+        key.SetDWordValue("Harden", 0)
+    }
+}
 
 func main() {
     restore := flag.Bool("restore", false, "Restore original settings")
@@ -35,6 +49,8 @@ func main() {
         trigger_macro(true)
         trigger_pdf_js(true)
         trigger_pdf_objects(true)
+
+        mark_status(false)
     } else {
         fmt.Println("Disabling dangerous features...")
 
@@ -43,6 +59,8 @@ func main() {
         trigger_macro(false)
         trigger_pdf_js(false)
         trigger_pdf_objects(false)
+
+        mark_status(true)
     }
 
     fmt.Println("Done!")
