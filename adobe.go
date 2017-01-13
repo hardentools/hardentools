@@ -49,12 +49,8 @@ func trigger_pdf_js(enable bool) {
 
     for _, adobe_version := range adobe_versions {
         path := fmt.Sprintf("SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs", adobe_version)
-        key, err := registry.OpenKey(registry.CURRENT_USER, path, registry.WRITE)
-        // Check
-        if err == nil {
-            key1, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
-            key = key1
-        }
+        key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
+
         key.SetDWordValue("bEnableJS", value)
         key.Close()
     }
@@ -84,13 +80,8 @@ func trigger_pdf_objects(enable bool) {
 
     for _, adobe_version := range adobe_versions {
         path := fmt.Sprintf("SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals", adobe_version)
-        key, err := registry.OpenKey(registry.CURRENT_USER, path, registry.WRITE)
-
-        // Check
-        if err == nil {
-            key1, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
-            key = key1
-        }
+        key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
+        
         key.SetDWordValue("bAllowOpenFile", allow_value)
         key.SetDWordValue("bSecureOpenFile", secure_value)
         key.Close()
