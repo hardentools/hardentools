@@ -24,7 +24,7 @@ import (
 )
 
 func trigger_wsh(enable bool) {
-    key, _, _ := registry.CreateKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows Script Host\\Settings", registry.WRITE)
+    key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Windows Script Host\\Settings", registry.WRITE)
 
     if enable {
         fmt.Println("[*] Enabling Windows Script Host")
