@@ -95,3 +95,22 @@ func trigger_macro(enable bool) {
         }
     }
 }
+
+
+// ActiveX
+
+func trigger_activex(enable bool) {
+	
+	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Office\\Common\\Security", registry.WRITE )
+	
+    if enable {
+        // Enable ActiveX
+        fmt.Println("[*] Enabling ActiveX in Office")
+		key.DeleteValue("DisableAllActiveX")
+    } else {
+        // Disable ActiveX
+        fmt.Println("[*] Disabling ActiveX in Office")
+		key.SetDWordValue("DisableAllActiveX", 1)
+    }
+    key.Close()
+}
