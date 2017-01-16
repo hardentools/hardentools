@@ -104,11 +104,11 @@ func trigger_activex(enable bool) {
 
     if enable {
         // Enable ActiveX
-        events.AppendText("* Enabling ActiveX in Office")
+        events.AppendText("* Enabling ActiveX in Office\n")
         key.DeleteValue("DisableAllActiveX")
     } else {
         // Disable ActiveX
-        events.AppendText("* Disabling ActiveX in Office")
+        events.AppendText("* Disabling ActiveX in Office\n")
         key.SetDWordValue("DisableAllActiveX", 1)
     }
     key.Close()
