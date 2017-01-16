@@ -39,11 +39,11 @@ func trigger_pdf_js(enable bool) {
 
     if enable {
         // Enable 
-        fmt.Println("[*] Enabling Acrobat Reader JavaScript")
+        events.AppendText("* Enabling Acrobat Reader JavaScript\n")
         value = 1
     } else {
         // Disable Packager
-        fmt.Println("[*] Disabling Acrobat Reader JavaScript")
+        events.AppendText("* Disabling Acrobat Reader JavaScript\n")
         value = 0
     }
 
@@ -68,12 +68,12 @@ func trigger_pdf_objects(enable bool) {
 
     if enable {
         // Enable 
-        fmt.Println("[*] Enabling the opening of objects embedded in PDF documents")
+        events.AppendText("* Enabling the opening of objects embedded in PDF documents\n")
         allow_value = 1
         secure_value = 0
     } else {
         // Disable
-        fmt.Println("[*] Disabling the opening of objects embedded in PDF documents")
+        events.AppendText("* Disabling the opening of objects embedded in PDF documents\n")
         allow_value = 0
         secure_value = 1
     }
