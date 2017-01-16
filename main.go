@@ -24,6 +24,9 @@ import (
     "golang.org/x/sys/windows/registry"
 )
 
+var window *walk.MainWindow
+var events *walk.TextEdit
+
 const harden_key_path = "SOFTWARE\\Security Without Borders\\"
 
 func check_status() bool {
@@ -82,19 +85,17 @@ func enable_all() {
 }
 
 func main() {
-    var window *walk.MainWindow
-    var events *walk.TextEdit
     var button_text, events_text string
     var button_func func()
 
     if check_status() == false {
         button_text = "Harden!"
         button_func = disable_all
-        events_text = "Ready to harden some features of your system?"
+        events_text = "- Ready to harden some features of your system?\n"
     } else {
         button_text = "Restore..."
         button_func = enable_all
-        events_text = "We have already hardened some risky features, do you want to restore them?"
+        events_text = "- We have already hardened some risky features, do you want to restore them?\n"
     }
 
     MainWindow{

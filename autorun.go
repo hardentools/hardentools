@@ -19,7 +19,6 @@
 package main
 
 import (
-    "fmt"
     "golang.org/x/sys/windows/registry"
 )
 
@@ -34,12 +33,12 @@ func trigger_autorun(enable bool) {
     key2, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", registry.WRITE)
 
     if enable {
-        fmt.Println("[*] Enabling AutoRun and AutoPlay")
+        events.AppendText("* Enabling AutoRun and AutoPlay")
         key.DeleteValue("NoDriveTypeAutoRun")
         key.DeleteValue("NoAutorun")
         key2.DeleteValue("DisableAutoplay")
     } else {
-        fmt.Println("[*] Disabling AutoRun and AutoPlay")
+        events.AppendText("* Disabling AutoRun and AutoPlay")
         key.SetDWordValue("NoDriveTypeAutoRun", 0xb5)
         key.SetDWordValue("NoAutorun", 1)
         key2.SetDWordValue("DisableAutoplay", 1)
