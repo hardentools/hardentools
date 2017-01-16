@@ -1,27 +1,27 @@
 /*
-    Hardentools
-    Copyright (C) 2017  Claudio Guarnieri, Mariano Graziano
+   Hardentools
+   Copyright (C) 2017  Claudio Guarnieri, Mariano Graziano
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 package main
 
 import (
-    "golang.org/x/sys/windows/registry"
     "github.com/lxn/walk"
     . "github.com/lxn/walk/declarative"
+    "golang.org/x/sys/windows/registry"
 )
 
 const harden_key_path = "SOFTWARE\\Security Without Borders\\"
@@ -78,7 +78,7 @@ func enable_all() {
     trigger_pdf_objects(true)
     trigger_autorun(true)
 
-    mark_status(false)    
+    mark_status(false)
 }
 
 func main() {
@@ -99,17 +99,17 @@ func main() {
 
     MainWindow{
         AssignTo: &window,
-        Title: "Harden - Security Without Borders",
-        MinSize: Size{400, 300},
-        Layout:  VBox{},
+        Title:    "Harden - Security Without Borders",
+        MinSize:  Size{400, 300},
+        Layout:   VBox{},
         Children: []Widget{
             TextEdit{
                 AssignTo: &events,
-                Text: events_text,
+                Text:     events_text,
                 ReadOnly: true,
             },
             PushButton{
-                Text: button_text,
+                Text:      button_text,
                 OnClicked: button_func,
             },
         },
