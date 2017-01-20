@@ -19,9 +19,9 @@
 package main
 
 import (
-    "github.com/lxn/walk"
-    . "github.com/lxn/walk/declarative"
-    "golang.org/x/sys/windows/registry"
+	"github.com/lxn/walk"
+	. "github.com/lxn/walk/declarative"
+	"golang.org/x/sys/windows/registry"
 )
 
 var window *walk.MainWindow
@@ -30,91 +30,93 @@ var events *walk.TextEdit
 const harden_key_path = "SOFTWARE\\Security Without Borders\\"
 
 func check_status() bool {
-    key, err := registry.OpenKey(registry.CURRENT_USER, harden_key_path, registry.READ)
-    if err != nil {
-        return false
-    }
+	key, err := registry.OpenKey(registry.CURRENT_USER, harden_key_path, registry.READ)
+	if err != nil {
+		return false
+	}
 
-    value, _, err := key.GetIntegerValue("Harden")
-    if err != nil {
-        return false
-    }
+	value, _, err := key.GetIntegerValue("Harden")
+	if err != nil {
+		return false
+	}
 
-    if value == 1 {
-        return true
-    } else {
-        return false
-    }
+	if value == 1 {
+		return true
+	} else {
+		return false
+	}
 }
 
 func mark_status(is_active bool) {
-    key, _, err := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.WRITE)
-    if err != nil {
-        panic(err)
-    }
+	key, _, err := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.WRITE)
+	if err != nil {
+		panic(err)
+	}
 
-    if is_active {
-        key.SetDWordValue("Harden", 1)
-    } else {
-        key.SetDWordValue("Harden", 0)
-    }
+	if is_active {
+		key.SetDWordValue("Harden", 1)
+	} else {
+		key.SetDWordValue("Harden", 0)
+	}
 }
 
 func disable_all() {
-//    trigger_wsh(false)
-//    trigger_ole(false)
-    trigger_macro(false)
-//    trigger_activex(false)
-//    trigger_pdf_js(false)
-//    trigger_pdf_objects(false)
-//    trigger_autorun(false)
+	//    trigger_wsh(false)
+	//    trigger_ole(false)
+	trigger_macro(false)
+	//    trigger_activex(false)
+	//    trigger_pdf_js(false)
+	//    trigger_pdf_objects(false)
+	//    trigger_autorun(false)
+	trigger_powershell(false)
 
-    mark_status(true)
+	mark_status(true)
 }
 
 func enable_all() {
-//    trigger_wsh(true)
-//    trigger_ole(true)
-    trigger_macro(true)
-//    trigger_activex(true)
-//    trigger_pdf_js(true)
-//    trigger_pdf_objects(true)
-//    trigger_autorun(true)
+	//    trigger_wsh(true)
+	//    trigger_ole(true)
+	trigger_macro(true)
+	//    trigger_activex(true)
+	//    trigger_pdf_js(true)
+	//    trigger_pdf_objects(true)
+	//    trigger_autorun(true)
+	trigger_powershell(true)
 
-    mark_status(false)
+	mark_status(false)
 }
 
 func main() {
-    var button_text, events_text string
-    var button_func func()
+	var button_text, events_text string
+	var button_func func()
 
-    if check_status() == false {
-        button_text = "Harden!"
-        button_func = disable_all
-        events_text = "- Ready to harden some features of your system?\n"
-    } else {
-        button_text = "Restore..."
-        button_func = enable_all
-        events_text = "- We have already hardened some risky features, do you want to restore them?\n"
-    }
+	if check_status() == false {
+		button_text = "Harden!"
+		button_func = disable_all
+		events_text = "- Ready to harden some features of your system?\n"
+	} else {
+		button_text = "Restore..."
+		button_func = enable_all
+		events_text = "- We have already hardened some risky features, do you want to restore them?\n"
+	}
 
-    MainWindow{
-        AssignTo: &window,
-        Title:    "Harden - Security Without Borders",
-        MinSize:  Size{400, 300},
-        Layout:   VBox{},
-        Children: []Widget{
-            TextEdit{
-                AssignTo: &events,
-                Text:     events_text,
-                ReadOnly: true,
-            },
-            PushButton{
-                Text:      button_text,
-                OnClicked: button_func,
-            },
-        },
-    }.Create()
-    
-    window.Run()
+	MainWindow{
+		AssignTo: &window,
+		Title:    "Harden - Security Without Borders",
+		MinSize:  Size{400, 300},
+		Layout:   VBox{},
+		Children: []Widget{
+			TextEdit{
+				AssignTo: &events,
+				Text:     events_text,
+				ReadOnly: true,
+			},
+			PushButton{
+				Text:      button_text,
+				OnClicked: button_func,
+			},
+		},
+	}.Create()
+
+	window.Run()
 }
