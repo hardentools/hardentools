@@ -32,10 +32,10 @@ import (
  * "3"="cmd.exe"
  */
 func trigger_powershell(enable bool) {
-	//key, _ := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
+	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
 	if enable {
 		events.AppendText("* Enabling Powershell and cmd\n")
-		//key.DeleteValue("DisallowRun")
+		key.DeleteValue("DisallowRun")
 	} else {
 		events.AppendText("* Disabling Powershell and cmd\ns")
 		key2, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.WRITE)
@@ -44,11 +44,11 @@ func trigger_powershell(enable bool) {
 			panic(err)
 		}
 
-		//key.SetDWordValue("DisallowRun", 0x1)
+		key.SetDWordValue("DisallowRun", 0x1)
 		key2.SetStringValue("1", "powershell_ise.exe")
 		key2.SetStringValue("2", "powershell.exe")
 		key2.SetStringValue("3", "cmd.exe")
 		key2.Close()
 	}
-	//key.Close()
+	key.Close()
 }
