@@ -19,9 +19,9 @@
 package main
 
 import (
+    "golang.org/x/sys/windows/registry"
     "github.com/lxn/walk"
     . "github.com/lxn/walk/declarative"
-    "golang.org/x/sys/windows/registry"
 )
 
 var window *walk.MainWindow
