@@ -64,8 +64,10 @@ func disable_all() {
     trigger_wsh(false)
     trigger_ole(false)
     trigger_macro(false)
+    trigger_activex(false)
     trigger_pdf_js(false)
     trigger_pdf_objects(false)
+    trigger_autorun(false)
 
     mark_status(true)
 }
@@ -74,10 +76,12 @@ func enable_all() {
     trigger_wsh(true)
     trigger_ole(true)
     trigger_macro(true)
+    trigger_activex(true)
     trigger_pdf_js(true)
     trigger_pdf_objects(true)
+    trigger_autorun(true)
 
-    mark_status(false)    
+    mark_status(false)
 }
 
 func main() {
@@ -96,17 +100,17 @@ func main() {
 
     MainWindow{
         AssignTo: &window,
-        Title: "Harden - Security Without Borders",
-        MinSize: Size{400, 300},
-        Layout:  VBox{},
+        Title:    "Harden - Security Without Borders",
+        MinSize:  Size{400, 300},
+        Layout:   VBox{},
         Children: []Widget{
             TextEdit{
                 AssignTo: &events,
-                Text: events_text,
+                Text:     events_text,
                 ReadOnly: true,
             },
             PushButton{
-                Text: button_text,
+                Text:      button_text,
                 OnClicked: button_func,
             },
         },
