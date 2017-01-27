@@ -57,7 +57,7 @@ func trigger_pdf_js(enable bool) {
 }
 
 /*
-bAllowOpenFile set to 0 and 
+bAllowOpenFile set to 0 and
 bSecureOpenFile set to 1 to disable
 the opening of non-PDF documents
 */
