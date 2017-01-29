@@ -61,26 +61,26 @@ func mark_status(is_active bool) {
 }
 
 func disable_all() {
-	//    trigger_wsh(false)
-	//    trigger_ole(false)
+	trigger_wsh(false)
+	trigger_ole(false)
 	trigger_macro(false)
-	//    trigger_activex(false)
-	//    trigger_pdf_js(false)
-	//    trigger_pdf_objects(false)
-	//    trigger_autorun(false)
+	trigger_activex(false)
+	trigger_pdf_js(false)
+	trigger_pdf_objects(false)
+	trigger_autorun(false)
 	trigger_powershell(false)
 
 	mark_status(true)
 }
 
 func enable_all() {
-	//    trigger_wsh(true)
-	//    trigger_ole(true)
+	trigger_wsh(true)
+	trigger_ole(true)
 	trigger_macro(true)
-	//    trigger_activex(true)
-	//    trigger_pdf_js(true)
-	//    trigger_pdf_objects(true)
-	//    trigger_autorun(true)
+	trigger_activex(true)
+	trigger_pdf_js(true)
+	trigger_pdf_objects(true)
+	trigger_autorun(true)
 	trigger_powershell(true)
 
 	mark_status(false)

@@ -19,31 +19,33 @@
 package main
 
 import (
-    "golang.org/x/sys/windows/registry"
+	"golang.org/x/sys/windows/registry"
 )
 
 /*
  * Disables Windows AutoRun, still needs thourough testing!
+ *
+ *	// HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoDriveTypeAutoRun
+ *	// HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
+ *  // HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
  */
 func trigger_autorun(enable bool) {
-    // HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoDriveTypeAutoRun
-    // HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
-    // HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
-    key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
-    key2, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", registry.WRITE)
 
-    if enable {
-        events.AppendText("* Enabling AutoRun and AutoPlay\n")
-        key.DeleteValue("NoDriveTypeAutoRun")
-        key.DeleteValue("NoAutorun")
-        key2.DeleteValue("DisableAutoplay")
-    } else {
-        events.AppendText("* Disabling AutoRun and AutoPlay\ns")
-        key.SetDWordValue("NoDriveTypeAutoRun", 0xb5)
-        key.SetDWordValue("NoAutorun", 1)
-        key2.SetDWordValue("DisableAutoplay", 1)
-    }
+	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
+	key2, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", registry.WRITE)
 
-    key.Close()
-    key2.Close()
+	if enable {
+		events.AppendText("* Enabling AutoRun and AutoPlay\n")
+		key.DeleteValue("NoDriveTypeAutoRun")
+		key.DeleteValue("NoAutorun")
+		key2.DeleteValue("DisableAutoplay")
+	} else {
+		events.AppendText("* Disabling AutoRun and AutoPlay\n")
+		key.SetDWordValue("NoDriveTypeAutoRun", 0xb5)
+		key.SetDWordValue("NoAutorun", 1)
+		key2.SetDWordValue("DisableAutoplay", 1)
+	}
+
+	key.Close()
+	key2.Close()
 }

@@ -20,10 +20,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"golang.org/x/sys/windows/registry"
-	//    "encoding/hex"
 )
 
 func check(e error) {
@@ -83,8 +81,6 @@ func trigger_ole(enable bool) {
 */
 
 func trigger_macro(enable bool) {
-	var f *os.File
-	var err error
 
 	var value uint32
 	if enable {
@@ -97,44 +93,16 @@ func trigger_macro(enable bool) {
 		value = 4
 	}
 
-	// Open file for registry backup
-	f, err = os.Create("hardentools_office_macros_bkp.reg")
-	check(err)
-	defer f.Close()
-	header := "Windows Registry Editor Version 5.00\n"
-	_, err = f.WriteString(header)
-	check(err)
-
 	for _, office_version := range office_versions {
 		for _, office_app := range office_apps {
 
 			// TODO: Should we leave Excel enabled?
 			path := fmt.Sprintf("SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security", office_version, office_app)
-
-			// backup current settings to .reg file
-			if enable {
-				pathRegEdit := "\n[HKEY_CURRENT_USER\\" + path + "]\n"
-				var oldValue uint64
-				var err error
-				keyOrg, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.READ)
-				oldValue, _, err = keyOrg.GetIntegerValue("VBAWarnings")
-				if err == nil {
-					//fmt.Println("Old value of ", path, " = ", oldValue)
-					value := pathRegEdit + "\"VBAWarnings\"=dword:" + fmt.Sprintf("%08x", oldValue)
-					fmt.Println(value)
-					_, err := f.WriteString(value)
-					check(err)
-				}
-				keyOrg.Close()
-			}
-
 			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.WRITE)
 			key.SetDWordValue("VBAWarnings", value)
 			key.Close()
 		}
 	}
-	_, err = f.WriteString("\n")
-	check(err)
 }
 
 // ActiveX

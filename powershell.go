@@ -35,13 +35,17 @@ func trigger_powershell(enable bool) {
 	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
 	if enable {
 		events.AppendText("* Enabling Powershell and cmd\n")
-		key.DeleteValue("DisallowRun")
+		err := key.DeleteValue("DisallowRun")
+		if err != nil {
+			events.AppendText("!! DeleteValue to enable powershell failed. Please try to start hardentools.exe as administrator!\n")
+			//panic(err)
+		}
 	} else {
-		events.AppendText("* Disabling Powershell and cmd\ns")
+		events.AppendText("* Disabling Powershell and cmd\n")
 		key2, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.WRITE)
 		if err != nil {
-			events.AppendText("** CreateKey to disable powershell failed: ")
-			panic(err)
+			events.AppendText("!! CreateKey to disable powershell failed. Please try to start hardentools.exe as administrator!\n")
+			//panic(err)
 		}
 
 		key.SetDWordValue("DisallowRun", 0x1)
