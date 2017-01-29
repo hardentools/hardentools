@@ -30,4 +30,4 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 - **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
 
 ### Powershell and cmd.exe
-- ** Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer: Needs local admin rights. Please be aware if the normal user doesn't have local admin rights and you start hardentools.exe with another user (having local admin rights), the settings will only work for this admin user.
+- ** Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs local admin rights. Please be aware if the normal user doesn't have local admin rights and you start hardentools.exe with another user (having local admin rights), the settings will only work for this admin user.
