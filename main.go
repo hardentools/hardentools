@@ -68,6 +68,7 @@ func disable_all() {
     trigger_pdf_js(false)
     trigger_pdf_objects(false)
     trigger_autorun(false)
+    trigger_powershell(false)
 
     mark_status(true)
 }
@@ -80,6 +81,7 @@ func enable_all() {
     trigger_pdf_js(true)
     trigger_pdf_objects(true)
     trigger_autorun(true)
+    trigger_powershell(true)
 
     mark_status(false)
 }
