@@ -25,12 +25,11 @@ import (
 /*
  * Disables Windows AutoRun, still needs thourough testing!
  *
- *    // HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoDriveTypeAutoRun
- *    // HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
+ *  // HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoDriveTypeAutoRun
+ *  // HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
  *  // HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
  */
 func trigger_autorun(enable bool) {
-
     key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
     key2, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", registry.WRITE)
 
