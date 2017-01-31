@@ -27,6 +27,7 @@ import (
 
 var window *walk.MainWindow
 var events *walk.TextEdit
+var progress *walk.ProgressBar
 
 const harden_key_path = "SOFTWARE\\Security Without Borders\\"
 
@@ -63,12 +64,19 @@ func mark_status(is_active bool) {
 
 func disable_all() {
     trigger_wsh(false)
+    progress.SetValue(14)
     trigger_ole(false)
+    progress.SetValue(24)
     trigger_macro(false)
+    progress.SetValue(42)
     trigger_activex(false)
+    progress.SetValue(56)
     trigger_pdf_js(false)
+    progress.SetValue(70)
     trigger_pdf_objects(false)
+    progress.SetValue(84)
     trigger_autorun(false)
+    progress.SetValue(100)
 
     mark_status(true)
 
@@ -78,12 +86,19 @@ func disable_all() {
 
 func restore_all() {
     trigger_wsh(true)
+    progress.SetValue(14)
     trigger_ole(true)
+    progress.SetValue(24)
     trigger_macro(true)
+    progress.SetValue(42)
     trigger_activex(true)
+    progress.SetValue(56)
     trigger_pdf_js(true)
+    progress.SetValue(70)
     trigger_pdf_objects(true)
+    progress.SetValue(84)
     trigger_autorun(true)
+    progress.SetValue(100)
 
     mark_status(false)
 
@@ -92,17 +107,17 @@ func restore_all() {
 }
 
 func main() {
-    var button_text, events_text string
+    var label_text, button_text, events_text string
     var button_func func()
 
     if check_status() == false {
         button_text = "Harden!"
         button_func = disable_all
-        events_text = "- Ready to harden some features of your system?\n"
+        label_text = "Ready to harden some features of your system?"
     } else {
         button_text = "Restore..."
         button_func = restore_all
-        events_text = "- We have already hardened some risky features, do you want to restore them?\n"
+        label_text = "We have already hardened some risky features, do you want to restore them?"
     }
 
     MainWindow{
@@ -111,14 +126,18 @@ func main() {
         MinSize:  Size{400, 300},
         Layout:   VBox{},
         Children: []Widget{
+            Label{Text: label_text},
+            PushButton{
+                Text:      button_text,
+                OnClicked: button_func,
+            },
+            ProgressBar{
+                AssignTo: &progress,
+            },
             TextEdit{
                 AssignTo: &events,
                 Text:     events_text,
                 ReadOnly: true,
-            },
-            PushButton{
-                Text:      button_text,
-                OnClicked: button_func,
             },
         },
     }.Create()

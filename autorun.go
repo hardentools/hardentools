@@ -34,12 +34,12 @@ func trigger_autorun(enable bool) {
     key_autoplay, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", registry.WRITE)
 
     if enable {
-        events.AppendText("* Enabling AutoRun and AutoPlay\n")
+        events.AppendText("Enabling AutoRun and AutoPlay\n")
         key_autorun.DeleteValue("NoDriveTypeAutoRun")
         key_autorun.DeleteValue("NoAutorun")
         key_autoplay.DeleteValue("DisableAutoplay")
     } else {
-        events.AppendText("* Disabling AutoRun and AutoPlay\ns")
+        events.AppendText("Disabling AutoRun and AutoPlay\ns")
         key_autorun.SetDWordValue("NoDriveTypeAutoRun", 0xb5)
         key_autorun.SetDWordValue("NoAutorun", 1)
         key_autoplay.SetDWordValue("DisableAutoplay", 1)
