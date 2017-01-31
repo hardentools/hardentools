@@ -73,7 +73,7 @@ func disable_all() {
     mark_status(true)
 
     walk.MsgBox(window, "Done!", "I have disabled all risky features!", walk.MsgBoxIconInformation)
-    os.Exit()
+    os.Exit(0)
 }
 
 func restore_all() {
@@ -88,7 +88,7 @@ func restore_all() {
     mark_status(false)
 
     walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconInformation)
-    os.Exit()  
+    os.Exit(0)  
 }
 
 func main() {
