@@ -87,7 +87,7 @@ func restore_all() {
 
     mark_status(false)
 
-    walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconInformation)
+    walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconExclamation)
     os.Exit(0)  
 }
 
