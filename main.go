@@ -19,8 +19,9 @@
 package main
 
 import (
-    "golang.org/x/sys/windows/registry"
+    "os"
     "github.com/lxn/walk"
+    "golang.org/x/sys/windows/registry"
     . "github.com/lxn/walk/declarative"
 )
 
@@ -70,9 +71,12 @@ func disable_all() {
     trigger_autorun(false)
 
     mark_status(true)
+
+    walk.MsgBox(window, "Done!", "I have disabled all risky features!", walk.MsgBoxIconInformation)
+    os.Exit()
 }
 
-func enable_all() {
+func restore_all() {
     trigger_wsh(true)
     trigger_ole(true)
     trigger_macro(true)
@@ -82,6 +86,9 @@ func enable_all() {
     trigger_autorun(true)
 
     mark_status(false)
+
+    walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconInformation)
+    os.Exit()  
 }
 
 func main() {
@@ -94,7 +101,7 @@ func main() {
         events_text = "- Ready to harden some features of your system?\n"
     } else {
         button_text = "Restore..."
-        button_func = enable_all
+        button_func = restore_all
         events_text = "- We have already hardened some risky features, do you want to restore them?\n"
     }
 
