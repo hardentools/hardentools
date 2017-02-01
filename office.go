@@ -44,11 +44,11 @@ func trigger_ole(enable bool) {
     var value uint32
     if enable {
         // Enable Packager
-        events.AppendText("* Enabling Office Packager Objects\n")
+        events.AppendText("Enabling Office Packager Objects\n")
         value = 1
     } else {
         // Disable Packager
-        events.AppendText("* Disabling Office Packager Objects\n")
+        events.AppendText("Disabling Office Packager Objects\n")
         value = 2
     }
 
@@ -75,11 +75,11 @@ func trigger_macro(enable bool) {
     var value uint32
     if enable {
         // Enable Macro
-        events.AppendText("* Enabling Office Macros\n")
+        events.AppendText("Enabling Office Macros\n")
         value = 2
     } else {
         // Disable Macro
-        events.AppendText("* Disabling Office Macros\n")
+        events.AppendText("Disabling Office Macros\n")
         value = 4
     }
 
@@ -104,11 +104,11 @@ func trigger_activex(enable bool) {
 
     if enable {
         // Enable ActiveX
-        events.AppendText("* Enabling ActiveX in Office\n")
+        events.AppendText("Enabling ActiveX in Office\n")
         key.DeleteValue("DisableAllActiveX")
     } else {
         // Disable ActiveX
-        events.AppendText("* Disabling ActiveX in Office\n")
+        events.AppendText("Disabling ActiveX in Office\n")
         key.SetDWordValue("DisableAllActiveX", 1)
     }
     key.Close()
