@@ -7,8 +7,8 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 
 ## What this tool does NOT
 
-- Prevent software from being exploited.
-- Prevent the abuse of features that are harder to disable, e.g. PowerShell.
+- It does NOT prevent software from being exploited.
+- It does NOT prevent the abuse of features that are harder to disable, e.g. PowerShell.
 - **It is NOT an Antivirus**. It does not protect your computer. It doesn't identify, block, or remove any malware.
 
 
