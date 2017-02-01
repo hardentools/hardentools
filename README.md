@@ -14,9 +14,11 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 
 ## Disabled Features
 
-### Windows
+### Generic Windows Features
 
 - **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
+
+- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
 
 ### Microsoft Office
 
@@ -31,7 +33,3 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 - **Disable JavaScript in PDF documents**. Acrobat Reader allows to execute JavaScript code from within PDF documents. This is widely abused for exploitation and malicious activity.
 
 - **Disable execution of objects embedded in PDF documents**. Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
-
-### Windows Explorer
-
-- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
