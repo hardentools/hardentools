@@ -10,6 +10,7 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 - It does NOT prevent software from being exploited.
 - It does NOT prevent the abuse of every available risky feature.
 - **It is NOT an Antivirus**. It does not protect your computer. It doesn't identify, block, or remove any malware.
+- It does NOT prevent the changes it implements from being reverted. If malicious code runs on the system and it is able to restore them, the premise of the tool is defeated, isn't it?
 
 
 ## Disabled Features
