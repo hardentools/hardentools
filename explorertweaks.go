@@ -32,16 +32,16 @@ func trigger_explorertweaks(enable bool) {
     
     if enable {
         events.AppendText("Enabling Explorer Tweaks\n")
-        key_explorertweaks.SetDWordValue("NavPaneShowAllFolders", 0xff)
-        key_explorertweaks.SetDWordValue("HideFileExt", 0x00000001)
-        key_explorertweaks.SetDWordValue("Hidden", 0x00000002)
-        key_explorertweaks.SetDWordValue("ShowSuperHidden", 0x00000000)
-    } else {
-        events.AppendText("Disabling Explorer Tweaks\n")
-        key_explorertweaks.SetDWordValue("NavPaneShowAllFolders", 0x00000001)
+        //key_explorertweaks.SetDWordValue("NavPaneShowAllFolders", 0xff)
         key_explorertweaks.SetDWordValue("HideFileExt", 0x00000000)
         key_explorertweaks.SetDWordValue("Hidden", 0x00000001)
-        key_explorertweaks.SetDWordValue("ShowSuperHidden", 0x00000001)
+        //key_explorertweaks.SetDWordValue("ShowSuperHidden", 0x00000001)
+    } else {
+        events.AppendText("Disabling Explorer Tweaks\n")
+        //key_explorertweaks.SetDWordValue("NavPaneShowAllFolders", 0x00000001)
+        key_explorertweaks.SetDWordValue("HideFileExt", 0x00000001)
+        key_explorertweaks.SetDWordValue("Hidden", 0x00000002)
+        //key_explorertweaks.SetDWordValue("ShowSuperHidden", 0x00000000)
     }
 
     key_explorertweaks.Close()
