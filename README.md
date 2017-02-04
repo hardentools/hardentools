@@ -3,6 +3,8 @@
 Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply **reduce the attack surface by disabling the low-hanging fruit**.
 
 > **WARNING**: This is just an experiment, it is not meant for public distribution yet. Also, this tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. Use this at your own risk.
+ 
+> **PLEASE BE AWARE**: You need administrative rights for your Windows user. Windows will ask you to grant this rights when starting hardentools.exe. If you are starting hardentools with another user, the settings will only work for this other user. If you want to disable risky features for every user you have to start it for every user right now.
 
 
 ## What this tool does NOT
@@ -20,6 +22,8 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 - **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
 - **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
+
+- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs reboot to work.
 
 ### Microsoft Office
 
