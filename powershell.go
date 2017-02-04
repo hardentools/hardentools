@@ -32,25 +32,27 @@ Disables Powershell and cmd.exe
  "3"="cmd.exe"
  */
 func trigger_powershell(enable bool) {
-    key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
+    key_explorer, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
     if enable {
         events.AppendText("Enabling Powershell and cmd\n")
-        err := key.DeleteValue("DisallowRun")
+        err := key_explorer.DeleteValue("DisallowRun")
         if err != nil {
             events.AppendText("!! DeleteValue to enable Powershell and cmd failed.\n")
         }
     } else {
         events.AppendText("Disabling Powershell and cmd\n")
-        key2, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.WRITE)
+        key_disallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.WRITE)
         if err != nil {
             events.AppendText("!! CreateKey to disable powershell failed.\n")
         }
 
-        key.SetDWordValue("DisallowRun", 0x1)
-        key2.SetStringValue("1", "powershell_ise.exe")
-        key2.SetStringValue("2", "powershell.exe")
-        key2.SetStringValue("3", "cmd.exe")
-        key2.Close()
+        key_explorer.SetDWordValue("DisallowRun", 0x1)
+        key_disallow.SetStringValue("1", "powershell_ise.exe")
+        key_disallow.SetStringValue("2", "powershell.exe")
+        key_disallow.SetStringValue("3", "cmd.exe")
+
+        key_disallow.Close()
     }
-    key.Close()
+    
+    key_explorer.Close()
 }

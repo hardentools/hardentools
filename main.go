@@ -82,7 +82,7 @@ func disable_all() {
 
     mark_status(true)
 
-    walk.MsgBox(window, "Done!", "I have disabled all risky features!", walk.MsgBoxIconInformation)
+    walk.MsgBox(window, "Done!", "I have disabled all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
     os.Exit(0)
 }
 
