@@ -82,7 +82,6 @@ func disable_all() {
     trigger_powershell(false)
     progress.SetValue(100)
     
-
     mark_status(true)
 
     walk.MsgBox(window, "Done!", "I have disabled all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
