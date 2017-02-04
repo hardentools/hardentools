@@ -26,10 +26,10 @@ func trigger_wsh(enable bool) {
     key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Windows Script Host\\Settings", registry.WRITE)
 
     if enable {
-        events.AppendText("* Enabling Windows Script Host\n")
+        events.AppendText("Enabling Windows Script Host\n")
         key.DeleteValue("Enabled")
     } else {
-        events.AppendText("* Disabling Windows Script Host\n")
+        events.AppendText("Disabling Windows Script Host\n")
         key.SetDWordValue("Enabled", 0)
     }
 

@@ -1,15 +1,29 @@
 # Hardentools
 
-Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. For the moment this remains an experimental attempt, nothing more, nothing less.
+Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply **reduce the attack surface by disabling the low-hanging fruit**.
 
-**WARNING: This is just an experiment, it is not meant for public distribution yet. Also, this tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. Use this at your own risk.**
+> **WARNING**: This is just an experiment, it is not meant for public distribution yet. Also, this tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. Use this at your own risk.
+
+> **PLEASE BE AWARE**: You need administrative rights for your Windows user. Windows will ask you to grant this rights when starting hardentools.exe. If you are starting hardentools with another user, the settings will only work for this other user.
+
+
+## What this tool does NOT
+
+- It does NOT prevent software from being exploited.
+- It does NOT prevent the abuse of every available risky feature.
+- **It is NOT an Antivirus**. It does not protect your computer. It doesn't identify, block, or remove any malware.
+- It does NOT prevent the changes it implements from being reverted. If malicious code runs on the system and it is able to restore them, the premise of the tool is defeated, isn't it?
 
 
 ## Disabled Features
 
-### Windows
+### Generic Windows Features
 
 - **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
+
+- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
+
+- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs reboot to work.
 
 ### Microsoft Office
 
@@ -24,10 +38,3 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 - **Disable JavaScript in PDF documents**. Acrobat Reader allows to execute JavaScript code from within PDF documents. This is widely abused for exploitation and malicious activity.
 
 - **Disable execution of objects embedded in PDF documents**. Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
-
-### Windows Explorer
-
-- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
-
-### Powershell and cmd.exe
-- ** Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs local admin rights. Please be aware if the normal user doesn't have local admin rights and you start hardentools.exe with another user (having local admin rights), the settings will only work for this admin user.
