@@ -25,26 +25,26 @@ import (
 // Explorer
 
 /*
-- HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced
+- HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer
  */
 func trigger_explorertweaks(enable bool) {
-    key_explorertweaks, _, _ := registry.CreateKey(registry.CURRENT_USER, "SYSTEM\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", registry.WRITE)
+    key_explorertweaks, _, _ := registry.CreateKey(registry.CURRENT_USER, "SYSTEM\\Microsoft\\Windows\\CurrentVersion\\Explorer", registry.WRITE)
+    key_explorertweaksAdvanced, _, _ := registry.CreateKey(registry.CURRENT_USER, "SYSTEM\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", registry.WRITE)
     
     if enable {
         events.AppendText("Enabling Explorer Tweaks\n")
-        //key_explorertweaks.SetDWordValue("NavPaneShowAllFolders", 0xff)
-        key_explorertweaks.SetDWordValue("HideFileExt", 0x00000000)
-        key_explorertweaks.SetDWordValue("Hidden", 0x00000001)
-        key_explorertweaks.SetDWordValue("ShowSuperHidden", 0x00000001)
+        key_explorertweaksAdvanced.SetDWordValue("HideFileExt", 0x00000000)
+        key_explorertweaksAdvanced.SetDWordValue("Hidden", 0x00000001)
+        key_explorertweaksAdvanced.SetDWordValue("ShowSuperHidden", 0x00000001)
     } else {
         events.AppendText("Disabling Explorer Tweaks\n")
-        //key_explorertweaks.SetDWordValue("NavPaneShowAllFolders", 0x00000001)
-        key_explorertweaks.SetDWordValue("HideFileExt", 0x00000001)
-        key_explorertweaks.SetDWordValue("Hidden", 0x00000002)
-        key_explorertweaks.SetDWordValue("ShowSuperHidden", 0x00000000)
+        key_explorertweaksAdvanced.SetDWordValue("HideFileExt", 0x00000001)
+        key_explorertweaksAdvanced.SetDWordValue("Hidden", 0x00000002)
+        key_explorertweaksAdvanced.SetDWordValue("ShowSuperHidden", 0x00000000)
     }
 
     key_explorertweaks.Close()
+    key_explorertweaksAdvanced.Close()
 }
 
 // Notes:
