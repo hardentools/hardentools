@@ -63,6 +63,8 @@ func mark_status(is_active bool) {
 }
 
 func disable_all() {
+    trigger_networkipv6(false)
+    progress.SetValue(10)
     trigger_wsh(false)
     progress.SetValue(14)
     trigger_ole(false)
@@ -79,6 +81,7 @@ func disable_all() {
     progress.SetValue(90)
     trigger_powershell(false)
     progress.SetValue(100)
+    
 
     mark_status(true)
 
@@ -87,6 +90,8 @@ func disable_all() {
 }
 
 func restore_all() {
+    trigger_networkipv6(true)
+    progress.SetValue(10)
     trigger_wsh(true)
     progress.SetValue(14)
     trigger_ole(true)
