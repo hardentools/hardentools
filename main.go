@@ -77,6 +77,7 @@ func disable_all() {
     progress.SetValue(84)
     trigger_autorun(false)
     progress.SetValue(100)
+    trigger_ProtectedView(false)
 
     mark_status(true)
 
@@ -99,11 +100,12 @@ func restore_all() {
     progress.SetValue(84)
     trigger_autorun(true)
     progress.SetValue(100)
+    trigger_ProtectedView(true)
 
     mark_status(false)
 
     walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconExclamation)
-    os.Exit(0)  
+    os.Exit(0)
 }
 
 func main() {

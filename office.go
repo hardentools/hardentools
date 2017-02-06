@@ -113,3 +113,22 @@ func trigger_activex(enable bool) {
     }
     key.Close()
 }
+
+//Protected View
+
+func trigger_ProtectedView(enable bool){
+    var value uint32
+    if enable {
+        // Enable Protected View
+        events.AppendText("Enabling Protected View\n")
+        value = 1
+    } else {
+        // Disable Protected View
+        events.AppendText("Disabling Protected View\n")
+        value = 0
+    }
+    for _, office_version := range office_versions {
+        key, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Office\\%s\\Outlook\\Security", office_version)
+        key.SetDWordValue("MarkInternalAsUnsafe", value)
+    }
+}
