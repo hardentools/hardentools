@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# go get github.com/lxc/win
-# go get github.com/lxc/walk
+# go get github.com/lxn/win
+# go get github.com/lxn/walk
 # go get github.com/akavel/rsrc
 # go get golang.org/x/sys/windows/registry
 

@@ -76,12 +76,14 @@ func disable_all() {
     trigger_pdf_objects(false)
     progress.SetValue(84)
     trigger_autorun(false)
+    progress.SetValue(90)
+    trigger_powershell(false)
     progress.SetValue(100)
     trigger_ProtectedView(false)
 
     mark_status(true)
 
-    walk.MsgBox(window, "Done!", "I have disabled all risky features!", walk.MsgBoxIconInformation)
+    walk.MsgBox(window, "Done!", "I have disabled all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
     os.Exit(0)
 }
 
@@ -99,13 +101,20 @@ func restore_all() {
     trigger_pdf_objects(true)
     progress.SetValue(84)
     trigger_autorun(true)
+    progress.SetValue(90)
+    trigger_powershell(true)
     progress.SetValue(100)
     trigger_ProtectedView(true)
 
     mark_status(false)
 
+<<<<<<< HEAD
     walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconExclamation)
     os.Exit(0)
+=======
+    walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
+    os.Exit(0)  
+>>>>>>> origin/master
 }
 
 func main() {
