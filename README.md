@@ -25,6 +25,8 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 
 - **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs reboot to work.
 
+- **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
+
 ### Microsoft Office
 
 - **Disable Macros**. Macros are at times used by Microsoft Office users to script and automate certain activities, especially calculations with Microsoft Excel. However, macros are currently a security plague, and they are widely used as a vehicle for compromise. With Hardentools, macros are disabled and the "Enable this Content" notification is disabled too, to prevent users from being tricked.
