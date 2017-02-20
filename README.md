@@ -1,3 +1,5 @@
+![Hardentools](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/icon%40128.png)
+
 # Hardentools
 
 Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply **reduce the attack surface by disabling the low-hanging fruit**.
