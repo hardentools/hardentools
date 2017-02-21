@@ -5,8 +5,6 @@
 Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply **reduce the attack surface by disabling the low-hanging fruit**.
 
 > **WARNING**: This is just an experiment, it is not meant for public distribution yet. Also, this tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. Use this at your own risk.
- 
-> **PLEASE BE AWARE**: You need administrative rights for your Windows user. Windows will ask you to grant this rights when starting hardentools.exe. If you are starting hardentools with another user, the settings will only work for this other user. If you want to disable risky features for every user you have to start it for every user right now.
 
 ## How to use it
 
@@ -21,6 +19,8 @@ Then, you will see the main Hardentools window. It's very simple, you just click
 In case you wish to restore the default settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Restore" button. Similarly, click it and wait for the modifications to be reverted.
 
 In the future, we will create the ability to select or deselect certain modifications Hardentools is configured to make.
+
+**Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
 ## What this tool does NOT
 
