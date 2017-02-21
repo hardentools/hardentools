@@ -8,6 +8,19 @@ Hardentools is a collection of simple utilities designed to disable a number of 
  
 > **PLEASE BE AWARE**: You need administrative rights for your Windows user. Windows will ask you to grant this rights when starting hardentools.exe. If you are starting hardentools with another user, the settings will only work for this other user. If you want to disable risky features for every user you have to start it for every user right now.
 
+## How to use it
+
+Once you double-click on the icon, depending on your Windows security settings, you will be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
+
+![screenshot1](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/screenshot1.png)
+
+Then, you will see the main Hardentools window. It's very simple, you just click on the "Harden" button, and the tool will make the changes to your Windows configuration to disable a set of features that are risky. Once completed, you will be asked to restart your computer for all the changes to have full effect.
+
+![screenshot2](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/screenshot2.png)
+
+In case you wish to restore the default settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Restore" button. Similarly, click it and wait for the modifications to be reverted.
+
+In the future, we will create the ability to select or deselect certain modifications Hardentools is configured to make.
 
 ## What this tool does NOT
 
