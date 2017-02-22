@@ -8,6 +8,8 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 
 Bear in mind, after running Hardentools you won't be able, for example, to do complex calculations with Microsoft Office Excel or use the Command-line terminal, but those are pretty much the only considerable "downsides" of having a slightly safer Windows environment. Before deciding to use it, make sure you read this document thoroughly and understand that yes, something might break. In case you experience malfunctions as a result of the modifications implemented by this tool, please do let us know.
 
+When you're ready, you can find the latest download [here](https://github.com/securitywithoutborders/hardentools/releases).
+
 ## How to use it
 
 Once you double-click on the icon, depending on your Windows security settings, you will be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
