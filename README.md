@@ -12,7 +12,7 @@ When you're ready, you can find the latest download [here](https://github.com/se
 
 ## How to use it
 
-Once you double-click on the icon, depending on your Windows security settings, you will be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
+Once you double-click on the icon, depending on your Windows security settings, you should be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
 
 ![screenshot1](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/screenshot1.png)
 
