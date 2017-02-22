@@ -6,6 +6,8 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 
 > **WARNING**: This is just an experiment, it is not meant for public distribution yet. Also, this tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. Use this at your own risk.
 
+Bear in mind, after running Hardentools you won't be, for example, able to do complex calculations with Microsoft Office Excel or use the Command-line terminal, but those are pretty much the only considerable "downsides" of having a slightly safer Windows environment. Before deciding to use it, make sure you read this document thoroughly and understand that yes, something might break. In case you experience malfunctions as a result of the modifications implemented by this tool, please do let us know.
+
 ## How to use it
 
 Once you double-click on the icon, depending on your Windows security settings, you will be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
@@ -36,9 +38,9 @@ In the future, we will create the ability to select or deselect certain modifica
 
 - **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
-- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
+- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices. For example, this should prevent applicatons from automatically executing when you plug a USB stick into your computer.
 
-- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs reboot to work.
+- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. You will not be able to use the terminal and it should prevent the use of PowerShell by malicious code trying to infect the system.
 
 ### Microsoft Office
 
