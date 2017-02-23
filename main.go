@@ -79,6 +79,7 @@ func disable_all() {
     progress.SetValue(84)
     trigger_powershell(false)
     progress.SetValue(100)
+    trigger_ProtectedView(false)
 
     mark_status(true)
 
@@ -103,11 +104,17 @@ func restore_all() {
     progress.SetValue(84)
     trigger_powershell(true)
     progress.SetValue(100)
+    trigger_ProtectedView(true)
 
     mark_status(false)
 
+<<<<<<< HEAD
+    walk.MsgBox(window, "Done!", "I have restored all risky features!", walk.MsgBoxIconExclamation)
+    os.Exit(0)
+=======
     walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
     os.Exit(0)  
+>>>>>>> origin/master
 }
 
 func main() {
