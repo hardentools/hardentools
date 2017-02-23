@@ -63,6 +63,8 @@ func mark_status(is_active bool) {
 }
 
 func disable_all() {
+    trigger_networkipv6(false)
+    progress.SetValue(10)
     trigger_wsh(false)
     progress.SetValue(12)
     trigger_ole(false)
@@ -79,7 +81,7 @@ func disable_all() {
     progress.SetValue(84)
     trigger_powershell(false)
     progress.SetValue(100)
-
+    
     mark_status(true)
 
     walk.MsgBox(window, "Done!", "I have disabled all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
@@ -87,6 +89,8 @@ func disable_all() {
 }
 
 func restore_all() {
+    trigger_networkipv6(true)
+    progress.SetValue(10)
     trigger_wsh(true)
     progress.SetValue(12)
     trigger_ole(true)
