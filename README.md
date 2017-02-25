@@ -1,11 +1,30 @@
+![Hardentools](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/icon%40128.png)
+
 # Hardentools
 
-Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply **reduce the attack surface by disabling the low-hanging fruit**.
+Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for Enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply reduce the attack surface by disabling the low-hanging fruit. **Hardentools is intended for individuals at risk, who might want an extra level of security at the price of *some* usability**. It is not intended for corporate environments.
 
 > **WARNING**: This is just an experiment, it is not meant for public distribution yet. Also, this tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. Use this at your own risk.
- 
-> **PLEASE BE AWARE**: You need administrative rights for your Windows user. Windows will ask you to grant this rights when starting hardentools.exe. If you are starting hardentools with another user, the settings will only work for this other user. If you want to disable risky features for every user you have to start it for every user right now.
 
+Bear in mind, after running Hardentools you won't be able, for example, to do complex calculations with Microsoft Office Excel or use the Command-line terminal, but those are pretty much the only considerable "downsides" of having a slightly safer Windows environment. Before deciding to use it, make sure you read this document thoroughly and understand that yes, something might break. In case you experience malfunctions as a result of the modifications implemented by this tool, please do let us know.
+
+When you're ready, you can find the latest download [here](https://github.com/securitywithoutborders/hardentools/releases).
+
+## How to use it
+
+Once you double-click on the icon, depending on your Windows security settings, you should be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
+
+![screenshot1](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/screenshot1.png)
+
+Then, you will see the main Hardentools window. It's very simple, you just click on the "Harden" button, and the tool will make the changes to your Windows configuration to disable a set of features that are risky. Once completed, you will be asked to restart your computer for all the changes to have full effect.
+
+![screenshot2](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/screenshot2.png)
+
+In case you wish to restore the default settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Restore" button. Similarly, click it and wait for the modifications to be reverted.
+
+In the future, we will create the ability to select or deselect certain modifications Hardentools is configured to make.
+
+**Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
 ## What this tool does NOT
 
@@ -21,9 +40,9 @@ Hardentools is a collection of simple utilities designed to disable a number of 
 
 - **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
-- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices.
+- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices. For example, this should prevent applicatons from automatically executing when you plug a USB stick into your computer.
 
-- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. Needs reboot to work.
+- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. You will not be able to use the terminal and it should prevent the use of PowerShell by malicious code trying to infect the system.
 
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
