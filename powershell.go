@@ -65,7 +65,7 @@ func trigger_powershell(enable bool) {
         //       if this is a bug or a feature 
         key_disallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
         if err != nil {
-            events.AppendText("!! CreateKey to disable powershell failed.\n")
+            events.AppendText("!! OpenKey to enable Powershell and cmd failed.\n")
         }
         for i := 1; i < 100; i++ {
             value, _, _ := key_disallow.GetStringValue(strconv.Itoa(i))
