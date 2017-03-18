@@ -26,16 +26,16 @@ func trigger_uac(enable bool) {
 	key, _ := registry.OpenKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", registry.WRITE)
 
 	if enable {
-		events.AppendText("Setting UAC to not ask for changing Windows settings (default)\n")
+		events.AppendText("Restoring UAC to default settings\n")
 		err := key.SetDWordValue("ConsentPromptBehaviorAdmin", 5)
 		if err != nil {
-			events.AppendText("!! Setting UAC failed.\n")
+			events.AppendText("!! SetDWordValue on UAC failed.\n")
 		}
 	} else {
-		events.AppendText("Setting UAC to always ask on secure desktop (secure)\n")
+		events.AppendText("Setting UAC to prompt for consent on secure desktops\n")
 		err := key.SetDWordValue("ConsentPromptBehaviorAdmin", 2)
 		if err != nil {
-			events.AppendText("!! Setting UAC failed.\n")
+			events.AppendText("!! SetDWordValue on UAC failed.\n")
 		}
 	}
 
