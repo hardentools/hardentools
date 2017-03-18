@@ -59,3 +59,7 @@ In the future, we will create the ability to select or deselect certain modifica
 - **Disable JavaScript in PDF documents**. Acrobat Reader allows to execute JavaScript code from within PDF documents. This is widely abused for exploitation and malicious activity.
 
 - **Disable execution of objects embedded in PDF documents**. Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
+
+## Authors
+
+This tools is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst.
