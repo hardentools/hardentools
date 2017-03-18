@@ -130,13 +130,13 @@ func main() {
 
 	MainWindow{
 		AssignTo: &window,
-		Title:	"Harden - Security Without Borders",
-		MinSize:  Size{400, 300},
-		Layout:   VBox{},
+		Title: "Harden - Security Without Borders",
+		MinSize: Size{400, 300},
+		Layout: VBox{},
 		Children: []Widget{
 			Label{Text: label_text},
 			PushButton{
-				Text:	  button_text,
+				Text: button_text,
 				OnClicked: button_func,
 			},
 			ProgressBar{
@@ -144,7 +144,7 @@ func main() {
 			},
 			TextEdit{
 				AssignTo: &events,
-				Text:	 events_text,
+				Text: events_text,
 				ReadOnly: true,
 			},
 		},
