@@ -27,17 +27,19 @@ import (
 - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
 - HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
  */
-func trigger_autorun(enable bool) {
+func trigger_autorun(harden bool) {
 	key_autorun, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.WRITE)
 	key_autoplay, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", registry.WRITE)
 
-	if enable {
-		events.AppendText("Enabling AutoRun and AutoPlay\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling AutoRun and AutoPlay\n")
+		
 		key_autorun.DeleteValue("NoDriveTypeAutoRun")
 		key_autorun.DeleteValue("NoAutorun")
 		key_autoplay.DeleteValue("DisableAutoplay")
 	} else {
-		events.AppendText("Disabling AutoRun and AutoPlay\n")
+		events.AppendText("Hardening by disabling AutoRun and AutoPlay\n")
+		
 		key_autorun.SetDWordValue("NoDriveTypeAutoRun", 0xb5)
 		key_autorun.SetDWordValue("NoAutorun", 1)
 		key_autoplay.SetDWordValue("DisableAutoplay", 1)

@@ -60,56 +60,47 @@ func mark_status(is_active bool) {
 	}
 }
 
-func disable_all() {
-	trigger_wsh(false)
-	progress.SetValue(12)
-	trigger_ole(false)
-	progress.SetValue(30)
-	trigger_macro(false)
-	progress.SetValue(36)
-	trigger_activex(false)
-	progress.SetValue(48)
-	trigger_pdf_js(false)
-	progress.SetValue(60)
-	trigger_pdf_objects(false)
-	progress.SetValue(72)
-	trigger_autorun(false)
-	progress.SetValue(84)
-	trigger_powershell(false)
-	progress.SetValue(90)
-	trigger_uac(false)
-	progress.SetValue(100)
+func harden_all() {
+	var harden bool = true
 
-	mark_status(true)
+	trigger_all(harden)
 
-	walk.MsgBox(window, "Done!", "I have disabled all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
+	mark_status(harden)
+
+	walk.MsgBox(window, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
 	os.Exit(0)
 }
 
 func restore_all() {
-	trigger_wsh(true)
-	progress.SetValue(12)
-	trigger_ole(true)
-	progress.SetValue(30)
-	trigger_macro(true)
-	progress.SetValue(36)
-	trigger_activex(true)
-	progress.SetValue(48)
-	trigger_pdf_js(true)
-	progress.SetValue(60)
-	trigger_pdf_objects(true)
-	progress.SetValue(72)
-	trigger_autorun(true)
-	progress.SetValue(84)
-	trigger_powershell(true)
-	progress.SetValue(90)
-	trigger_uac(true)
-	progress.SetValue(100)
+	var harden bool = false
 
-	mark_status(false)
+	trigger_all(harden)
+
+	mark_status(harden)
 
 	walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
 	os.Exit(0)  
+}
+
+func trigger_all(harden bool) {
+	trigger_wsh(harden)
+	progress.SetValue(12)
+	trigger_ole(harden)
+	progress.SetValue(30)
+	trigger_macro(harden)
+	progress.SetValue(36)
+	trigger_activex(harden)
+	progress.SetValue(48)
+	trigger_pdf_js(harden)
+	progress.SetValue(60)
+	trigger_pdf_objects(harden)
+	progress.SetValue(72)
+	trigger_autorun(harden)
+	progress.SetValue(84)
+	trigger_powershell(harden)
+	progress.SetValue(90)
+	trigger_uac(harden)
+	progress.SetValue(100) 
 }
 
 func main() {
@@ -118,7 +109,7 @@ func main() {
 
 	if check_status() == false {
 		button_text = "Harden!"
-		button_func = disable_all
+		button_func = harden_all
 		label_text = "Ready to harden some features of your system?"
 	} else {
 		button_text = "Restore..."

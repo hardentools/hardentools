@@ -20,14 +20,14 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func trigger_wsh(enable bool) {
+func trigger_wsh(harden bool) {
 	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Windows Script Host\\Settings", registry.WRITE)
 
-	if enable {
-		events.AppendText("Enabling Windows Script Host\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling Windows Script Host\n")
 		key.DeleteValue("Enabled")
 	} else {
-		events.AppendText("Disabling Windows Script Host\n")
+		events.AppendText("Hardening by disabling Windows Script Host\n")
 		key.SetDWordValue("Enabled", 0)
 	}
 

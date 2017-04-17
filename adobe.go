@@ -32,16 +32,14 @@ bEnableJS possible values:
 1 - Enable AcroJS
 */
 
-func trigger_pdf_js(enable bool) {
+func trigger_pdf_js(harden bool) {
 	var value uint32
 
-	if enable {
-		// Enable 
-		events.AppendText("Enabling Acrobat Reader JavaScript\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling Acrobat Reader JavaScript\n")
 		value = 1
 	} else {
-		// Disable Packager
-		events.AppendText("Disabling Acrobat Reader JavaScript\n")
+		events.AppendText("Hardening by disabling Acrobat Reader JavaScript\n")
 		value = 0
 	}
 
@@ -60,18 +58,16 @@ bSecureOpenFile set to 1 to disable
 the opening of non-PDF documents
 */
 
-func trigger_pdf_objects(enable bool) {
+func trigger_pdf_objects(harden bool) {
 	var allow_value uint32
 	var secure_value uint32
 
-	if enable {
-		// Enable 
-		events.AppendText("Enabling the opening of objects embedded in PDF documents\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling embedded objects in PDFs\n")
 		allow_value = 1
 		secure_value = 0
 	} else {
-		// Disable
-		events.AppendText("Disabling the opening of objects embedded in PDF documents\n")
+		events.AppendText("Hardening by disabling embedded objects in PDFs\n")
 		allow_value = 0
 		secure_value = 1
 	}

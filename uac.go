@@ -20,17 +20,19 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func trigger_uac(enable bool) {
+func trigger_uac(harden bool) {
 	key, _ := registry.OpenKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", registry.WRITE)
 
-	if enable {
-		events.AppendText("Restoring UAC to default settings\n")
+	if harden==false {
+		events.AppendText("Restoring default by restoring UAC to default settings\n")
+		
 		err := key.SetDWordValue("ConsentPromptBehaviorAdmin", 5)
 		if err != nil {
 			events.AppendText("!! SetDWordValue on UAC failed.\n")
 		}
 	} else {
-		events.AppendText("Setting UAC to prompt for consent on secure desktops\n")
+		events.AppendText("Hardening by setting UAC to prompt for consent on secure desktops\n")
+		
 		err := key.SetDWordValue("ConsentPromptBehaviorAdmin", 2)
 		if err != nil {
 			events.AppendText("!! SetDWordValue on UAC failed.\n")
