@@ -30,13 +30,13 @@ Disables Powershell and cmd.exe
  "2"="powershell.exe"
  "3"="cmd.exe"
 */
-func trigger_powershell(enable bool) {
+func trigger_powershell(harden bool) {
 	key_explorer, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
 	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
 
 	// enable
-	if enable {
-		events.AppendText("Enabling Powershell and cmd\n")
+	if harden==false {
+		events.AppendText("Restoring original setting by enabling Powershell and cmd\n")
 
 		// set DisallowRun to old value / delete if no old value saved
 		saved_state, _, err_sst := hardentools_key.GetIntegerValue("SavedStateDisallowRun")
@@ -76,8 +76,7 @@ func trigger_powershell(enable bool) {
 
 		hardentools_key.DeleteValue("SavedStateDisallowRun")
 	} else {
-		// disable
-		events.AppendText("Disabling Powershell and cmd\n")
+		events.AppendText("Hardening by disabling Powershell and cmd\n")
 
 		// handle current state (save if not default, to be able to restore former state)
 		current_state, _, err_cs := key_explorer.GetIntegerValue("DisallowRun")

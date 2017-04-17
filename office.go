@@ -38,15 +38,13 @@ var office_apps = []string{"Excel", "PowerPoint", "Word"}
 2 - No prompt, Object does not execute
 */
 
-func trigger_ole(enable bool) {
+func trigger_ole(harden bool) {
 	var value uint32
-	if enable {
-		// Enable Packager
-		events.AppendText("Enabling Office Packager Objects\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling Office Packager Objects\n")
 		value = 1
 	} else {
-		// Disable Packager
-		events.AppendText("Disabling Office Packager Objects\n")
+		events.AppendText("Hardening by disabling Office Packager Objects\n")
 		value = 2
 	}
 
@@ -69,15 +67,13 @@ func trigger_ole(enable bool) {
 4 - Disable all
 */
 
-func trigger_macro(enable bool) {
+func trigger_macro(harden bool) {
 	var value uint32
-	if enable {
-		// Enable Macro
-		events.AppendText("Enabling Office Macros\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling Office Macros\n")
 		value = 2
 	} else {
-		// Disable Macro
-		events.AppendText("Disabling Office Macros\n")
+		events.AppendText("Hardening by disabling Office Macros\n")
 		value = 4
 	}
 
@@ -96,17 +92,15 @@ func trigger_macro(enable bool) {
 
 // ActiveX
 
-func trigger_activex(enable bool) {
+func trigger_activex(harden bool) {
 
 	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Office\\Common\\Security", registry.WRITE)
 
-	if enable {
-		// Enable ActiveX
-		events.AppendText("Enabling ActiveX in Office\n")
+	if harden==false {
+		events.AppendText("Restoring default by enabling ActiveX in Office\n")
 		key.DeleteValue("DisableAllActiveX")
 	} else {
-		// Disable ActiveX
-		events.AppendText("Disabling ActiveX in Office\n")
+		events.AppendText("Hardening by disabling ActiveX in Office\n")
 		key.SetDWordValue("DisableAllActiveX", 1)
 	}
 	key.Close()
