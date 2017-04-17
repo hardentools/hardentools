@@ -100,6 +100,8 @@ func trigger_all(harden bool) {
 	trigger_powershell(harden)
 	progress.SetValue(90)
 	trigger_uac(harden)
+	progress.SetValue(195) 
+	trigger_fileassoc(harden)
 	progress.SetValue(100) 
 }
 
