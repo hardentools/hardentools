@@ -46,7 +46,7 @@ In the future, we will create the ability to select or deselect certain modifica
 
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
-- **Disable file extensions mainly used for malicious purposes** Disables the .hta and .js file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
+- **Disable file extensions mainly used for malicious purposes**. Disables the .hta and .js file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
 ### Microsoft Office
 
