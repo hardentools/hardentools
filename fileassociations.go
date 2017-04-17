@@ -45,7 +45,6 @@ func trigger_fileassoc(harden bool) {
 		for _, extension := range extensions {
 			// Step 1: Reassociate system wide default
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
-			events.AppendText(assocString)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err != nil {
 				events.AppendText("error occured")
@@ -63,7 +62,6 @@ func trigger_fileassoc(harden bool) {
 			
 			// Step 1: Remove association (system wide default)
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
-			events.AppendText(assocString)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err != nil {
 				events.AppendText("error occured")
