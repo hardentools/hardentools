@@ -27,16 +27,28 @@ import (
 // - .bat/.cmd (most probably breaks many programs; but would also prevent arbitrary code (including cmd.exe and powershell.exe) to be executed, even if disabled using Explorer\DisallowRun)
 // -
 // What to disable:
-// - .hta (allows execution of JavaScript and other scripting languages; seldomly run by user directly)
-// - .js (allows execution of JavaScript
+// - .hta allows execution of JavaScript and other scripting languages; seldomly run by user directly)
+// - .js allows execution of JavaScript
+// - .jse JScript Encoded Script File
+// - .WSF Windows Script files
+// - .WSH Windows Script Host files
+// - .scr Windows Screen Saver extension, may break these, but seen commonly in phishing emails, contains executable code
+// - .vbs Visual Basic Script, mainly malicious
+// - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
 func trigger_fileassoc(harden bool) {
 	type Extension struct {
 		ext string
 		assoc string
 	}
-	var extensions = [2]Extension {
+	var extensions = [8]Extension {
 		{ ".hta", "htafile" },
 		{ ".js", "JSFile" },
+		{ ".JSE", "JSEFile" },
+		{ ".WSH", "WSHFile" },
+		{ ".WSF", "WSFFile" },
+		{ ".scr", "scrfile" },
+		{ ".vbs", "VBSFile" },
+		{ ".pif", "piffile" },
 	}
 
 	if harden==false {
