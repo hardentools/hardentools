@@ -46,6 +46,8 @@ In the future, we will create the ability to select or deselect certain modifica
 
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
+- **Disable file extensions mainly used for malicious purposes**. Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scr", ".vbs" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
+
 ### Microsoft Office
 
 - **Disable Macros**. Macros are at times used by Microsoft Office users to script and automate certain activities, especially calculations with Microsoft Excel. However, macros are currently a security plague, and they are widely used as a vehicle for compromise. With Hardentools, macros are disabled and the "Enable this Content" notification is disabled too, to prevent users from being tricked.
