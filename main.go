@@ -78,23 +78,14 @@ func restore_all() {
 
 func trigger_all(harden bool) {
 	trigger_wsh(harden)
-	progress.SetValue(12)
 	trigger_ole(harden)
-	progress.SetValue(30)
 	trigger_macro(harden)
-	progress.SetValue(36)
 	trigger_activex(harden)
-	progress.SetValue(48)
 	trigger_pdf_js(harden)
-	progress.SetValue(60)
 	trigger_pdf_objects(harden)
-	progress.SetValue(72)
 	trigger_autorun(harden)
-	progress.SetValue(84)
 	trigger_powershell(harden)
-	progress.SetValue(90)
 	trigger_uac(harden)
-	progress.SetValue(95) 
 	trigger_fileassoc(harden)
 	progress.SetValue(100) 
 }
