@@ -47,13 +47,13 @@ func check_status() bool {
 	}
 }
 
-func mark_status(is_active bool) {
+func mark_status(hardened bool) {
 	key, _, err := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.WRITE)
 	if err != nil {
 		panic(err)
 	}
 
-	if is_active {
+	if hardened {
 		key.SetDWordValue("Harden", 1)
 	} else {
 		key.SetDWordValue("Harden", 0)
@@ -61,22 +61,16 @@ func mark_status(is_active bool) {
 }
 
 func harden_all() {
-	var harden bool = true
-
-	trigger_all(harden)
-
-	mark_status(harden)
+	trigger_all(true)
+	mark_status(true)
 
 	walk.MsgBox(window, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
 	os.Exit(0)
 }
 
 func restore_all() {
-	var harden bool = false
-
-	trigger_all(harden)
-
-	mark_status(harden)
+	trigger_all(false)
+	mark_status(false)
 
 	walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
 	os.Exit(0)  
