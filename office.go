@@ -30,6 +30,38 @@ var office_versions = []string{
 
 var office_apps = []string{"Excel", "PowerPoint", "Word"}
 
+// methods used by trigger_ole and trigger_macro
+func harden_office(pathRegEx string, value_name string, value uint32) {
+	for _, office_version := range office_versions {
+		for _, office_app := range office_apps {
+			path := fmt.Sprintf(pathRegEx, office_version, office_app)
+			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
+			// save current state
+			save_original_registry_DWORD(key, path, value_name)
+			// harden
+			key.SetDWordValue(value_name, value)
+			key.Close()
+		}
+	}
+}
+
+func restore_office(pathRegEx string, value_name string, default_value uint32) {
+	for _, office_version := range office_versions {
+		for _, office_app := range office_apps {
+			path := fmt.Sprintf(pathRegEx, office_version, office_app)
+			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
+			// retrieve saved state
+			value, err := retrieve_original_registry_DWORD(path, value_name)
+			if err == nil {
+				key.SetDWordValue(value_name, value)
+			} else {
+				key.SetDWordValue(value_name, default_value)
+			}
+			key.Close()
+		}
+	}
+}
+
 // Office Packager Objects
 
 /*
@@ -39,22 +71,19 @@ var office_apps = []string{"Excel", "PowerPoint", "Word"}
 */
 
 func trigger_ole(harden bool) {
-	var value uint32
+	var value_name = "PackagerPrompt"
+	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security"
+	
 	if harden==false {
 		events.AppendText("Restoring default by enabling Office Packager Objects\n")
-		value = 1
+		var default_value uint32 = 1
+		
+		restore_office(pathRegEx, value_name, default_value)
 	} else {
 		events.AppendText("Hardening by disabling Office Packager Objects\n")
-		value = 2
-	}
-
-	for _, office_version := range office_versions {
-		for _, office_app := range office_apps {
-			path := fmt.Sprintf("SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security", office_version, office_app)
-			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.WRITE)
-			key.SetDWordValue("PackagerPrompt", value)
-			key.Close()
-		}
+		var value uint32 = 2
+		
+		harden_office(pathRegEx, value_name, value)
 	}
 }
 
@@ -69,39 +98,45 @@ func trigger_ole(harden bool) {
 
 func trigger_macro(harden bool) {
 	var value uint32
-	if harden==false {
-		events.AppendText("Restoring default by enabling Office Macros\n")
-		value = 2
-	} else {
+	var value_name = "VBAWarnings"
+	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security"
+	
+	if harden==true {
 		events.AppendText("Hardening by disabling Office Macros\n")
 		value = 4
-	}
-
-	for _, office_version := range office_versions {
-		for _, office_app := range office_apps {
-
-			// TODO: Should we leave Excel enabled?
-
-			path := fmt.Sprintf("SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security", office_version, office_app)
-			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.WRITE)
-			key.SetDWordValue("VBAWarnings", value)
-			key.Close()
-		}
+		
+		harden_office(pathRegEx, value_name, value)
+	} else {
+		events.AppendText("Restoring original settings for Office Macros\n")
+		var default_value uint32 = 2
+		
+		restore_office(pathRegEx, value_name, default_value)
 	}
 }
 
 // ActiveX
 
 func trigger_activex(harden bool) {
-
-	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Office\\Common\\Security", registry.WRITE)
+	var path = "SOFTWARE\\Microsoft\\Office\\Common\\Security"
+	key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
+	var value_name = "DisableAllActiveX"
 
 	if harden==false {
 		events.AppendText("Restoring default by enabling ActiveX in Office\n")
-		key.DeleteValue("DisableAllActiveX")
+		// retrieve saved state
+		value, err := retrieve_original_registry_DWORD(path, value_name)
+		if err == nil {
+			key.SetDWordValue(value_name, value)
+		} else {
+			key.DeleteValue(value_name)
+		}
 	} else {
 		events.AppendText("Hardening by disabling ActiveX in Office\n")
-		key.SetDWordValue("DisableAllActiveX", 1)
+		// save current state
+		save_original_registry_DWORD(key, path, value_name)
+		// harden
+		key.SetDWordValue(value_name, 1)
 	}
 	key.Close()
 }
+
