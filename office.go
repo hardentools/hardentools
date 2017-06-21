@@ -45,7 +45,7 @@ func harden_office(pathRegEx string, value_name string, value uint32) {
 	}
 }
 
-func restore_office(pathRegEx string, value_name string, default_value uint32) {
+func restore_office(pathRegEx string, value_name string) {
 	for _, office_version := range office_versions {
 		for _, office_app := range office_apps {
 			path := fmt.Sprintf(pathRegEx, office_version, office_app)
@@ -55,7 +55,7 @@ func restore_office(pathRegEx string, value_name string, default_value uint32) {
 			if err == nil {
 				key.SetDWordValue(value_name, value)
 			} else {
-				key.SetDWordValue(value_name, default_value)
+				key.DeleteValue(value_name)
 			}
 			key.Close()
 		}
@@ -75,10 +75,9 @@ func trigger_ole(harden bool) {
 	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security"
 	
 	if harden==false {
-		events.AppendText("Restoring default by enabling Office Packager Objects\n")
-		var default_value uint32 = 1
+		events.AppendText("Restoring original settings for Office Packager Objects\n")
 		
-		restore_office(pathRegEx, value_name, default_value)
+		restore_office(pathRegEx, value_name)
 	} else {
 		events.AppendText("Hardening by disabling Office Packager Objects\n")
 		var value uint32 = 2
@@ -108,9 +107,8 @@ func trigger_macro(harden bool) {
 		harden_office(pathRegEx, value_name, value)
 	} else {
 		events.AppendText("Restoring original settings for Office Macros\n")
-		var default_value uint32 = 2
 		
-		restore_office(pathRegEx, value_name, default_value)
+		restore_office(pathRegEx, value_name)
 	}
 }
 
@@ -122,7 +120,7 @@ func trigger_activex(harden bool) {
 	var value_name = "DisableAllActiveX"
 
 	if harden==false {
-		events.AppendText("Restoring default by enabling ActiveX in Office\n")
+		events.AppendText("Restoring original settings for ActiveX in Office\n")
 		// retrieve saved state
 		value, err := retrieve_original_registry_DWORD(path, value_name)
 		if err == nil {
