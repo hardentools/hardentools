@@ -34,28 +34,11 @@ func trigger_autorun(harden bool) {
 	key_autoplay, _, _ := registry.CreateKey(registry.CURRENT_USER, key_autoplay_name, registry.ALL_ACCESS)
 
 	if harden==false {
-		events.AppendText("Restoring previous state of AutoRun and AutoPlay\n")
+		events.AppendText("Restoring original settings for AutoRun and AutoPlay\n")
 		
-		value, err := retrieve_original_registry_DWORD(key_autorun_name, "NoDriveTypeAutoRun")
-		if err == nil {
-			key_autorun.SetDWordValue("NoDriveTypeAutoRun", value)
-		} else {
-			key_autorun.DeleteValue("NoDriveTypeAutoRun")
-		}
-		
-		value, err = retrieve_original_registry_DWORD(key_autorun_name, "NoAutorun")
-		if err == nil {
-			key_autorun.SetDWordValue("NoAutorun", value)
-		} else {
-			key_autorun.DeleteValue("NoAutorun")
-		}
-		
-		value, err = retrieve_original_registry_DWORD(key_autoplay_name, "DisableAutoplay")
-		if err == nil {
-			key_autoplay.SetDWordValue("DisableAutoplay", value)
-		} else {
-			key_autorun.DeleteValue("DisableAutoplay")
-		}
+		restore_key(key_autorun, key_autorun_name, "NoDriveTypeAutoRun")
+		restore_key(key_autorun, key_autorun_name,"NoAutorun")
+		restore_key(key_autoplay, key_autoplay_name,"DisableAutoplay")
 	} else {
 		events.AppendText("Hardening by disabling AutoRun and AutoPlay\n")
 		

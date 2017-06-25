@@ -20,6 +20,8 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// TODO: Add error handling for all methods
+
 // save original registry key
 func save_original_registry_DWORD(key registry.Key, key_name string, value_name string){
 	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
@@ -43,4 +45,14 @@ func retrieve_original_registry_DWORD(key_name string, value_name string) (value
 		return uint32(value64), nil
 	}
 	return 0, err
+}
+
+// Helper method for restoring original state
+func restore_key(key registry.Key, key_name string, value_name string){
+	value, err := retrieve_original_registry_DWORD(key_name, value_name)
+	if err == nil {
+		key.SetDWordValue(value_name, value)
+	} else {
+		key.DeleteValue(value_name)
+	}
 }

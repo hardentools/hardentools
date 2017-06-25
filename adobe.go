@@ -23,8 +23,37 @@ import (
 
 var adobe_versions = []string{
 	"DC", // Acrobat Reader DC
-	"XI", // Acrobat Reader XI - To test
+	"XI", // Acrobat Reader XI
 }
+
+// methods used by trigger_* methods for writing the actual registry key values
+func harden_adobe(pathRegEx string, value_name string, value uint32) {
+	for _, adobe_version := range adobe_versions {
+		path := fmt.Sprintf(pathRegEx, adobe_version)
+		key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
+		// save current state
+		save_original_registry_DWORD(key, path, value_name)
+		// harden
+		key.SetDWordValue(value_name, value)
+		key.Close()
+	}
+}
+
+func restore_adobe(pathRegEx string, value_name string) {
+	for _, adobe_version := range adobe_versions {
+		path := fmt.Sprintf(pathRegEx, adobe_version)
+		key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
+		// retrieve saved state
+		value, err := retrieve_original_registry_DWORD(path, value_name)
+		if err == nil {
+			key.SetDWordValue(value_name, value)
+		} else {
+			key.DeleteValue(value_name)
+		}
+		key.Close()
+	}
+}
+
 
 /*
 bEnableJS possible values:
@@ -34,21 +63,16 @@ bEnableJS possible values:
 
 func trigger_pdf_js(harden bool) {
 	var value uint32
+	var value_name = "bEnableJS"
+	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs"
 
 	if harden==false {
-		events.AppendText("Restoring default by enabling Acrobat Reader JavaScript\n")
-		value = 1
+		events.AppendText("Restoring original settings for Acrobat Reader JavaScript\n")
+		restore_adobe(pathRegEx, value_name)
 	} else {
 		events.AppendText("Hardening by disabling Acrobat Reader JavaScript\n")
-		value = 0
-	}
-
-	for _, adobe_version := range adobe_versions {
-		path := fmt.Sprintf("SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs", adobe_version)
-		key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
-
-		key.SetDWordValue("bEnableJS", value)
-		key.Close()
+		value = 0  // Disable AcroJS
+		harden_adobe(pathRegEx, value_name, value)
 	}
 }
 
@@ -61,23 +85,19 @@ the opening of non-PDF documents
 func trigger_pdf_objects(harden bool) {
 	var allow_value uint32
 	var secure_value uint32
-
+	var value_name_allow = "bAllowOpenFile"
+	var value_name_secure = "bSecureOpenFile"
+	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals"
+	
 	if harden==false {
-		events.AppendText("Restoring default by enabling embedded objects in PDFs\n")
-		allow_value = 1
-		secure_value = 0
+		events.AppendText("Restoring original settings for embedded objects in PDFs\n")
+		restore_adobe(pathRegEx, value_name_allow)
+		restore_adobe(pathRegEx, value_name_secure)
 	} else {
 		events.AppendText("Hardening by disabling embedded objects in PDFs\n")
 		allow_value = 0
 		secure_value = 1
-	}
-
-	for _, adobe_version := range adobe_versions {
-		path := fmt.Sprintf("SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals", adobe_version)
-		key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
-		
-		key.SetDWordValue("bAllowOpenFile", allow_value)
-		key.SetDWordValue("bSecureOpenFile", secure_value)
-		key.Close()
+		harden_adobe(pathRegEx, value_name_allow, allow_value)
+		harden_adobe(pathRegEx, value_name_secure, secure_value)
 	}
 }

@@ -21,23 +21,23 @@ import (
 )
 
 func trigger_uac(harden bool) {
-	key, _ := registry.OpenKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", registry.WRITE)
-
+	key_name := "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
+	key, _ := registry.OpenKey(registry.LOCAL_MACHINE, key_name, registry.ALL_ACCESS)
+	value_name := "ConsentPromptBehaviorAdmin"
+	
 	if harden==false {
-		events.AppendText("Restoring default by restoring UAC to default settings\n")
-		
-		err := key.SetDWordValue("ConsentPromptBehaviorAdmin", 5)
-		if err != nil {
-			events.AppendText("!! SetDWordValue on UAC failed.\n")
-		}
+		events.AppendText("Restoring original UAC settings\n")
+		restore_key(key, key_name, value_name)
 	} else {
 		events.AppendText("Hardening by setting UAC to prompt for consent on secure desktops\n")
+		var value uint32 = 2
 		
-		err := key.SetDWordValue("ConsentPromptBehaviorAdmin", 2)
-		if err != nil {
-			events.AppendText("!! SetDWordValue on UAC failed.\n")
-		}
+		// save original state to be able to restore it
+		save_original_registry_DWORD(key, key_name, value_name)
+		
+		// harden
+		key.SetDWordValue(value_name, value)
 	}
-
+	
 	key.Close()
 }
