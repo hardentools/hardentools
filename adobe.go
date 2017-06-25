@@ -43,13 +43,8 @@ func restore_adobe(pathRegEx string, value_name string) {
 	for _, adobe_version := range adobe_versions {
 		path := fmt.Sprintf(pathRegEx, adobe_version)
 		key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
-		// retrieve saved state
-		value, err := retrieve_original_registry_DWORD(path, value_name)
-		if err == nil {
-			key.SetDWordValue(value_name, value)
-		} else {
-			key.DeleteValue(value_name)
-		}
+		// restore previous state
+		restore_key(key, path, value_name)
 		key.Close()
 	}
 }
