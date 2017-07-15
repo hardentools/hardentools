@@ -17,10 +17,10 @@
 package main
 
 import (
-	"os"
 	"github.com/lxn/walk"
-	"golang.org/x/sys/windows/registry"
 	. "github.com/lxn/walk/declarative"
+	"golang.org/x/sys/windows/registry"
+	"os"
 )
 
 var window *walk.MainWindow
@@ -73,7 +73,7 @@ func restore_all() {
 	mark_status(false)
 
 	walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
-	os.Exit(0)  
+	os.Exit(0)
 }
 
 func trigger_all(harden bool) {
@@ -87,7 +87,7 @@ func trigger_all(harden bool) {
 	trigger_powershell(harden)
 	trigger_uac(harden)
 	trigger_fileassoc(harden)
-	progress.SetValue(100) 
+	progress.SetValue(100)
 }
 
 func main() {
@@ -106,13 +106,13 @@ func main() {
 
 	MainWindow{
 		AssignTo: &window,
-		Title: "Harden - Security Without Borders",
-		MinSize: Size{400, 300},
-		Layout: VBox{},
+		Title:    "Harden - Security Without Borders",
+		MinSize:  Size{400, 300},
+		Layout:   VBox{},
 		Children: []Widget{
 			Label{Text: label_text},
 			PushButton{
-				Text: button_text,
+				Text:      button_text,
 				OnClicked: button_func,
 			},
 			ProgressBar{
@@ -120,7 +120,7 @@ func main() {
 			},
 			TextEdit{
 				AssignTo: &events,
-				Text: events_text,
+				Text:     events_text,
 				ReadOnly: true,
 			},
 		},

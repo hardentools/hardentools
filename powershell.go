@@ -36,12 +36,12 @@ func trigger_powershell(harden bool) {
 	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
 
 	// enable
-	if harden==false {
+	if harden == false {
 		events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
 
 		// set DisallowRun to old value / delete if no old value saved
 		restore_key(key_explorer, key_explorer_name, "DisallowRun")
-		
+
 		// delete values for disallowed executables (by iterating all existing values)
 		// TODO: This only works if the hardentools values are the last
 		//       ones (if values are deleted and numbers are not in

@@ -49,7 +49,6 @@ func restore_adobe(pathRegEx string, value_name string) {
 	}
 }
 
-
 /*
 bEnableJS possible values:
 0 - Disable AcroJS
@@ -61,12 +60,12 @@ func trigger_pdf_js(harden bool) {
 	var value_name = "bEnableJS"
 	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs"
 
-	if harden==false {
+	if harden == false {
 		events.AppendText("Restoring original settings for Acrobat Reader JavaScript\n")
 		restore_adobe(pathRegEx, value_name)
 	} else {
 		events.AppendText("Hardening by disabling Acrobat Reader JavaScript\n")
-		value = 0  // Disable AcroJS
+		value = 0 // Disable AcroJS
 		harden_adobe(pathRegEx, value_name, value)
 	}
 }
@@ -83,8 +82,8 @@ func trigger_pdf_objects(harden bool) {
 	var value_name_allow = "bAllowOpenFile"
 	var value_name_secure = "bSecureOpenFile"
 	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals"
-	
-	if harden==false {
+
+	if harden == false {
 		events.AppendText("Restoring original settings for embedded objects in PDFs\n")
 		restore_adobe(pathRegEx, value_name_allow)
 		restore_adobe(pathRegEx, value_name_secure)
