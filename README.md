@@ -20,7 +20,7 @@ Then, you will see the main Hardentools window. It's very simple, you just click
 
 ![screenshot2](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/screenshot2.png)
 
-In case you wish to restore the default settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Restore" button. Similarly, click it and wait for the modifications to be reverted.
+In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Restore" button. Similarly, click it and wait for the modifications to be reverted.
 
 In the future, we will create the ability to select or deselect certain modifications Hardentools is configured to make.
 

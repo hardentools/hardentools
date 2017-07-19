@@ -31,26 +31,16 @@ Disables Powershell and cmd.exe
  "3"="cmd.exe"
 */
 func trigger_powershell(harden bool) {
-	key_explorer, _, _ := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
+	key_explorer_name := "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
+	key_explorer, _, _ := registry.CreateKey(registry.CURRENT_USER, key_explorer_name, registry.ALL_ACCESS)
 	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
 
 	// enable
-	if harden==false {
-		events.AppendText("Restoring original setting by enabling Powershell and cmd\n")
+	if harden == false {
+		events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
 
 		// set DisallowRun to old value / delete if no old value saved
-		saved_state, _, err_sst := hardentools_key.GetIntegerValue("SavedStateDisallowRun")
-		if err_sst == nil {
-			err := key_explorer.SetDWordValue("DisallowRun", uint32(saved_state))
-			if err != nil {
-				events.AppendText("!! SetValue to enable Powershell and cmd failed.\n")
-			}
-		} else {
-			err := key_explorer.DeleteValue("DisallowRun")
-			if err != nil {
-				events.AppendText("!! DeleteValue to enable Powershell and cmd failed.\n")
-			}
-		}
+		restore_key(key_explorer, key_explorer_name, "DisallowRun")
 
 		// delete values for disallowed executables (by iterating all existing values)
 		// TODO: This only works if the hardentools values are the last
@@ -73,20 +63,11 @@ func trigger_powershell(harden bool) {
 			}
 		}
 		key_disallow.Close()
-
-		hardentools_key.DeleteValue("SavedStateDisallowRun")
 	} else {
 		events.AppendText("Hardening by disabling Powershell and cmd\n")
 
-		// handle current state (save if not default, to be able to restore former state)
-		current_state, _, err_cs := key_explorer.GetIntegerValue("DisallowRun")
-		if err_cs != nil {
-			// no need to save state
-			//events.AppendText("Error reading DisallowRun value\n")
-		} else {
-			// save state
-			hardentools_key.SetDWordValue("SavedStateDisallowRun", uint32(current_state))
-		}
+		// save original state of "DisallowRun" value to be able to restore it
+		save_original_registry_DWORD(key_explorer, key_explorer_name, "DisallowRun")
 
 		// create DisallowRun key
 		key_disallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)

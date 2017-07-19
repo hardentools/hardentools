@@ -37,23 +37,23 @@ import (
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
 func trigger_fileassoc(harden bool) {
 	type Extension struct {
-		ext string
+		ext   string
 		assoc string
 	}
-	var extensions = [8]Extension {
-		{ ".hta", "htafile" },
-		{ ".js", "JSFile" },
-		{ ".JSE", "JSEFile" },
-		{ ".WSH", "WSHFile" },
-		{ ".WSF", "WSFFile" },
-		{ ".scr", "scrfile" },
-		{ ".vbs", "VBSFile" },
-		{ ".pif", "piffile" },
+	var extensions = [8]Extension{
+		{".hta", "htafile"},
+		{".js", "JSFile"},
+		{".JSE", "JSEFile"},
+		{".WSH", "WSHFile"},
+		{".WSF", "WSFFile"},
+		{".scr", "scrfile"},
+		{".vbs", "VBSFile"},
+		{".pif", "piffile"},
 	}
 
-	if harden==false {
+	if harden == false {
 		events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
-		
+
 		for _, extension := range extensions {
 			// Step 1: Reassociate system wide default
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
@@ -62,16 +62,16 @@ func trigger_fileassoc(harden bool) {
 				events.AppendText("error occured")
 				events.AppendText(fmt.Sprintln("%s", err))
 			}
-			
+
 			// Step 2 (Reassociate user defaults) is not necessary, since this is automatically done by Windows on first usage
 		}
 	} else {
 		events.AppendText("Hardening by disabling potentially malicious file associations\n")
-		
+
 		for _, extension := range extensions {
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
-			
+
 			// Step 1: Remove association (system wide default)
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()

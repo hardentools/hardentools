@@ -21,14 +21,22 @@ import (
 )
 
 func trigger_wsh(harden bool) {
-	key, _, _ := registry.CreateKey(registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Windows Script Host\\Settings", registry.WRITE)
+	key_name := "SOFTWARE\\Microsoft\\Windows Script Host\\Settings"
+	key, _, _ := registry.CreateKey(registry.CURRENT_USER, key_name, registry.ALL_ACCESS)
+	value_name := "Enabled"
 
-	if harden==false {
-		events.AppendText("Restoring default by enabling Windows Script Host\n")
-		key.DeleteValue("Enabled")
+	if harden == false {
+		events.AppendText("Restoring original settings for Windows Script Host\n")
+		restore_key(key, key_name, value_name)
 	} else {
 		events.AppendText("Hardening by disabling Windows Script Host\n")
-		key.SetDWordValue("Enabled", 0)
+		var value uint32 = 0
+
+		// save original state to be able to restore it
+		save_original_registry_DWORD(key, key_name, value_name)
+
+		// harden
+		key.SetDWordValue(value_name, value)
 	}
 
 	key.Close()
