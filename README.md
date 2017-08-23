@@ -62,6 +62,13 @@ In the future, we will create the ability to select or deselect certain modifica
 
 - **Disable execution of objects embedded in PDF documents**. Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
 
+- **Switch on the Protected Mode** (enabled by default in current versions)
+
+- **Switch on Protected View** for all files from untrusted sources
+
+- **Switch on Enhanced Security** (enabled by default in current versions)
+
+
 ## Authors
 
 This tools is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst.
