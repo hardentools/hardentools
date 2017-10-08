@@ -95,3 +95,68 @@ func trigger_pdf_objects(harden bool) {
 		harden_adobe(pathRegEx, value_name_secure, secure_value)
 	}
 }
+
+/*
+ * Switch on the Protected Mode setting under "Security (Enhanced)" (enabled by default in current versions)
+ * (HKEY_LOCAL_USER\Software\Adobe\Acrobat Reader<version>\Privileged -> DWORD „bProtectedMode“)
+ * 0 - Disable Protected Mode
+ * 1 - Enable Protected Mode
+ */
+func trigger_pdf_protectedmode(harden bool) {
+	var value uint32
+	var value_name = "bProtectedMode"
+	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Privileged"
+
+	if harden == false {
+		events.AppendText("Restoring original settings for Acrobat Reader Protected Mode\n")
+		restore_adobe(pathRegEx, value_name)
+	} else {
+		events.AppendText("Hardening by enabling Acrobat Reader Protected Mode\n")
+		value = 1
+		harden_adobe(pathRegEx, value_name, value)
+	}
+}
+
+/*
+ * Switch on Protected View for all files from untrusted sources
+ * (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\<version>\TrustManager -> iProtectedView)
+ * 0 - Disable Protected View
+ * 1 - Enable Protected View
+ */
+func trigger_pdf_protectedview(harden bool) {
+	var value uint32
+	var value_name = "iProtectedView"
+	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager"
+
+	if harden == false {
+		events.AppendText("Restoring original settings for Acrobat Reader Protected View\n")
+		restore_adobe(pathRegEx, value_name)
+	} else {
+		events.AppendText("Hardening by enabling Acrobat Reader Protected View\n")
+		value = 1
+		harden_adobe(pathRegEx, value_name, value)
+	}
+}
+
+/*
+ * Switch on Enhanced Security setting under "Security (Enhanced)"
+ * (enabled by default in current versions)
+ * (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\DC\TrustManager -> bEnhancedSecurityInBrowser = 1 & bEnhancedSecurityStandalone = 1)
+ */
+func trigger_pdf_enhancedsec(harden bool) {
+	var value uint32
+	var value_name = "bEnhancedSecurityInBrowser"
+	var value_name2 = "bEnhancedSecurityStandalone"
+	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager"
+
+	if harden == false {
+		events.AppendText("Restoring original settings for Acrobat Reader Enhanced Security\n")
+		restore_adobe(pathRegEx, value_name)
+		restore_adobe(pathRegEx, value_name2)
+	} else {
+		events.AppendText("Hardening by enabling Acrobat Reader Enhanced Security\n")
+		value = 1
+		harden_adobe(pathRegEx, value_name, value)
+		harden_adobe(pathRegEx, value_name2, value)
+	}
+}
