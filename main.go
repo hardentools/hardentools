@@ -117,7 +117,7 @@ func main() {
 
 	MainWindow{
 		AssignTo: &window,
-		Title:    "Harden - Security Without Borders",
+		Title:    "HardenTools - Security Without Borders",
 		MinSize:  Size{400, 300},
 		Layout:   VBox{},
 		Children: []Widget{
