@@ -32,7 +32,7 @@ import (
 func triggerPowerShell(harden bool) {
 	keyExplorerName := "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
 	keyExplorer, _, _ := registry.CreateKey(registry.CURRENT_USER, keyExplorerName, registry.ALL_ACCESS)
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
 
 	if harden == false {
 		events.AppendText("Restoring original settings by enabling Powershell and cmd\n")

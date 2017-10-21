@@ -43,7 +43,7 @@ func _restoreAdobe(pathRegEx string, valueName string) {
 		path := fmt.Sprintf(pathRegEx, adobeVersion)
 		key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
 
-		restoreKey(key, path, value_name)
+		restoreKey(key, path, valueName)
 		key.Close()
 	}
 }

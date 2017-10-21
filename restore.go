@@ -24,7 +24,7 @@ import (
 
 // Save original registry key.
 func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName string) {
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
 
 	originalValue, _, err := key.GetIntegerValue(valueName)
 	if err == nil {
@@ -35,7 +35,7 @@ func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName strin
 
 // Restore registry key from saved state.
 func retrieveOriginalRegistryDWORD(keyName string, valueName string) (value uint32, err error) {
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
 
 	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + keyName + "_" + valueName)
 	hardentoolsKey.Close()

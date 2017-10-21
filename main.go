@@ -27,10 +27,10 @@ var window *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
 
-const hardentoolsKey = "SOFTWARE\\Security Without Borders\\"
+const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
 
 func checkStatus() bool {
-	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKey, registry.READ)
+	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
 	if err != nil {
 		return false
 	}
@@ -48,7 +48,7 @@ func checkStatus() bool {
 }
 
 func markStatus(hardened bool) {
-	key, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKey, registry.WRITE)
+	key, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.WRITE)
 	if err != nil {
 		panic(err)
 	}
