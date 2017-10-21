@@ -21,26 +21,24 @@ import (
 	"strconv"
 )
 
-/*
-Disables Powershell and cmd.exe
- [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
- "DisallowRun"=dword:00000001
- [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
- "1"="powershell_ise.exe"
- "2"="powershell.exe"
- "3"="cmd.exe"
-*/
-func trigger_powershell(harden bool) {
-	key_explorer_name := "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
-	key_explorer, _, _ := registry.CreateKey(registry.CURRENT_USER, key_explorer_name, registry.ALL_ACCESS)
-	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+// Disables Powershell and cmd.exe
+//  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+//  "DisallowRun"=dword:00000001
+//  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
+//  "1"="powershell_ise.exe"
+//  "2"="powershell.exe"
+//  "3"="cmd.exe"
 
-	// enable
+func triggerPowerShell(harden bool) {
+	keyExplorerName := "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
+	keyExplorer, _, _ := registry.CreateKey(registry.CURRENT_USER, keyExplorerName, registry.ALL_ACCESS)
+	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+
 	if harden == false {
 		events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
 
-		// set DisallowRun to old value / delete if no old value saved
-		restore_key(key_explorer, key_explorer_name, "DisallowRun")
+		// Set DisallowRun to old value / delete if no old value saved.
+		restoreKey(keyExplorer, keyExplorerName, "DisallowRun")
 
 		// delete values for disallowed executables (by iterating all existing values)
 		// TODO: This only works if the hardentools values are the last
@@ -51,51 +49,55 @@ func trigger_powershell(harden bool) {
 		//       were not created by hardentools if they are equivalent
 		//       with the hardentools created ones (it has to be decided
 		//       if this is a bug or a feature
-		key_disallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
+
+		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
 			events.AppendText("!! OpenKey to enable Powershell and cmd failed.\n")
 		}
+
 		for i := 1; i < 100; i++ {
-			value, _, _ := key_disallow.GetStringValue(strconv.Itoa(i))
+			value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
+
 			switch value {
 			case "powershell_ise.exe", "powershell.exe", "cmd.exe":
-				key_disallow.DeleteValue(strconv.Itoa(i))
+				keyDisallow.DeleteValue(strconv.Itoa(i))
 			}
 		}
-		key_disallow.Close()
+
+		keyDisallow.Close()
 	} else {
 		events.AppendText("Hardening by disabling Powershell and cmd\n")
 
-		// save original state of "DisallowRun" value to be able to restore it
-		save_original_registry_DWORD(key_explorer, key_explorer_name, "DisallowRun")
+		// Save original state of "DisallowRun" value to be able to restore it.
+		saveOriginalRegistryDWORD(keyExplorer, keyExplorerName, "DisallowRun")
 
-		// create DisallowRun key
-		key_disallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
+		// Create DisallowRun key.
+		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
 			events.AppendText("!! CreateKey to disable powershell failed.\n")
 		}
 
-		// enable DisallowRun
-		key_explorer.SetDWordValue("DisallowRun", 0x1)
+		// Enable DisallowRun.
+		keyExplorer.SetDWordValue("DisallowRun", 0x1)
 
-		//// set values for disallowed executables
-		// find starting point (only relevant if there are existing entries)
-		starting_point := 1
+		// Find starting point (only relevant if there are existing entries)
+		startingPoint := 1
 		for i := 1; i < 100; i++ {
-			starting_point = i
-			_, _, err_sp := key_disallow.GetStringValue(strconv.Itoa(starting_point))
-			if err_sp != nil {
+			startingPoint = i
+			_, _, err = keyDisallow.GetStringValue(strconv.Itoa(startingPoint))
+			if err != nil {
 				break
 			}
 		}
-		// set values
-		key_disallow.SetStringValue(strconv.Itoa(starting_point), "powershell_ise.exe")
-		key_disallow.SetStringValue(strconv.Itoa(starting_point+1), "powershell.exe")
-		key_disallow.SetStringValue(strconv.Itoa(starting_point+2), "cmd.exe")
 
-		key_disallow.Close()
+		// Set values.
+		keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
+		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
+		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
+
+		keyDisallow.Close()
 	}
 
-	key_explorer.Close()
-	hardentools_key.Close()
+	keyExplorer.Close()
+	hardentoolsKey.Close()
 }

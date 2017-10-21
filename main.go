@@ -27,10 +27,10 @@ var window *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
 
-const harden_key_path = "SOFTWARE\\Security Without Borders\\"
+const hardentoolsKey = "SOFTWARE\\Security Without Borders\\"
 
-func check_status() bool {
-	key, err := registry.OpenKey(registry.CURRENT_USER, harden_key_path, registry.READ)
+func checkStatus() bool {
+	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKey, registry.READ)
 	if err != nil {
 		return false
 	}
@@ -42,13 +42,13 @@ func check_status() bool {
 
 	if value == 1 {
 		return true
-	} else {
-		return false
 	}
+
+	return false
 }
 
-func mark_status(hardened bool) {
-	key, _, err := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.WRITE)
+func markStatus(hardened bool) {
+	key, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKey, registry.WRITE)
 	if err != nil {
 		panic(err)
 	}
@@ -60,51 +60,59 @@ func mark_status(hardened bool) {
 	}
 }
 
-func harden_all() {
-	trigger_all(true)
-	mark_status(true)
+func hardenAll() {
+	triggerAll(true)
+	markStatus(true)
 
 	walk.MsgBox(window, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
 	os.Exit(0)
 }
 
-func restore_all() {
-	trigger_all(false)
-	mark_status(false)
+func restoreAll() {
+	triggerAll(false)
+	markStatus(false)
 
 	walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
 	os.Exit(0)
 }
 
-func trigger_all(harden bool) {
-	trigger_wsh(harden)
-	trigger_ole(harden)
-	trigger_macro(harden)
-	trigger_activex(harden)
-	trigger_pdf_js(harden)
-	trigger_pdf_objects(harden)
-	trigger_pdf_protectedmode(harden)
-	trigger_pdf_protectedview(harden)
-	trigger_pdf_enhancedsec(harden)
-	trigger_autorun(harden)
-	trigger_powershell(harden)
-	trigger_uac(harden)
-	trigger_fileassoc(harden)
+func triggerAll(harden bool) {
+	// WSH.
+	triggerWSH(harden)
+	// Office.
+	triggerOfficeOLE(harden)
+	triggerOfficeMacros(harden)
+	triggerOfficeActiveX(harden)
+	// PDF.
+	triggerPDFJS(harden)
+	triggerPDFObjects(harden)
+	triggerPDFProtectedMode(harden)
+	triggerPDFProtectedView(harden)
+	triggerPDFEnhancedSecurity(harden)
+	// Autorun.
+	triggerAutorun(harden)
+	// PowerShell.
+	triggerPowerShell(harden)
+	// UAC.
+	triggerUAC(harden)
+	// Explorer.
+	triggerFileAssociation(harden)
+
 	progress.SetValue(100)
 }
 
 func main() {
-	var label_text, button_text, events_text string
-	var button_func func()
+	var labelText, buttonText, eventsText string
+	var buttonFunc func()
 
-	if check_status() == false {
-		button_text = "Harden!"
-		button_func = harden_all
-		label_text = "Ready to harden some features of your system?"
+	if checkStatus() == false {
+		buttonText = "Harden!"
+		buttonFunc = hardenAll
+		labelText = "Ready to harden some features of your system?"
 	} else {
-		button_text = "Restore..."
-		button_func = restore_all
-		label_text = "We have already hardened some risky features, do you want to restore them?"
+		buttonText = "Restore..."
+		buttonFunc = restoreAll
+		labelText = "We have already hardened some risky features, do you want to restore them?"
 	}
 
 	MainWindow{
@@ -113,17 +121,17 @@ func main() {
 		MinSize:  Size{400, 300},
 		Layout:   VBox{},
 		Children: []Widget{
-			Label{Text: label_text},
+			Label{Text: labelText},
 			PushButton{
-				Text:      button_text,
-				OnClicked: button_func,
+				Text:      buttonText,
+				OnClicked: buttonFunc,
 			},
 			ProgressBar{
 				AssignTo: &progress,
 			},
 			TextEdit{
 				AssignTo: &events,
-				Text:     events_text,
+				Text:     eventsText,
 				ReadOnly: true,
 			},
 		},

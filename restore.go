@@ -20,39 +20,37 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// TODO: Add error handling for all methods
+// TODO: Add error handling for all methods.
 
-// save original registry key
-func save_original_registry_DWORD(key registry.Key, key_name string, value_name string) {
-	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+// Save original registry key.
+func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName string) {
+	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
 
-	original_value, _, err := key.GetIntegerValue(value_name)
+	originalValue, _, err := key.GetIntegerValue(valueName)
 	if err == nil {
-		// save state
-		hardentools_key.SetDWordValue("SavedState_"+key_name+"_"+value_name, uint32(original_value))
+		hardentoolsKey.SetDWordValue("SavedState_" + keyName + "_" + valueName, uint32(originalValue))
 	}
-	hardentools_key.Close()
+	hardentoolsKey.Close()
 }
 
-// restore registry key from saved state
-func retrieve_original_registry_DWORD(key_name string, value_name string) (value uint32, err error) {
-	hardentools_key, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
+// Restore registry key from saved state.
+func retrieveOriginalRegistryDWORD(keyName string, valueName string) (value uint32, err error) {
+	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, harden_key_path, registry.ALL_ACCESS)
 
-	// retrieve saved state
-	value64, _, err := hardentools_key.GetIntegerValue("SavedState_" + key_name + "_" + value_name)
-	hardentools_key.Close()
+	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + keyName + "_" + valueName)
+	hardentoolsKey.Close()
 	if err == nil {
 		return uint32(value64), nil
 	}
 	return 0, err
 }
 
-// Helper method for restoring original state
-func restore_key(key registry.Key, key_name string, value_name string) {
-	value, err := retrieve_original_registry_DWORD(key_name, value_name)
+// Helper method for restoring original state.
+func restoreKey(key registry.Key, keyName string, valueName string) {
+	value, err := retrieveOriginalRegistryDWORD(keyName, valueName)
 	if err == nil {
-		key.SetDWordValue(value_name, value)
+		key.SetDWordValue(valueName, value)
 	} else {
-		key.DeleteValue(value_name)
+		key.DeleteValue(valueName)
 	}
 }

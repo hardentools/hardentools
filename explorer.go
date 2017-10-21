@@ -22,7 +22,6 @@ import (
 	"os/exec"
 )
 
-// Documentation:
 // What better not to disable:
 // - .bat/.cmd (most probably breaks many programs; but would also prevent arbitrary code (including cmd.exe and powershell.exe) to be executed, even if disabled using Explorer\DisallowRun)
 // -
@@ -35,11 +34,14 @@ import (
 // - .scr Windows Screen Saver extension, may break these, but seen commonly in phishing emails, contains executable code
 // - .vbs Visual Basic Script, mainly malicious
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
-func trigger_fileassoc(harden bool) {
+
+func triggerFileAssociation(harden bool) {
+
 	type Extension struct {
 		ext   string
 		assoc string
 	}
+
 	var extensions = [8]Extension{
 		{".hta", "htafile"},
 		{".js", "JSFile"},
@@ -80,9 +82,9 @@ func trigger_fileassoc(harden bool) {
 				events.AppendText(fmt.Sprintln("%s", err))
 			}
 			// Step 2: Remove user association
-			value_names, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
-			for _, value_name := range value_names {
-				regKey.DeleteValue(value_name)
+			valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
+			for _, valueName := range valueNames {
+				regKey.DeleteValue(valueName)
 			}
 			regKey.Close()
 		}
