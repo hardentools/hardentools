@@ -30,13 +30,8 @@ func triggerWSH(harden bool) {
 		restoreKey(key, keyName, valueName)
 	} else {
 		events.AppendText("Hardening by disabling Windows Script Host\n")
-		var value uint32
-
-		// save original state to be able to restore it
 		saveOriginalRegistryDWORD(key, keyName, valueName)
-
-		// harden
-		key.SetDWordValue(valueName, value)
+		key.SetDWordValue(valueName, 0)
 	}
 
 	key.Close()

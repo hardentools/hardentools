@@ -30,13 +30,8 @@ func triggerUAC(harden bool) {
 		restoreKey(key, keyName, valueName)
 	} else {
 		events.AppendText("Hardening by setting UAC to prompt for consent on secure desktops\n")
-		var value uint32 = 2
-
-		// save original state to be able to restore it
 		saveOriginalRegistryDWORD(key, keyName, valueName)
-
-		// harden
-		key.SetDWordValue(valueName, value)
+		key.SetDWordValue(valueName, 2)
 	}
 
 	key.Close()
