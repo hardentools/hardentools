@@ -56,6 +56,8 @@ In the future, we will create the ability to select or deselect certain modifica
 
 - **Disabling ActiveX**. Disables ActiveX Controls for all Office applications.
 
+- **Disable DDE**. Disables DDE for Word and Excel
+
 ### Acrobat Reader
 
 - **Disable JavaScript in PDF documents**. Acrobat Reader allows to execute JavaScript code from within PDF documents. This is widely abused for exploitation and malicious activity.
