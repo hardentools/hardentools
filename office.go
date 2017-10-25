@@ -28,9 +28,9 @@ var officeVersions = []string{
 	"16.0", // Office 2016
 }
 
-var officeApps = []string{"Excel", "PowerPoint", "Word"}
+var standardOfficeApps = []string{"Excel", "PowerPoint", "Word"}
 
-func _hardenOffice(pathRegEx string, valueName string, value uint32) {
+func _hardenOffice(pathRegEx string, valueName string, value uint32, officeApps []string) {
 	for _, officeVersion := range officeVersions {
 		for _, officeApp := range officeApps {
 			path := fmt.Sprintf(pathRegEx, officeVersion, officeApp)
@@ -44,7 +44,7 @@ func _hardenOffice(pathRegEx string, valueName string, value uint32) {
 	}
 }
 
-func _restoreOffice(pathRegEx string, valueName string) {
+func _restoreOffice(pathRegEx string, valueName string, officeApps []string) {
 	for _, officeVersion := range officeVersions {
 		for _, officeApp := range officeApps {
 			path := fmt.Sprintf(pathRegEx, officeVersion, officeApp)
@@ -69,12 +69,12 @@ func triggerOfficeOLE(harden bool) {
 	if harden == false {
 		events.AppendText("Restoring original settings for Office Packager Objects\n")
 
-		_restoreOffice(pathRegEx, valueName)
+		_restoreOffice(pathRegEx, valueName, standardOfficeApps)
 	} else {
 		events.AppendText("Hardening by disabling Office Packager Objects\n")
 		var value uint32 = 2
 
-		_hardenOffice(pathRegEx, valueName, value)
+		_hardenOffice(pathRegEx, valueName, value, standardOfficeApps)
 	}
 }
 
@@ -94,11 +94,11 @@ func triggerOfficeMacros(harden bool) {
 		events.AppendText("Hardening by disabling Office Macros\n")
 		value = 4
 
-		_hardenOffice(pathRegEx, valueName, value)
+		_hardenOffice(pathRegEx, valueName, value, standardOfficeApps)
 	} else {
 		events.AppendText("Restoring original settings for Office Macros\n")
 
-		_restoreOffice(pathRegEx, valueName)
+		_restoreOffice(pathRegEx, valueName, standardOfficeApps)
 	}
 }
 
@@ -127,4 +127,52 @@ func triggerOfficeActiveX(harden bool) {
 	}
 
 	key.Close()
+}
+
+
+
+// DDE Mitigations
+// necessary options (Powerpoint is also set, but unclear if helpful
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail]
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
+//    "DontUpdateLinks"=dword:00000001
+// additionally only for Excel:
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
+//   "DDEAllowed"=dword:00000000
+//   "DDECleaned"=dword:00000001
+//   "Options"=dword:00000117
+func triggerOfficeDDE(harden bool) {
+	var valueName_links = "DontUpdateLinks"
+	var value_links uint32 = 1
+
+	var valueName_DDEAllowed = "DDEAllowed"
+	var value_DDEAllowed uint32 = 0
+	
+	var valueName_DDECleaned = "DDECleaned"
+	var value_DDECleaned uint32 = 1
+    
+    var valueName_Options = "Options"
+    var value_Options uint32 = 0x117 // dword:00000117
+	
+	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
+	var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
+
+	if harden == false {
+		events.AppendText("Restoring original settings for Office DDE Links\n")
+
+		_restoreOffice(pathRegEx, valueName_links, standardOfficeApps)
+		_restoreOffice(pathRegExWordMail, valueName_links, []string{"Word"})
+		_restoreOffice(pathRegEx, valueName_Options, []string{"Excel"})
+		_restoreOffice(pathRegEx, valueName_DDECleaned, []string{"Excel"})
+		_restoreOffice(pathRegEx, valueName_DDEAllowed, []string{"Excel"})
+	} else {
+		events.AppendText("Hardening by disabling Office DDE Links\n")
+		
+		_hardenOffice(pathRegEx, valueName_links, value_links, standardOfficeApps)
+		_hardenOffice(pathRegExWordMail, valueName_links, value_links, []string{"Word"})
+		_hardenOffice(pathRegEx, valueName_DDEAllowed, value_DDEAllowed, []string{"Excel"})
+		_hardenOffice(pathRegEx, valueName_DDECleaned, value_DDECleaned, []string{"Excel"})
+		_hardenOffice(pathRegEx, valueName_Options, value_Options, []string{"Excel"})
+	}
 }
