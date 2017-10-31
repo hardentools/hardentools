@@ -42,14 +42,16 @@ func triggerFileAssociation(harden bool) {
 		assoc string
 	}
 
-	var extensions = [8]Extension{
+	var extensions = []Extension{
 		{".hta", "htafile"},
 		{".js", "JSFile"},
 		{".JSE", "JSEFile"},
 		{".WSH", "WSHFile"},
 		{".WSF", "WSFFile"},
+		{".scf", "SHCmdFile"},
 		{".scr", "scrfile"},
 		{".vbs", "VBSFile"},
+		{".VBE", "VBEFile"},
 		{".pif", "piffile"},
 	}
 
