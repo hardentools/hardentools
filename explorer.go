@@ -31,8 +31,10 @@ import (
 // - .jse JScript Encoded Script File
 // - .WSF Windows Script files
 // - .WSH Windows Script Host files
+// - .scf Windows Explorer Shell Cmd File (mainly used for "Show Desktop" button)
 // - .scr Windows Screen Saver extension, may break these, but seen commonly in phishing emails, contains executable code
 // - .vbs Visual Basic Script, mainly malicious
+// - .VBE Visual Basic Script Encoded, mainly malicious
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
 
 func triggerFileAssociation(harden bool) {
