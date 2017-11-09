@@ -34,7 +34,7 @@ func _hardenOffice(pathRegEx string, valueName string, value uint32, officeApps 
 	for _, officeVersion := range officeVersions {
 		for _, officeApp := range officeApps {
 			path := fmt.Sprintf(pathRegEx, officeVersion, officeApp)
-			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
+			key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
 			// Save current state.
 			saveOriginalRegistryDWORD(key, path, valueName)
 			// Harden.
@@ -129,48 +129,83 @@ func triggerOfficeActiveX(harden bool) {
 	key.Close()
 }
 
-// DDE Mitigations for Word and Excel
+// DDE Mitigations for Word, Outlook and Excel
 // doesnt harden OneNote for now (due to high impact)
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail]
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail] (this one is for Outlook)
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
 //    "DontUpdateLinks"=dword:00000001
+//
 // additionally only for Excel:
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
 //   "DDEAllowed"=dword:00000000
 //   "DDECleaned"=dword:00000001
 //   "Options"=dword:00000117
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\<version>\Excel\Security]
+//   WorkbookLinkWarnings(DWORD) = 2
+//
+// for Word&Outlook 2007:
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\12.0\Word\Options\vpref]
+//    fNoCalclinksOnopen_90_1(DWORD)=1
 func triggerOfficeDDE(harden bool) {
-	var valueName_links = "DontUpdateLinks"
-	var value_links uint32 = 1
+	var valueNameLinks = "DontUpdateLinks"
+	var valueLinks uint32 = 1
 
-	var valueName_DDEAllowed = "DDEAllowed"
-	var value_DDEAllowed uint32 = 0
+	var valueNameDDEAllowed = "DDEAllowed"
+	var valueDDEAllowed uint32 = 0
 
-	var valueName_DDECleaned = "DDECleaned"
-	var value_DDECleaned uint32 = 1
+	var valueNameDDECleaned = "DDECleaned"
+	var valueDDECleaned uint32 = 1
 
-	var valueName_Options = "Options"
-	var value_Options uint32 = 0x117 // dword:00000117
+	var valueNameOptions = "Options"
+	var valueOptions uint32 = 0x117 // dword:00000117
+
+	var valueNameWorkbookLinkWarnings = "WorkbookLinkWarnings"
+	var valueWorkbookLinkWarnings uint32 = 2
+
+	var valueNameWord2007 = "fNoCalclinksOnopen_90_1"
+	var valueWord2007 uint32 = 1
 
 	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
 	var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
+	var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
+	var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
+
+	keyWord2007, _, _ := registry.CreateKey(registry.CURRENT_USER, pathWord2007, registry.WRITE)
 
 	if harden == false {
 		events.AppendText("Restoring original settings for Office DDE Links\n")
 
-		_restoreOffice(pathRegEx, valueName_links, []string{"Word", "Excel"})
-		_restoreOffice(pathRegExWordMail, valueName_links, []string{"Word"})
-		_restoreOffice(pathRegEx, valueName_Options, []string{"Excel"})
-		_restoreOffice(pathRegEx, valueName_DDECleaned, []string{"Excel"})
-		_restoreOffice(pathRegEx, valueName_DDEAllowed, []string{"Excel"})
+		_restoreOffice(pathRegEx, valueNameLinks, []string{"Word", "Excel"})
+		_restoreOffice(pathRegExWordMail, valueNameLinks, []string{"Word"})
+		_restoreOffice(pathRegEx, valueNameOptions, []string{"Excel"})
+		_restoreOffice(pathRegEx, valueNameDDECleaned, []string{"Excel"})
+		_restoreOffice(pathRegEx, valueNameDDEAllowed, []string{"Excel"})
+		_restoreOffice(pathRegExSecurity, valueNameWorkbookLinkWarnings, []string{"Excel"})
+
+		//// Word 2007 key:
+		// Retrieve saved state.
+		value, err := retrieveOriginalRegistryDWORD(pathWord2007, valueNameWord2007)
+		if err == nil {
+			keyWord2007.SetDWordValue(valueNameWord2007, value)
+		} else {
+			keyWord2007.DeleteValue(valueNameWord2007)
+		}
 	} else {
 		events.AppendText("Hardening by disabling Office DDE Links\n")
 
-		_hardenOffice(pathRegEx, valueName_links, value_links, []string{"Word", "Excel"})
-		_hardenOffice(pathRegExWordMail, valueName_links, value_links, []string{"Word"})
-		_hardenOffice(pathRegEx, valueName_DDEAllowed, value_DDEAllowed, []string{"Excel"})
-		_hardenOffice(pathRegEx, valueName_DDECleaned, value_DDECleaned, []string{"Excel"})
-		_hardenOffice(pathRegEx, valueName_Options, value_Options, []string{"Excel"})
+		_hardenOffice(pathRegEx, valueNameLinks, valueLinks, []string{"Word", "Excel"})
+		_hardenOffice(pathRegExWordMail, valueNameLinks, valueLinks, []string{"Word"})
+		_hardenOffice(pathRegEx, valueNameDDEAllowed, valueDDEAllowed, []string{"Excel"})
+		_hardenOffice(pathRegEx, valueNameDDECleaned, valueDDECleaned, []string{"Excel"})
+		_hardenOffice(pathRegEx, valueNameOptions, valueOptions, []string{"Excel"})
+		_hardenOffice(pathRegExSecurity, valueNameWorkbookLinkWarnings, valueWorkbookLinkWarnings, []string{"Excel"})
+
+		//// Word 2007 key:
+		// Save current state.
+		saveOriginalRegistryDWORD(keyWord2007, pathWord2007, valueNameWord2007)
+		// Harden.
+		keyWord2007.SetDWordValue(valueNameWord2007, valueWord2007)
+
 	}
 }
