@@ -129,8 +129,6 @@ func triggerOfficeActiveX(harden bool) {
 	key.Close()
 }
 
-
-
 // DDE Mitigations for Word and Excel
 // doesnt harden OneNote for now (due to high impact)
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
@@ -148,13 +146,13 @@ func triggerOfficeDDE(harden bool) {
 
 	var valueName_DDEAllowed = "DDEAllowed"
 	var value_DDEAllowed uint32 = 0
-	
+
 	var valueName_DDECleaned = "DDECleaned"
 	var value_DDECleaned uint32 = 1
-    
-    var valueName_Options = "Options"
-    var value_Options uint32 = 0x117 // dword:00000117
-	
+
+	var valueName_Options = "Options"
+	var value_Options uint32 = 0x117 // dword:00000117
+
 	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
 	var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
 
@@ -168,7 +166,7 @@ func triggerOfficeDDE(harden bool) {
 		_restoreOffice(pathRegEx, valueName_DDEAllowed, []string{"Excel"})
 	} else {
 		events.AppendText("Hardening by disabling Office DDE Links\n")
-		
+
 		_hardenOffice(pathRegEx, valueName_links, value_links, []string{"Word", "Excel"})
 		_hardenOffice(pathRegExWordMail, valueName_links, value_links, []string{"Word"})
 		_hardenOffice(pathRegEx, valueName_DDEAllowed, value_DDEAllowed, []string{"Excel"})
