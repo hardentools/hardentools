@@ -46,7 +46,7 @@ In the future, we will create the ability to select or deselect certain modifica
 
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
-- **Disable file extensions mainly used for malicious purposes**. Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scr", ".vbs" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
+- **Disable file extensions mainly used for malicious purposes**. Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
 ### Microsoft Office
 
@@ -55,6 +55,8 @@ In the future, we will create the ability to select or deselect certain modifica
 - **Disable OLE object execution**. Microsoft Office applications are able to embed so called "OLE objects" and execute them, at times also automatically (for example through PowerPoint animations). Windows executables, such as spyware, can also be embedded and executed as an object. This is also a security disaster which we observed used time and time again, particularly in attacks against activists in repressed regions. Hardentools entirely disables this functionality.
 
 - **Disabling ActiveX**. Disables ActiveX Controls for all Office applications.
+
+- **Disable DDE**. Disables DDE for Word and Excel
 
 ### Acrobat Reader
 

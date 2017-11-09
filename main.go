@@ -83,6 +83,7 @@ func triggerAll(harden bool) {
 	triggerOfficeOLE(harden)
 	triggerOfficeMacros(harden)
 	triggerOfficeActiveX(harden)
+	triggerOfficeDDE(harden)
 	// PDF.
 	triggerPDFJS(harden)
 	triggerPDFObjects(harden)
