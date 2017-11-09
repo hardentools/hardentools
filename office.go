@@ -130,7 +130,8 @@ func triggerOfficeActiveX(harden bool) {
 }
 
 // DDE Mitigations for Word, Outlook and Excel
-// doesnt harden OneNote for now (due to high impact)
+
+// Doesn't harden OneNote for now (due to high impact).
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail] (this one is for Outlook)
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
@@ -147,12 +148,13 @@ func triggerOfficeActiveX(harden bool) {
 // for Word&Outlook 2007:
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\12.0\Word\Options\vpref]
 //    fNoCalclinksOnopen_90_1(DWORD)=1
+
 func triggerOfficeDDE(harden bool) {
 	var valueNameLinks = "DontUpdateLinks"
 	var valueLinks uint32 = 1
 
 	var valueNameDDEAllowed = "DDEAllowed"
-	var valueDDEAllowed uint32 = 0
+	var valueDDEAllowed uint32
 
 	var valueNameDDECleaned = "DDECleaned"
 	var valueDDECleaned uint32 = 1
@@ -206,6 +208,5 @@ func triggerOfficeDDE(harden bool) {
 		saveOriginalRegistryDWORD(keyWord2007, pathWord2007, valueNameWord2007)
 		// Harden.
 		keyWord2007.SetDWordValue(valueNameWord2007, valueWord2007)
-
 	}
 }
