@@ -23,20 +23,19 @@ import (
 	"os"
 )
 
-
 type ExpertConfig struct {
 	// WSH.
 	WSH bool
 	// Office.
-	OfficeOLE bool
-	OfficeMacros bool
+	OfficeOLE     bool
+	OfficeMacros  bool
 	OfficeActiveX bool
-	OfficeDDE bool
+	OfficeDDE     bool
 	// PDF.
-	PDFJS bool
-	PDFObjects bool
-	PDFProtectedMode bool
-	PDFProtectedView bool
+	PDFJS               bool
+	PDFObjects          bool
+	PDFProtectedMode    bool
+	PDFProtectedView    bool
 	PDFEnhancedSecurity bool
 	// Autorun.
 	Autorun bool
@@ -48,14 +47,13 @@ type ExpertConfig struct {
 	FileAssociations bool
 }
 
-var expertConfig = &ExpertConfig{ true, true, true, true, true, true, true, true, true, true, true, true, true, true }
+var expertConfig = &ExpertConfig{true, true, true, true, true, true, true, true, true, true, true, true, true, true}
 
 var window *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
 
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
-
 
 func checkStatus() bool {
 	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
@@ -107,26 +105,54 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	//events.AppendText("expertConfig = "+expertConfig)
 	// WSH.
-	if expertConfig.WSH { triggerWSH(harden) }
+	if expertConfig.WSH {
+		triggerWSH(harden)
+	}
 	// Office.
-	if expertConfig.OfficeOLE { triggerOfficeOLE(harden) }
-	if expertConfig.OfficeMacros { triggerOfficeMacros(harden) }
-	if expertConfig.OfficeActiveX { triggerOfficeActiveX(harden) }
-	if expertConfig.OfficeDDE { triggerOfficeDDE(harden) }
+	if expertConfig.OfficeOLE {
+		triggerOfficeOLE(harden)
+	}
+	if expertConfig.OfficeMacros {
+		triggerOfficeMacros(harden)
+	}
+	if expertConfig.OfficeActiveX {
+		triggerOfficeActiveX(harden)
+	}
+	if expertConfig.OfficeDDE {
+		triggerOfficeDDE(harden)
+	}
 	// PDF.
-	if expertConfig.PDFJS { triggerPDFJS(harden) }
-	if expertConfig.PDFObjects { triggerPDFObjects(harden) }
-	if expertConfig.PDFProtectedMode { triggerPDFProtectedMode(harden) }
-	if expertConfig.PDFProtectedView { triggerPDFProtectedView(harden) }
-	if expertConfig.PDFEnhancedSecurity { triggerPDFEnhancedSecurity(harden) }
+	if expertConfig.PDFJS {
+		triggerPDFJS(harden)
+	}
+	if expertConfig.PDFObjects {
+		triggerPDFObjects(harden)
+	}
+	if expertConfig.PDFProtectedMode {
+		triggerPDFProtectedMode(harden)
+	}
+	if expertConfig.PDFProtectedView {
+		triggerPDFProtectedView(harden)
+	}
+	if expertConfig.PDFEnhancedSecurity {
+		triggerPDFEnhancedSecurity(harden)
+	}
 	// Autorun.
-	if expertConfig.Autorun { triggerAutorun(harden) }
+	if expertConfig.Autorun {
+		triggerAutorun(harden)
+	}
 	// PowerShell.
-	if expertConfig.PowerShell { triggerPowerShell(harden) }
+	if expertConfig.PowerShell {
+		triggerPowerShell(harden)
+	}
 	// UAC.
-	if expertConfig.UAC { triggerUAC(harden) }
+	if expertConfig.UAC {
+		triggerUAC(harden)
+	}
 	// Explorer.
-	if expertConfig.FileAssociations { triggerFileAssociation(harden) }
+	if expertConfig.FileAssociations {
+		triggerFileAssociation(harden)
+	}
 
 	progress.SetValue(100)
 }
@@ -134,7 +160,6 @@ func triggerAll(harden bool) {
 func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
-
 
 	if checkStatus() == false {
 		buttonText = "Harden!"
@@ -168,7 +193,7 @@ func main() {
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
-				MinSize: Size{500,300},
+				MinSize:  Size{500, 300},
 			},
 			HSpacer{},
 			Label{Text: "Expert Settings - chance only if you now what you are doing"},
