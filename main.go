@@ -23,11 +23,39 @@ import (
 	"os"
 )
 
+
+type ExpertConfig struct {
+	// WSH.
+	WSH bool
+	// Office.
+	OfficeOLE int
+	OfficeMacros int
+	OfficeActiveX int
+	OfficeDDE int
+	// PDF.
+	PDFJS int
+	PDFObjects int
+	PDFProtectedMode int
+	PDFProtectedView int
+	PDFEnhancedSecurity int
+	// Autorun.
+	Autorun int
+	// PowerShell.
+	PowerShell int
+	// UAC.
+	UAC int
+	// Explorer.
+	FileAssociations int
+}
+
+var expertConfig = &ExpertConfig{ true, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+
 var window *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
 
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
+
 
 func checkStatus() bool {
 	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
@@ -78,26 +106,26 @@ func restoreAll() {
 
 func triggerAll(harden bool) {
 	// WSH.
-	triggerWSH(harden)
+	if expertConfig.WSH { triggerWSH(harden) }
 	// Office.
-	triggerOfficeOLE(harden)
-	triggerOfficeMacros(harden)
-	triggerOfficeActiveX(harden)
-	triggerOfficeDDE(harden)
+	if expertConfig.OfficeOLE == 1 { triggerOfficeOLE(harden) }
+	if expertConfig.OfficeMacros == 1 { triggerOfficeMacros(harden) }
+	if expertConfig.OfficeActiveX == 1 { triggerOfficeActiveX(harden) }
+	if expertConfig.OfficeDDE == 1 { triggerOfficeDDE(harden) }
 	// PDF.
-	triggerPDFJS(harden)
-	triggerPDFObjects(harden)
-	triggerPDFProtectedMode(harden)
-	triggerPDFProtectedView(harden)
-	triggerPDFEnhancedSecurity(harden)
+	if expertConfig.PDFJS == 1 { triggerPDFJS(harden) }
+	if expertConfig.PDFObjects == 1 { triggerPDFObjects(harden) }
+	if expertConfig.PDFProtectedMode == 1 { triggerPDFProtectedMode(harden) }
+	if expertConfig.PDFProtectedView == 1 { triggerPDFProtectedView(harden) }
+	if expertConfig.PDFEnhancedSecurity == 1 { triggerPDFEnhancedSecurity(harden) }
 	// Autorun.
-	triggerAutorun(harden)
+	if expertConfig.Autorun == 1 { triggerAutorun(harden) }
 	// PowerShell.
-	triggerPowerShell(harden)
+	if expertConfig.PowerShell == 1 { triggerPowerShell(harden) }
 	// UAC.
-	triggerUAC(harden)
+	if expertConfig.UAC == 1 { triggerUAC(harden) }
 	// Explorer.
-	triggerFileAssociation(harden)
+	if expertConfig.FileAssociations == 1 { triggerFileAssociation(harden) }
 
 	progress.SetValue(100)
 }
@@ -105,6 +133,7 @@ func triggerAll(harden bool) {
 func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
+
 
 	if checkStatus() == false {
 		buttonText = "Harden!"
@@ -119,8 +148,12 @@ func main() {
 	MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{400, 300},
+		MinSize:  Size{600, 600},
 		Layout:   VBox{},
+		DataBinder: DataBinder{
+			DataSource: expertConfig,
+			AutoSubmit: true,
+		},
 		Children: []Widget{
 			Label{Text: labelText},
 			PushButton{
@@ -134,6 +167,174 @@ func main() {
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
+				MinSize: Size{500,300},
+			},
+			VSplitter{
+				Children: []Widget{
+					// WSH
+					HSplitter{
+						Children: []Widget{
+							/*Label{
+								Text:    "Consider WSH",
+								Enabled: Bind("wshB1.Checked"),
+							},*/
+							// RadioButtonGroup is needed for data binding only.
+							CheckBox{
+								Name:    "wshB1",
+								Text:    "Windows Scripting Host",
+								Checked: Bind("WSH"),
+							},
+							/*RadioButtonGroup{
+								DataMember: "WSH",
+								Buttons: []RadioButton{
+									RadioButton{
+										Name:  "wshB1",
+										Text:  "Yes",
+										Value: 1,
+									},
+									RadioButton{
+										Name:  "wshB2",
+										Text:  "No",
+										Value: 0,
+									},
+								},
+							},*/
+						},
+					},
+					// OfficeOLE
+					HSplitter{
+						Children: []Widget{
+							Label{
+								Text:    "Consider Office OLE",
+								Enabled: Bind("officeOLEB1.Checked"),
+							},
+							RadioButtonGroup{
+								DataMember: "OfficeOLE",
+								Buttons: []RadioButton{
+									RadioButton{
+										Name:  "officeOLEB1",
+										Text:  "Yes",
+										Value: 1,
+									},
+									RadioButton{
+										Name:  "officeOLEB2",
+										Text:  "No",
+										Value: 0,
+									},
+								},
+							},
+						},
+					},
+					// OfficeMacros
+					HSplitter{
+						Children: []Widget{
+							Label{
+								Text:    "Consider Office Macros",
+								Enabled: Bind("officeMacrosB1.Checked"),
+							},
+							RadioButtonGroup{
+								DataMember: "OfficeMacros",
+								Buttons: []RadioButton{
+									RadioButton{
+										Name:  "officeMacrosB1",
+										Text:  "Yes",
+										Value: 1,
+									},
+									RadioButton{
+										Name:  "officeMacrosB2",
+										Text:  "No",
+										Value: 0,
+									},
+								},
+							},
+						},
+					},
+					// OfficeActiveX
+					HSplitter{
+						Children: []Widget{
+							Label{
+								Text:    "Consider Office ActiveX",
+								Enabled: Bind("officeActiveXB1.Checked"),
+							},
+							RadioButtonGroup{
+								DataMember: "OfficeActiveX",
+								Buttons: []RadioButton{
+									RadioButton{
+										Name:  "officeActiveXB1",
+										Text:  "Yes",
+										Value: 1,
+									},
+									RadioButton{
+										Name:  "officeActiveXB2",
+										Text:  "No",
+										Value: 0,
+									},
+								},
+							},
+						},
+					},
+					// OfficeDDE
+					HSplitter{
+						Children: []Widget{
+							Label{
+								Text:    "Consider Office DDE",
+								Enabled: Bind("officeDDEB1.Checked"),
+							},
+							RadioButtonGroup{
+								DataMember: "OfficeDDE",
+								Buttons: []RadioButton{
+									RadioButton{
+										Name:  "officeDDEB1",
+										Text:  "Yes",
+										Value: 1,
+									},
+									RadioButton{
+										Name:  "officeDDEB2",
+										Text:  "No",
+										Value: 0,
+									},
+								},
+							},
+						},
+					},
+/*
+	PDFJS int
+	PDFObjects int
+	PDFProtectedMode int
+	PDFProtectedView int
+	PDFEnhancedSecurity int
+	// Autorun.
+	Autorun int
+
+	// UAC.
+	UAC int
+	// Explorer.
+	FileAssociations int*/
+					// PowerShell
+					HSplitter{
+						Children: []Widget{
+							Label{
+								Text:    "Disable Powershell and cmd.exe",
+								Enabled: Bind("cmdB1.Checked"),
+							},
+							RadioButtonGroup{
+								DataMember: "PowerShell",
+								Buttons: []RadioButton{
+									RadioButton{
+										Name:  "cmdB1",
+										Text:  "Yes",
+										Value: 1,
+									},
+									RadioButton{
+										Name:  "cmdB2",
+										Text:  "No",
+										Value: 0,
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}.Create()
