@@ -28,27 +28,27 @@ type ExpertConfig struct {
 	// WSH.
 	WSH bool
 	// Office.
-	OfficeOLE int
-	OfficeMacros int
-	OfficeActiveX int
-	OfficeDDE int
+	OfficeOLE bool
+	OfficeMacros bool
+	OfficeActiveX bool
+	OfficeDDE bool
 	// PDF.
-	PDFJS int
-	PDFObjects int
-	PDFProtectedMode int
-	PDFProtectedView int
-	PDFEnhancedSecurity int
+	PDFJS bool
+	PDFObjects bool
+	PDFProtectedMode bool
+	PDFProtectedView bool
+	PDFEnhancedSecurity bool
 	// Autorun.
-	Autorun int
+	Autorun bool
 	// PowerShell.
-	PowerShell int
+	PowerShell bool
 	// UAC.
-	UAC int
+	UAC bool
 	// Explorer.
-	FileAssociations int
+	FileAssociations bool
 }
 
-var expertConfig = &ExpertConfig{ true, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }
+var expertConfig = &ExpertConfig{ true, true, true, true, true, true, true, true, true, true, true, true, true, true }
 
 var window *walk.MainWindow
 var events *walk.TextEdit
@@ -105,27 +105,28 @@ func restoreAll() {
 }
 
 func triggerAll(harden bool) {
+	//events.AppendText("expertConfig = "+expertConfig)
 	// WSH.
 	if expertConfig.WSH { triggerWSH(harden) }
 	// Office.
-	if expertConfig.OfficeOLE == 1 { triggerOfficeOLE(harden) }
-	if expertConfig.OfficeMacros == 1 { triggerOfficeMacros(harden) }
-	if expertConfig.OfficeActiveX == 1 { triggerOfficeActiveX(harden) }
-	if expertConfig.OfficeDDE == 1 { triggerOfficeDDE(harden) }
+	if expertConfig.OfficeOLE { triggerOfficeOLE(harden) }
+	if expertConfig.OfficeMacros { triggerOfficeMacros(harden) }
+	if expertConfig.OfficeActiveX { triggerOfficeActiveX(harden) }
+	if expertConfig.OfficeDDE { triggerOfficeDDE(harden) }
 	// PDF.
-	if expertConfig.PDFJS == 1 { triggerPDFJS(harden) }
-	if expertConfig.PDFObjects == 1 { triggerPDFObjects(harden) }
-	if expertConfig.PDFProtectedMode == 1 { triggerPDFProtectedMode(harden) }
-	if expertConfig.PDFProtectedView == 1 { triggerPDFProtectedView(harden) }
-	if expertConfig.PDFEnhancedSecurity == 1 { triggerPDFEnhancedSecurity(harden) }
+	if expertConfig.PDFJS { triggerPDFJS(harden) }
+	if expertConfig.PDFObjects { triggerPDFObjects(harden) }
+	if expertConfig.PDFProtectedMode { triggerPDFProtectedMode(harden) }
+	if expertConfig.PDFProtectedView { triggerPDFProtectedView(harden) }
+	if expertConfig.PDFEnhancedSecurity { triggerPDFEnhancedSecurity(harden) }
 	// Autorun.
-	if expertConfig.Autorun == 1 { triggerAutorun(harden) }
+	if expertConfig.Autorun { triggerAutorun(harden) }
 	// PowerShell.
-	if expertConfig.PowerShell == 1 { triggerPowerShell(harden) }
+	if expertConfig.PowerShell { triggerPowerShell(harden) }
 	// UAC.
-	if expertConfig.UAC == 1 { triggerUAC(harden) }
+	if expertConfig.UAC { triggerUAC(harden) }
 	// Explorer.
-	if expertConfig.FileAssociations == 1 { triggerFileAssociation(harden) }
+	if expertConfig.FileAssociations { triggerFileAssociation(harden) }
 
 	progress.SetValue(100)
 }
@@ -169,167 +170,98 @@ func main() {
 				ReadOnly: true,
 				MinSize: Size{500,300},
 			},
-			VSplitter{
-				Children: []Widget{
-					// WSH
-					HSplitter{
-						Children: []Widget{
-							/*Label{
-								Text:    "Consider WSH",
-								Enabled: Bind("wshB1.Checked"),
-							},*/
-							// RadioButtonGroup is needed for data binding only.
-							CheckBox{
-								Name:    "wshB1",
-								Text:    "Windows Scripting Host",
-								Checked: Bind("WSH"),
-							},
-							/*RadioButtonGroup{
-								DataMember: "WSH",
-								Buttons: []RadioButton{
-									RadioButton{
-										Name:  "wshB1",
-										Text:  "Yes",
-										Value: 1,
-									},
-									RadioButton{
-										Name:  "wshB2",
-										Text:  "No",
-										Value: 0,
-									},
+			Label{Text: "Expert Settings - chance only if you now what you are doing"},
+			Composite{
+				Layout: Grid{Columns: 3},
+				VSplitter{
+					Children: []Widget{
+						HSplitter{
+							Children: []Widget{
+								CheckBox{
+									Name:    "wshCB",
+									Text:    "Windows Script Host",
+									Checked: Bind("WSH"),
 								},
-							},*/
-						},
-					},
-					// OfficeOLE
-					HSplitter{
-						Children: []Widget{
-							Label{
-								Text:    "Consider Office OLE",
-								Enabled: Bind("officeOLEB1.Checked"),
-							},
-							RadioButtonGroup{
-								DataMember: "OfficeOLE",
-								Buttons: []RadioButton{
-									RadioButton{
-										Name:  "officeOLEB1",
-										Text:  "Yes",
-										Value: 1,
-									},
-									RadioButton{
-										Name:  "officeOLEB2",
-										Text:  "No",
-										Value: 0,
-									},
+								CheckBox{
+									Name:    "officeOleCB",
+									Text:    "Office Packager Objects (OLE)",
+									Checked: Bind("OfficeOLE"),
+								},
+								CheckBox{
+									Name:    "OfficeMacros",
+									Text:    "Office Macros",
+									Checked: Bind("OfficeMacros"),
 								},
 							},
 						},
-					},
-					// OfficeMacros
-					HSplitter{
-						Children: []Widget{
-							Label{
-								Text:    "Consider Office Macros",
-								Enabled: Bind("officeMacrosB1.Checked"),
-							},
-							RadioButtonGroup{
-								DataMember: "OfficeMacros",
-								Buttons: []RadioButton{
-									RadioButton{
-										Name:  "officeMacrosB1",
-										Text:  "Yes",
-										Value: 1,
-									},
-									RadioButton{
-										Name:  "officeMacrosB2",
-										Text:  "No",
-										Value: 0,
-									},
+						HSplitter{
+							Children: []Widget{
+								CheckBox{
+									Name:    "OfficeActiveX",
+									Text:    "Office ActiveX",
+									Checked: Bind("OfficeActiveX"),
+								},
+								CheckBox{
+									Name:    "OfficeDDE",
+									Text:    "Office DDE  Links",
+									Checked: Bind("OfficeDDE"),
+								},
+								CheckBox{
+									Name:    "PDFJS",
+									Text:    "Acrobat Reader JavaScript",
+									Checked: Bind("PDFJS"),
 								},
 							},
 						},
-					},
-					// OfficeActiveX
-					HSplitter{
-						Children: []Widget{
-							Label{
-								Text:    "Consider Office ActiveX",
-								Enabled: Bind("officeActiveXB1.Checked"),
-							},
-							RadioButtonGroup{
-								DataMember: "OfficeActiveX",
-								Buttons: []RadioButton{
-									RadioButton{
-										Name:  "officeActiveXB1",
-										Text:  "Yes",
-										Value: 1,
-									},
-									RadioButton{
-										Name:  "officeActiveXB2",
-										Text:  "No",
-										Value: 0,
-									},
+						HSplitter{
+							Children: []Widget{
+								CheckBox{
+									Name:    "PDFObjects",
+									Text:    "Acrobat Reader Embedded Objects",
+									Checked: Bind("PDFObjects"),
+								},
+								CheckBox{
+									Name:    "PDFProtectedMode",
+									Text:    "Acrobat Reader ProtectedMode",
+									Checked: Bind("PDFProtectedMode"),
+								},
+								CheckBox{
+									Name:    "PDFProtectedView",
+									Text:    "Acrobat Reader ProtectedView",
+									Checked: Bind("PDFProtectedView"),
 								},
 							},
 						},
-					},
-					// OfficeDDE
-					HSplitter{
-						Children: []Widget{
-							Label{
-								Text:    "Consider Office DDE",
-								Enabled: Bind("officeDDEB1.Checked"),
-							},
-							RadioButtonGroup{
-								DataMember: "OfficeDDE",
-								Buttons: []RadioButton{
-									RadioButton{
-										Name:  "officeDDEB1",
-										Text:  "Yes",
-										Value: 1,
-									},
-									RadioButton{
-										Name:  "officeDDEB2",
-										Text:  "No",
-										Value: 0,
-									},
+						HSplitter{
+							Children: []Widget{
+								CheckBox{
+									Name:    "PDFEnhancedSecurity",
+									Text:    "Acrobat Reader Enhanced Security",
+									Checked: Bind("PDFEnhancedSecurity"),
+								},
+								CheckBox{
+									Name:    "Autorun",
+									Text:    "AutoRun and AutoPlay",
+									Checked: Bind("Autorun"),
+								},
+								CheckBox{
+									Name:    "UAC",
+									Text:    "UAC Prompt",
+									Checked: Bind("UAC"),
 								},
 							},
 						},
-					},
-/*
-	PDFJS int
-	PDFObjects int
-	PDFProtectedMode int
-	PDFProtectedView int
-	PDFEnhancedSecurity int
-	// Autorun.
-	Autorun int
-
-	// UAC.
-	UAC int
-	// Explorer.
-	FileAssociations int*/
-					// PowerShell
-					HSplitter{
-						Children: []Widget{
-							Label{
-								Text:    "Disable Powershell and cmd.exe",
-								Enabled: Bind("cmdB1.Checked"),
-							},
-							RadioButtonGroup{
-								DataMember: "PowerShell",
-								Buttons: []RadioButton{
-									RadioButton{
-										Name:  "cmdB1",
-										Text:  "Yes",
-										Value: 1,
-									},
-									RadioButton{
-										Name:  "cmdB2",
-										Text:  "No",
-										Value: 0,
-									},
+						HSplitter{
+							Children: []Widget{
+								CheckBox{
+									Name:    "FileAssociations",
+									Text:    "File associations",
+									Checked: Bind("FileAssociations"),
+								},
+								CheckBox{
+									Name:    "PowerShell",
+									Text:    "Powershell and cmd",
+									Checked: Bind("PowerShell"),
 								},
 							},
 						},
