@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# go get github.com/lxn/win
-# go get github.com/lxn/walk
-# go get github.com/akavel/rsrc
-# go get golang.org/x/sys/windows/registry
+GOOS=windows GOARCH=386 CC=i686-w64-mingw32-gcc CGO_ENABLED=1 go get -u --ldflags '-s -w -extldflags "-static" -H windowsgui' github.com/lxn/win
+GOOS=windows GOARCH=386 CC=i686-w64-mingw32-gcc CGO_ENABLED=1 go get -u --ldflags '-s -w -extldflags "-static" -H windowsgui' github.com/lxn/walk
+go get github.com/akavel/rsrc
+go get golang.org/x/sys/windows/registry
 go get gopkg.in/Knetic/govaluate.v3
 
 # check go version
