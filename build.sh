@@ -4,6 +4,7 @@
 # go get github.com/lxn/walk
 # go get github.com/akavel/rsrc
 # go get golang.org/x/sys/windows/registry
+go get gopkg.in/Knetic/govaluate.v3
 
 # check go version
 GO_VERSION="$(go version)"

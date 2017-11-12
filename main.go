@@ -170,101 +170,81 @@ func main() {
 				ReadOnly: true,
 				MinSize: Size{500,300},
 			},
+			HSpacer{},
 			Label{Text: "Expert Settings - chance only if you now what you are doing"},
 			Composite{
 				Layout: Grid{Columns: 3},
-				VSplitter{
-					Children: []Widget{
-						HSplitter{
-							Children: []Widget{
-								CheckBox{
-									Name:    "wshCB",
-									Text:    "Windows Script Host",
-									Checked: Bind("WSH"),
-								},
-								CheckBox{
-									Name:    "officeOleCB",
-									Text:    "Office Packager Objects (OLE)",
-									Checked: Bind("OfficeOLE"),
-								},
-								CheckBox{
-									Name:    "OfficeMacros",
-									Text:    "Office Macros",
-									Checked: Bind("OfficeMacros"),
-								},
-							},
-						},
-						HSplitter{
-							Children: []Widget{
-								CheckBox{
-									Name:    "OfficeActiveX",
-									Text:    "Office ActiveX",
-									Checked: Bind("OfficeActiveX"),
-								},
-								CheckBox{
-									Name:    "OfficeDDE",
-									Text:    "Office DDE  Links",
-									Checked: Bind("OfficeDDE"),
-								},
-								CheckBox{
-									Name:    "PDFJS",
-									Text:    "Acrobat Reader JavaScript",
-									Checked: Bind("PDFJS"),
-								},
-							},
-						},
-						HSplitter{
-							Children: []Widget{
-								CheckBox{
-									Name:    "PDFObjects",
-									Text:    "Acrobat Reader Embedded Objects",
-									Checked: Bind("PDFObjects"),
-								},
-								CheckBox{
-									Name:    "PDFProtectedMode",
-									Text:    "Acrobat Reader ProtectedMode",
-									Checked: Bind("PDFProtectedMode"),
-								},
-								CheckBox{
-									Name:    "PDFProtectedView",
-									Text:    "Acrobat Reader ProtectedView",
-									Checked: Bind("PDFProtectedView"),
-								},
-							},
-						},
-						HSplitter{
-							Children: []Widget{
-								CheckBox{
-									Name:    "PDFEnhancedSecurity",
-									Text:    "Acrobat Reader Enhanced Security",
-									Checked: Bind("PDFEnhancedSecurity"),
-								},
-								CheckBox{
-									Name:    "Autorun",
-									Text:    "AutoRun and AutoPlay",
-									Checked: Bind("Autorun"),
-								},
-								CheckBox{
-									Name:    "UAC",
-									Text:    "UAC Prompt",
-									Checked: Bind("UAC"),
-								},
-							},
-						},
-						HSplitter{
-							Children: []Widget{
-								CheckBox{
-									Name:    "FileAssociations",
-									Text:    "File associations",
-									Checked: Bind("FileAssociations"),
-								},
-								CheckBox{
-									Name:    "PowerShell",
-									Text:    "Powershell and cmd",
-									Checked: Bind("PowerShell"),
-								},
-							},
-						},
+				Border: true,
+				Children: []Widget{
+					CheckBox{
+						Name:    "wshCB",
+						Text:    "Windows Script Host",
+						Checked: Bind("WSH"),
+					},
+					CheckBox{
+						Name:    "officeOleCB",
+						Text:    "Office Packager Objects (OLE)",
+						Checked: Bind("OfficeOLE"),
+					},
+					CheckBox{
+						Name:    "OfficeMacros",
+						Text:    "Office Macros",
+						Checked: Bind("OfficeMacros"),
+					},
+					CheckBox{
+						Name:    "OfficeActiveX",
+						Text:    "Office ActiveX",
+						Checked: Bind("OfficeActiveX"),
+					},
+					CheckBox{
+						Name:    "OfficeDDE",
+						Text:    "Office DDE  Links",
+						Checked: Bind("OfficeDDE"),
+					},
+					CheckBox{
+						Name:    "PDFJS",
+						Text:    "Acrobat Reader JavaScript",
+						Checked: Bind("PDFJS"),
+					},
+					CheckBox{
+						Name:    "PDFObjects",
+						Text:    "Acrobat Reader Embedded Objects",
+						Checked: Bind("PDFObjects"),
+					},
+					CheckBox{
+						Name:    "PDFProtectedMode",
+						Text:    "Acrobat Reader ProtectedMode",
+						Checked: Bind("PDFProtectedMode"),
+					},
+					CheckBox{
+						Name:    "PDFProtectedView",
+						Text:    "Acrobat Reader ProtectedView",
+						Checked: Bind("PDFProtectedView"),
+					},
+					CheckBox{
+						Name:    "PDFEnhancedSecurity",
+						Text:    "Acrobat Reader Enhanced Security",
+						Checked: Bind("PDFEnhancedSecurity"),
+					},
+					CheckBox{
+						Name:    "Autorun",
+						Text:    "AutoRun and AutoPlay",
+						Checked: Bind("Autorun"),
+					},
+					CheckBox{
+						Name:    "UAC",
+						Text:    "UAC Prompt",
+						Checked: Bind("UAC"),
+					},
+					CheckBox{
+						Name:    "FileAssociations",
+						Text:    "File associations",
+						Checked: Bind("FileAssociations"),
+					},
+					CheckBox{
+						Name:    "PowerShell",
+						Text:    "Powershell and cmd",
+						Checked: Bind("PowerShell"),
 					},
 				},
 			},
