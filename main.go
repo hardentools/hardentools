@@ -174,7 +174,7 @@ func main() {
 	MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{600, 600},
+		MinSize:  Size{600, 500},
 		Layout:   VBox{},
 		DataBinder: DataBinder{
 			DataSource: expertConfig,
@@ -193,8 +193,9 @@ func main() {
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
-				MinSize:  Size{500, 300},
+				MinSize:  Size{500, 250},
 			},
+			HSpacer{},
 			HSpacer{},
 			Label{Text: "Expert Settings - change only if you now what you are doing!"},
 			Composite{
