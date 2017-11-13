@@ -196,7 +196,7 @@ func main() {
 				MinSize:  Size{500, 300},
 			},
 			HSpacer{},
-			Label{Text: "Expert Settings - chance only if you now what you are doing"},
+			Label{Text: "Expert Settings - change only if you now what you are doing!"},
 			Composite{
 				Layout: Grid{Columns: 3},
 				Border: true,
