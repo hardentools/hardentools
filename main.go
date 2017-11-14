@@ -23,6 +23,32 @@ import (
 	"os"
 )
 
+type ExpertConfig struct {
+	// WSH.
+	WSH bool
+	// Office.
+	OfficeOLE     bool
+	OfficeMacros  bool
+	OfficeActiveX bool
+	OfficeDDE     bool
+	// PDF.
+	PDFJS               bool
+	PDFObjects          bool
+	PDFProtectedMode    bool
+	PDFProtectedView    bool
+	PDFEnhancedSecurity bool
+	// Autorun.
+	Autorun bool
+	// PowerShell.
+	PowerShell bool
+	// UAC.
+	UAC bool
+	// Explorer.
+	FileAssociations bool
+}
+
+var expertConfig = &ExpertConfig{true, true, true, true, true, true, true, true, true, true, true, true, true, true}
+
 var window *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
@@ -77,27 +103,56 @@ func restoreAll() {
 }
 
 func triggerAll(harden bool) {
+	//events.AppendText("expertConfig = "+expertConfig)
 	// WSH.
-	triggerWSH(harden)
+	if expertConfig.WSH {
+		triggerWSH(harden)
+	}
 	// Office.
-	triggerOfficeOLE(harden)
-	triggerOfficeMacros(harden)
-	triggerOfficeActiveX(harden)
-	triggerOfficeDDE(harden)
+	if expertConfig.OfficeOLE {
+		triggerOfficeOLE(harden)
+	}
+	if expertConfig.OfficeMacros {
+		triggerOfficeMacros(harden)
+	}
+	if expertConfig.OfficeActiveX {
+		triggerOfficeActiveX(harden)
+	}
+	if expertConfig.OfficeDDE {
+		triggerOfficeDDE(harden)
+	}
 	// PDF.
-	triggerPDFJS(harden)
-	triggerPDFObjects(harden)
-	triggerPDFProtectedMode(harden)
-	triggerPDFProtectedView(harden)
-	triggerPDFEnhancedSecurity(harden)
+	if expertConfig.PDFJS {
+		triggerPDFJS(harden)
+	}
+	if expertConfig.PDFObjects {
+		triggerPDFObjects(harden)
+	}
+	if expertConfig.PDFProtectedMode {
+		triggerPDFProtectedMode(harden)
+	}
+	if expertConfig.PDFProtectedView {
+		triggerPDFProtectedView(harden)
+	}
+	if expertConfig.PDFEnhancedSecurity {
+		triggerPDFEnhancedSecurity(harden)
+	}
 	// Autorun.
-	triggerAutorun(harden)
+	if expertConfig.Autorun {
+		triggerAutorun(harden)
+	}
 	// PowerShell.
-	triggerPowerShell(harden)
+	if expertConfig.PowerShell {
+		triggerPowerShell(harden)
+	}
 	// UAC.
-	triggerUAC(harden)
+	if expertConfig.UAC {
+		triggerUAC(harden)
+	}
 	// Explorer.
-	triggerFileAssociation(harden)
+	if expertConfig.FileAssociations {
+		triggerFileAssociation(harden)
+	}
 
 	progress.SetValue(100)
 }
@@ -119,8 +174,12 @@ func main() {
 	MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{400, 300},
+		MinSize:  Size{600, 500},
 		Layout:   VBox{},
+		DataBinder: DataBinder{
+			DataSource: expertConfig,
+			AutoSubmit: true,
+		},
 		Children: []Widget{
 			Label{Text: labelText},
 			PushButton{
@@ -134,6 +193,86 @@ func main() {
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
+				MinSize:  Size{500, 250},
+			},
+			HSpacer{},
+			HSpacer{},
+			Label{Text: "Expert Settings - change only if you now what you are doing!"},
+			Composite{
+				Layout: Grid{Columns: 3},
+				Border: true,
+				Children: []Widget{
+					CheckBox{
+						Name:    "wshCB",
+						Text:    "Windows Script Host",
+						Checked: Bind("WSH"),
+					},
+					CheckBox{
+						Name:    "officeOleCB",
+						Text:    "Office Packager Objects (OLE)",
+						Checked: Bind("OfficeOLE"),
+					},
+					CheckBox{
+						Name:    "OfficeMacros",
+						Text:    "Office Macros",
+						Checked: Bind("OfficeMacros"),
+					},
+					CheckBox{
+						Name:    "OfficeActiveX",
+						Text:    "Office ActiveX",
+						Checked: Bind("OfficeActiveX"),
+					},
+					CheckBox{
+						Name:    "OfficeDDE",
+						Text:    "Office DDE  Links",
+						Checked: Bind("OfficeDDE"),
+					},
+					CheckBox{
+						Name:    "PDFJS",
+						Text:    "Acrobat Reader JavaScript",
+						Checked: Bind("PDFJS"),
+					},
+					CheckBox{
+						Name:    "PDFObjects",
+						Text:    "Acrobat Reader Embedded Objects",
+						Checked: Bind("PDFObjects"),
+					},
+					CheckBox{
+						Name:    "PDFProtectedMode",
+						Text:    "Acrobat Reader ProtectedMode",
+						Checked: Bind("PDFProtectedMode"),
+					},
+					CheckBox{
+						Name:    "PDFProtectedView",
+						Text:    "Acrobat Reader ProtectedView",
+						Checked: Bind("PDFProtectedView"),
+					},
+					CheckBox{
+						Name:    "PDFEnhancedSecurity",
+						Text:    "Acrobat Reader Enhanced Security",
+						Checked: Bind("PDFEnhancedSecurity"),
+					},
+					CheckBox{
+						Name:    "Autorun",
+						Text:    "AutoRun and AutoPlay",
+						Checked: Bind("Autorun"),
+					},
+					CheckBox{
+						Name:    "UAC",
+						Text:    "UAC Prompt",
+						Checked: Bind("UAC"),
+					},
+					CheckBox{
+						Name:    "FileAssociations",
+						Text:    "File associations",
+						Checked: Bind("FileAssociations"),
+					},
+					CheckBox{
+						Name:    "PowerShell",
+						Text:    "Powershell and cmd",
+						Checked: Bind("PowerShell"),
+					},
+				},
 			},
 		},
 	}.Create()
