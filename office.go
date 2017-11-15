@@ -103,31 +103,55 @@ func triggerOfficeMacros(harden bool) {
 }
 
 // ActiveX
-
-func triggerOfficeActiveX(harden bool) {
-	var path = "SOFTWARE\\Microsoft\\Office\\Common\\Security"
-	key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.WRITE)
-	var valueName = "DisableAllActiveX"
+type RegistrySingleValueDWORD struct {
+	rootKey registry.Key
+	path string
+	valueName string
+	hardenedValue uint32
+}
+func (regValue RegistrySingleValueDWORD) isHardened() (isHardened bool){
+	key, err := registry.OpenKey(regValue.rootKey, regValue.path, registry.READ)
+	
+	if err == nil {
+		currentValue, _, err := key.GetIntegerValue(regValue.valueName)
+		if err == nil {
+			if uint32(currentValue) == regValue.hardenedValue {
+				return true
+			}
+		}
+	}
+	return false
+}
+func (regValue RegistrySingleValueDWORD) harden(harden bool){
+	key, _, _ := registry.CreateKey(regValue.rootKey, regValue.path, registry.WRITE)
 
 	if harden == false {
-		events.AppendText("Restoring original settings for ActiveX in Office\n")
 		// Retrieve saved state.
-		value, err := retrieveOriginalRegistryDWORD(path, valueName)
+		value, err := retrieveOriginalRegistryDWORD(regValue.path, regValue.valueName)
 		if err == nil {
-			key.SetDWordValue(valueName, value)
+			key.SetDWordValue(regValue.valueName, value)
 		} else {
-			key.DeleteValue(valueName)
+			key.DeleteValue(regValue.valueName)
 		}
 	} else {
-		events.AppendText("Hardening by disabling ActiveX in Office\n")
 		// Save current state.
-		saveOriginalRegistryDWORD(key, path, valueName)
+		saveOriginalRegistryDWORD(key, regValue.path, regValue.valueName)
 		// Harden.
-		key.SetDWordValue(valueName, 1)
+		key.SetDWordValue(regValue.valueName, regValue.hardenedValue)
 	}
 
 	key.Close()
 }
+
+var ActiveX = RegistrySingleValueDWORD { registry.CURRENT_USER,
+	"SOFTWARE\\Microsoft\\Office\\Common\\Security",
+	"DisableAllActiveX",
+	1 }
+
+func triggerOfficeActiveX(harden bool) {
+	ActiveX.harden(harden)
+}
+
 
 // DDE Mitigations for Word, Outlook and Excel
 
