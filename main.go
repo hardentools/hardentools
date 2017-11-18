@@ -151,7 +151,7 @@ func triggerAll(harden bool) {
 	}
 	// Explorer.
 	if expertConfig.FileAssociations {
-		triggerFileAssociation(harden)
+		FileAssociations.harden(harden)
 	}
 
 	showStatus()
@@ -161,6 +161,7 @@ func triggerAll(harden bool) {
 
 func showStatus() {
 	events.AppendText(fmt.Sprintf("OLE hardened? %t\n", OfficeOLE.isHardened()))
+	FileAssociations.isHardened()
 	//		expertConfig.OfficeDDE = OfficeDDE.isHardened()
 	//		expertConfig.OfficeActiveX = OfficeActiveX.isHardened()
 	//		expertConfig.OfficeMacros = OfficeMacros.isHardened()
@@ -187,6 +188,7 @@ func main() {
 		expertConfig.UAC = UAC.isHardened()
 		expertConfig.WSH = WSH.isHardened()
 		expertConfig.Autorun = Autorun.isHardened()
+		expertConfig.FileAssociations = FileAssociations.isHardened()
 	}
 
 	MainWindow{
@@ -291,6 +293,7 @@ func main() {
 						Name:    "FileAssociations",
 						Text:    "File associations",
 						Checked: Bind("FileAssociations"),
+						Enabled: !(status && !FileAssociations.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "PowerShell",

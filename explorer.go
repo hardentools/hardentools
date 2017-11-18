@@ -37,14 +37,17 @@ import (
 // - .VBE Visual Basic Script Encoded, mainly malicious
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
 
-func triggerFileAssociation(harden bool) {
+type Extension struct {
+	ext   string
+	assoc string
+}
 
-	type Extension struct {
-		ext   string
-		assoc string
-	}
+type ExplorerAssociations struct {
+	extensions []Extension
+}
 
-	var extensions = []Extension{
+var FileAssociations = ExplorerAssociations{
+	[]Extension{
 		{".hta", "htafile"},
 		{".js", "JSFile"},
 		{".JSE", "JSEFile"},
@@ -54,13 +57,14 @@ func triggerFileAssociation(harden bool) {
 		{".scr", "scrfile"},
 		{".vbs", "VBSFile"},
 		{".VBE", "VBEFile"},
-		{".pif", "piffile"},
-	}
+		{".pif", "piffile"}},
+}
 
+func (explAssoc *ExplorerAssociations) harden(harden bool) {
 	if harden == false {
 		events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
 
-		for _, extension := range extensions {
+		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
@@ -74,7 +78,7 @@ func triggerFileAssociation(harden bool) {
 	} else {
 		events.AppendText("Hardening by disabling potentially malicious file associations\n")
 
-		for _, extension := range extensions {
+		for _, extension := range explAssoc.extensions {
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
 
@@ -93,4 +97,37 @@ func triggerFileAssociation(harden bool) {
 			regKey.Close()
 		}
 	}
+}
+
+func (explAssoc *ExplorerAssociations) isHardened() (isHardened bool) {
+	var hardened = true
+
+	for _, extension := range explAssoc.extensions {
+		regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
+		regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.READ)
+
+		// Step 1: Check association (system wide default)
+		assocString := fmt.Sprintf("assoc %s", extension.ext)
+		_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		if err != nil {
+			//events.AppendText(extension.ext)
+			//events.AppendText(" seems to be hardened\n")
+		} else {
+			hardened = false
+			//events.AppendText(extension.ext)
+			//events.AppendText(fmt.Sprintln(" seems not to be hardened: %s\n", out))
+		}
+
+		// Step 2: Check user association
+		valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
+		if len(valueNames) > 0 {
+			hardened = false
+			//events.AppendText(extension.ext)
+			//events.AppendText(" seems NOT to be hardened\n")
+		}
+
+		regKey.Close()
+	}
+
+	return hardened
 }
