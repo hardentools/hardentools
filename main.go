@@ -106,7 +106,7 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	// WSH.
 	if expertConfig.WSH {
-		triggerWSH(harden)
+		WSH.harden(harden)
 	}
 	// Office.
 	if expertConfig.OfficeOLE {
@@ -139,7 +139,7 @@ func triggerAll(harden bool) {
 	}
 	// Autorun.
 	if expertConfig.Autorun {
-		triggerAutorun(harden)
+		Autorun.harden(harden)
 	}
 	// PowerShell.
 	if expertConfig.PowerShell {
@@ -185,6 +185,8 @@ func main() {
 		expertConfig.OfficeActiveX = OfficeActiveX.isHardened()
 		expertConfig.OfficeMacros = OfficeMacros.isHardened()
 		expertConfig.UAC = UAC.isHardened()
+		expertConfig.WSH = WSH.isHardened()
+		expertConfig.Autorun = Autorun.isHardened()
 	}
 
 	MainWindow{
@@ -222,6 +224,7 @@ func main() {
 						Name:    "wshCB",
 						Text:    "Windows Script Host",
 						Checked: Bind("WSH"),
+						Enabled: !(status && !WSH.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "officeOleCB",
@@ -276,6 +279,7 @@ func main() {
 						Name:    "Autorun",
 						Text:    "AutoRun and AutoPlay",
 						Checked: Bind("Autorun"),
+						Enabled: !(status && !Autorun.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "UAC",

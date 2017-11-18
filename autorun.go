@@ -26,30 +26,22 @@ import (
 // - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
 // - HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
 
-func triggerAutorun(harden bool) {
-	var keyAutorunName = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
-	keyAutorun, _, _ := registry.CreateKey(registry.CURRENT_USER, keyAutorunName, registry.ALL_ACCESS)
-	var keyAutoplayName = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers"
-	keyAutoplay, _, _ := registry.CreateKey(registry.CURRENT_USER, keyAutoplayName, registry.ALL_ACCESS)
+var Autorun = RegistryMultiValue{
+	ArraySingleDWORD: []RegistrySingleValueDWORD{
+		RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+			ValueName:     "NoDriveTypeAutoRun",
+			HardenedValue: 0xb5},
 
-	if harden == false {
-		events.AppendText("Restoring original settings for AutoRun and AutoPlay\n")
+		RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+			ValueName:     "NoAutorun",
+			HardenedValue: 1},
 
-		restoreKey(keyAutorun, keyAutorunName, "NoDriveTypeAutoRun")
-		restoreKey(keyAutorun, keyAutorunName, "NoAutorun")
-		restoreKey(keyAutoplay, keyAutoplayName, "DisableAutoplay")
-	} else {
-		events.AppendText("Hardening by disabling AutoRun and AutoPlay\n")
-
-		saveOriginalRegistryDWORD(keyAutorun, keyAutorunName, "NoDriveTypeAutoRun")
-		saveOriginalRegistryDWORD(keyAutorun, keyAutorunName, "NoAutorun")
-		saveOriginalRegistryDWORD(keyAutoplay, keyAutoplayName, "DisableAutoplay")
-
-		keyAutorun.SetDWordValue("NoDriveTypeAutoRun", 0xb5)
-		keyAutorun.SetDWordValue("NoAutorun", 1)
-		keyAutoplay.SetDWordValue("DisableAutoplay", 1)
-	}
-
-	keyAutorun.Close()
-	keyAutoplay.Close()
-}
+		RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers",
+			ValueName:     "DisableAutoplay",
+			HardenedValue: 1}}}

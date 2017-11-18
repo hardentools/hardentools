@@ -30,11 +30,11 @@ type RegistrySingleValueDWORD struct {
 }
 
 type RegistryMultiValue struct {
-	Array []RegistrySingleValueDWORD
+	ArraySingleDWORD []RegistrySingleValueDWORD
 }
 
 // verify if RegistrySingleValueDWORD is already hardened (helper method)
-func (regValue RegistrySingleValueDWORD) isHardened() (isHardened bool) {
+func (regValue *RegistrySingleValueDWORD) isHardened() (isHardened bool) {
 	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
 
 	if err == nil {
@@ -49,7 +49,7 @@ func (regValue RegistrySingleValueDWORD) isHardened() (isHardened bool) {
 }
 
 // harden RegistrySingleValueDWORD helper method
-func (regValue RegistrySingleValueDWORD) harden(harden bool) {
+func (regValue *RegistrySingleValueDWORD) harden(harden bool) {
 	key, _, _ := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
 
 	if harden == false {
@@ -65,6 +65,24 @@ func (regValue RegistrySingleValueDWORD) harden(harden bool) {
 	key.Close()
 }
 
+func (regMultiValue *RegistryMultiValue) harden(harden bool) {
+	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
+		singleDWORD.harden(harden)
+	}
+}
+
+func (regMultiValue *RegistryMultiValue) isHardened() (isHardened bool) {
+	var hardened = true
+
+	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
+		if !singleDWORD.isHardened() {
+			hardened = false
+		}
+	}
+
+	return hardened
+}
+
 ////
 // save and restore methods
 //
@@ -77,7 +95,7 @@ func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName strin
 
 	originalValue, _, err := key.GetIntegerValue(valueName)
 	if err == nil {
-		hardentoolsKey.SetDWordValue("SavedState_"+keyName+"_"+valueName, uint32(originalValue))
+		hardentoolsKey.SetDWordValue("SavedState_"+keyName+"_"+valueName, uint32(originalValue)) // TODO: add RootKey here (LOCAL_MACHINE vs. LOCAL_USER) - needed for future improvements
 	}
 	hardentoolsKey.Close()
 }
@@ -86,7 +104,7 @@ func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName strin
 func retrieveOriginalRegistryDWORD(keyName string, valueName string) (value uint32, err error) {
 	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
 
-	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + keyName + "_" + valueName)
+	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + keyName + "_" + valueName) // TODO: evaluate RootKey here (LOCAL_MACHINE vs. LOCAL_USER) - needed for future improvements
 	hardentoolsKey.Close()
 	if err == nil {
 		return uint32(value64), nil
