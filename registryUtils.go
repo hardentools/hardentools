@@ -53,13 +53,8 @@ func (regValue RegistrySingleValueDWORD) harden(harden bool) {
 	key, _, _ := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
 
 	if harden == false {
-		// Retrieve saved state.
-		value, err := retrieveOriginalRegistryDWORD(regValue.Path, regValue.ValueName)
-		if err == nil {
-			key.SetDWordValue(regValue.ValueName, value)
-		} else {
-			key.DeleteValue(regValue.ValueName)
-		}
+		// Restore.
+		restoreKey(key, regValue.Path, regValue.ValueName)
 	} else {
 		// Save current state.
 		saveOriginalRegistryDWORD(key, regValue.Path, regValue.ValueName)

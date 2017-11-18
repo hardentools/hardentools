@@ -147,7 +147,7 @@ func triggerAll(harden bool) {
 	}
 	// UAC.
 	if expertConfig.UAC {
-		triggerUAC(harden)
+		UAC.harden(harden)
 	}
 	// Explorer.
 	if expertConfig.FileAssociations {
@@ -184,6 +184,7 @@ func main() {
 		expertConfig.OfficeDDE = OfficeDDE.isHardened()
 		expertConfig.OfficeActiveX = OfficeActiveX.isHardened()
 		expertConfig.OfficeMacros = OfficeMacros.isHardened()
+		expertConfig.UAC = UAC.isHardened()
 	}
 
 	MainWindow{
@@ -280,6 +281,7 @@ func main() {
 						Name:    "UAC",
 						Text:    "UAC Prompt",
 						Checked: Bind("UAC"),
+						Enabled: !(status && !UAC.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "FileAssociations",
