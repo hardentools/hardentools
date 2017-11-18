@@ -110,16 +110,16 @@ func triggerAll(harden bool) {
 	}
 	// Office.
 	if expertConfig.OfficeOLE {
-		triggerOfficeOLE(harden)
+		OfficeOLE.harden(harden)
 	}
 	if expertConfig.OfficeMacros {
-		triggerOfficeMacros(harden)
+		OfficeMacros.harden(harden)
 	}
 	if expertConfig.OfficeActiveX {
-		triggerOfficeActiveX(harden)
+		OfficeActiveX.harden(harden)
 	}
 	if expertConfig.OfficeDDE {
-		triggerOfficeDDE(harden)
+		OfficeDDE.harden(harden)
 	}
 	// PDF.
 	if expertConfig.PDFJS {

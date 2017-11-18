@@ -21,7 +21,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-var officeVersions = []string{
+var standardOfficeVersions = []string{
 	"12.0", // Office 2007
 	"14.0", // Office 2010
 	"15.0", // Office 2013
@@ -30,131 +30,83 @@ var officeVersions = []string{
 
 var standardOfficeApps = []string{"Excel", "PowerPoint", "Word"}
 
-func _hardenOffice(pathRegEx string, valueName string, value uint32, officeApps []string) {
-	for _, officeVersion := range officeVersions {
-		for _, officeApp := range officeApps {
-			path := fmt.Sprintf(pathRegEx, officeVersion, officeApp)
-			key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
-			// Save current state.
-			saveOriginalRegistryDWORD(key, path, valueName)
-			// Harden.
-			key.SetDWordValue(valueName, value)
-			key.Close()
+// data type for a RegEx Path / Single Value DWORD combination
+type OfficeRegistryRegExSingleDWORD struct {
+	RootKey        registry.Key
+	PathRegEx      string
+	ValueName      string
+	HardenedValue  uint32
+	OfficeApps     []string
+	OfficeVersions []string
+}
+
+// verify if RegistrySingleValueDWORD is already hardened (helper method)
+func (officeRegEx OfficeRegistryRegExSingleDWORD) isHardened() (isHardened bool) {
+	return false // TODO
+}
+
+// harden OfficeRegistryRegExSingleDWORD helper method
+func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) {
+	if harden {
+		// harden
+		for _, officeVersion := range regValue.OfficeVersions {
+			for _, officeApp := range regValue.OfficeApps {
+				path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
+				key, _, _ := registry.CreateKey(regValue.RootKey, path, registry.ALL_ACCESS)
+				// Save current state.
+				saveOriginalRegistryDWORD(key, path, regValue.ValueName)
+				// Harden.
+				key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
+				key.Close()
+			}
+		}
+	} else {
+		// restore
+		for _, officeVersion := range regValue.OfficeVersions {
+			for _, officeApp := range regValue.OfficeApps {
+				path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
+				key, _ := registry.OpenKey(regValue.RootKey, path, registry.ALL_ACCESS)
+				// restore previous state
+				restoreKey(key, path, regValue.ValueName)
+				key.Close()
+			}
 		}
 	}
 }
 
-func _restoreOffice(pathRegEx string, valueName string, officeApps []string) {
-	for _, officeVersion := range officeVersions {
-		for _, officeApp := range officeApps {
-			path := fmt.Sprintf(pathRegEx, officeVersion, officeApp)
-			key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
-			// restore previous state
-			restoreKey(key, path, valueName)
-			key.Close()
-		}
-	}
-}
-
-// Office Packager Objects
-
+//// Office Packager Objects
 // 0 - No prompt from Office when user clicks, object executes
 // 1 - Prompt from Office when user clicks, object executes
 // 2 - No prompt, Object does not execute
+var OfficeOLE = OfficeRegistryRegExSingleDWORD{
+	RootKey:        registry.CURRENT_USER,
+	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:      "PackagerPrompt",
+	HardenedValue:  2,
+	OfficeApps:     standardOfficeApps,
+	OfficeVersions: standardOfficeVersions}
 
-func triggerOfficeOLE(harden bool) {
-	var valueName = "PackagerPrompt"
-	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security"
-
-	if harden == false {
-		events.AppendText("Restoring original settings for Office Packager Objects\n")
-
-		_restoreOffice(pathRegEx, valueName, standardOfficeApps)
-	} else {
-		events.AppendText("Hardening by disabling Office Packager Objects\n")
-		var value uint32 = 2
-
-		_hardenOffice(pathRegEx, valueName, value, standardOfficeApps)
-	}
-}
-
-// Office Macros
-
+//// Office Macros
 // 1 - Enable all
 // 2 - Disable with notification
 // 3 - Digitally signed only
 // 4 - Disable all
+var OfficeMacros = OfficeRegistryRegExSingleDWORD{
+	RootKey:        registry.CURRENT_USER,
+	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:      "VBAWarnings",
+	HardenedValue:  4,
+	OfficeApps:     standardOfficeApps,
+	OfficeVersions: standardOfficeVersions}
 
-func triggerOfficeMacros(harden bool) {
-	var value uint32
-	var valueName = "VBAWarnings"
-	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security"
+// Office ActiveX
+var OfficeActiveX = RegistrySingleValueDWORD{
+	RootKey:       registry.CURRENT_USER,
+	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
+	ValueName:     "DisableAllActiveX",
+	HardenedValue: 1}
 
-	if harden == true {
-		events.AppendText("Hardening by disabling Office Macros\n")
-		value = 4
-
-		_hardenOffice(pathRegEx, valueName, value, standardOfficeApps)
-	} else {
-		events.AppendText("Restoring original settings for Office Macros\n")
-
-		_restoreOffice(pathRegEx, valueName, standardOfficeApps)
-	}
-}
-
-// ActiveX
-type RegistrySingleValueDWORD struct {
-	rootKey registry.Key
-	path string
-	valueName string
-	hardenedValue uint32
-}
-func (regValue RegistrySingleValueDWORD) isHardened() (isHardened bool){
-	key, err := registry.OpenKey(regValue.rootKey, regValue.path, registry.READ)
-	
-	if err == nil {
-		currentValue, _, err := key.GetIntegerValue(regValue.valueName)
-		if err == nil {
-			if uint32(currentValue) == regValue.hardenedValue {
-				return true
-			}
-		}
-	}
-	return false
-}
-func (regValue RegistrySingleValueDWORD) harden(harden bool){
-	key, _, _ := registry.CreateKey(regValue.rootKey, regValue.path, registry.WRITE)
-
-	if harden == false {
-		// Retrieve saved state.
-		value, err := retrieveOriginalRegistryDWORD(regValue.path, regValue.valueName)
-		if err == nil {
-			key.SetDWordValue(regValue.valueName, value)
-		} else {
-			key.DeleteValue(regValue.valueName)
-		}
-	} else {
-		// Save current state.
-		saveOriginalRegistryDWORD(key, regValue.path, regValue.valueName)
-		// Harden.
-		key.SetDWordValue(regValue.valueName, regValue.hardenedValue)
-	}
-
-	key.Close()
-}
-
-var ActiveX = RegistrySingleValueDWORD { registry.CURRENT_USER,
-	"SOFTWARE\\Microsoft\\Office\\Common\\Security",
-	"DisableAllActiveX",
-	1 }
-
-func triggerOfficeActiveX(harden bool) {
-	ActiveX.harden(harden)
-}
-
-
-// DDE Mitigations for Word, Outlook and Excel
-
+//// DDE Mitigations for Word, Outlook and Excel
 // Doesn't harden OneNote for now (due to high impact).
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail] (this one is for Outlook)
@@ -172,65 +124,106 @@ func triggerOfficeActiveX(harden bool) {
 // for Word&Outlook 2007:
 // [HKEY_CURRENT_USER\Software\Microsoft\Office\12.0\Word\Options\vpref]
 //    fNoCalclinksOnopen_90_1(DWORD)=1
+var pathRegExOptions = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
+var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
+var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
+var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
 
-func triggerOfficeDDE(harden bool) {
-	var valueNameLinks = "DontUpdateLinks"
-	var valueLinks uint32 = 1
+type OfficeDDEType struct {
+	ArrayRegExDWORD  []OfficeRegistryRegExSingleDWORD
+	ArraySingleDWORD []RegistrySingleValueDWORD
+}
 
-	var valueNameDDEAllowed = "DDEAllowed"
-	var valueDDEAllowed uint32
+var OfficeDDE = OfficeDDEType{
+	ArrayRegExDWORD: []OfficeRegistryRegExSingleDWORD{
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     pathRegExOptions,
+			ValueName:     "DontUpdateLinks",
+			HardenedValue: 1,
+			OfficeApps:    []string{"Word", "Excel"},
+			OfficeVersions: []string{
+				"14.0", // Office 2010
+				"15.0", // Office 2013
+				"16.0", // Office 2016
+			}},
 
-	var valueNameDDECleaned = "DDECleaned"
-	var valueDDECleaned uint32 = 1
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     pathRegExWordMail,
+			ValueName:     "DontUpdateLinks",
+			HardenedValue: 1,
+			OfficeApps:    []string{"Word"},
+			OfficeVersions: []string{
+				"14.0", // Office 2010
+				"15.0", // Office 2013
+				"16.0", // Office 2016
+			}},
 
-	var valueNameOptions = "Options"
-	var valueOptions uint32 = 0x117 // dword:00000117
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExOptions,
+			ValueName:      "DDEAllowed",
+			HardenedValue:  0,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions},
 
-	var valueNameWorkbookLinkWarnings = "WorkbookLinkWarnings"
-	var valueWorkbookLinkWarnings uint32 = 2
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExOptions,
+			ValueName:      "DDECleaned",
+			HardenedValue:  1,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions},
 
-	var valueNameWord2007 = "fNoCalclinksOnopen_90_1"
-	var valueWord2007 uint32 = 1
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExOptions,
+			ValueName:      "Options",
+			HardenedValue:  0x117,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions},
 
-	var pathRegEx = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
-	var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
-	var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
-	var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExSecurity,
+			ValueName:      "WorkbookLinkWarnings",
+			HardenedValue:  2,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions},
+	},
 
-	keyWord2007, _, _ := registry.CreateKey(registry.CURRENT_USER, pathWord2007, registry.WRITE)
+	ArraySingleDWORD: []RegistrySingleValueDWORD{
+		RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          pathWord2007,
+			ValueName:     "fNoCalclinksOnopen_90_1",
+			HardenedValue: 1},
+	},
+}
 
-	if harden == false {
-		events.AppendText("Restoring original settings for Office DDE Links\n")
-
-		_restoreOffice(pathRegEx, valueNameLinks, []string{"Word", "Excel"})
-		_restoreOffice(pathRegExWordMail, valueNameLinks, []string{"Word"})
-		_restoreOffice(pathRegEx, valueNameOptions, []string{"Excel"})
-		_restoreOffice(pathRegEx, valueNameDDECleaned, []string{"Excel"})
-		_restoreOffice(pathRegEx, valueNameDDEAllowed, []string{"Excel"})
-		_restoreOffice(pathRegExSecurity, valueNameWorkbookLinkWarnings, []string{"Excel"})
-
-		//// Word 2007 key:
-		// Retrieve saved state.
-		value, err := retrieveOriginalRegistryDWORD(pathWord2007, valueNameWord2007)
-		if err == nil {
-			keyWord2007.SetDWordValue(valueNameWord2007, value)
-		} else {
-			keyWord2007.DeleteValue(valueNameWord2007)
-		}
-	} else {
-		events.AppendText("Hardening by disabling Office DDE Links\n")
-
-		_hardenOffice(pathRegEx, valueNameLinks, valueLinks, []string{"Word", "Excel"})
-		_hardenOffice(pathRegExWordMail, valueNameLinks, valueLinks, []string{"Word"})
-		_hardenOffice(pathRegEx, valueNameDDEAllowed, valueDDEAllowed, []string{"Excel"})
-		_hardenOffice(pathRegEx, valueNameDDECleaned, valueDDECleaned, []string{"Excel"})
-		_hardenOffice(pathRegEx, valueNameOptions, valueOptions, []string{"Excel"})
-		_hardenOffice(pathRegExSecurity, valueNameWorkbookLinkWarnings, valueWorkbookLinkWarnings, []string{"Excel"})
-
-		//// Word 2007 key:
-		// Save current state.
-		saveOriginalRegistryDWORD(keyWord2007, pathWord2007, valueNameWord2007)
-		// Harden.
-		keyWord2007.SetDWordValue(valueNameWord2007, valueWord2007)
+func (regValue *OfficeDDEType) harden(harden bool) {
+	for _, officePart := range OfficeDDE.ArrayRegExDWORD {
+		officePart.harden(harden)
 	}
+	for _, officePart := range OfficeDDE.ArraySingleDWORD {
+		officePart.harden(harden)
+	}
+}
+
+func (regValue *OfficeDDEType) isHardened() (isHardened bool) {
+	var hardened = true
+
+	for _, officePart := range OfficeDDE.ArrayRegExDWORD {
+		if !officePart.isHardened() {
+			hardened = false
+		}
+	}
+	for _, officePart := range OfficeDDE.ArraySingleDWORD {
+		if !officePart.isHardened() {
+			hardened = false
+		}
+	}
+
+	return hardened
 }

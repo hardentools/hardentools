@@ -20,7 +20,61 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// data type for a single DWORD value that suffices for hardening
+// a distinct setting
+type RegistrySingleValueDWORD struct {
+	RootKey       registry.Key
+	Path          string
+	ValueName     string
+	HardenedValue uint32
+}
+
+type RegistryMultiValue struct {
+	Array []RegistrySingleValueDWORD
+}
+
+// verify if RegistrySingleValueDWORD is already hardened (helper method)
+func (regValue RegistrySingleValueDWORD) isHardened() (isHardened bool) {
+	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
+
+	if err == nil {
+		currentValue, _, err := key.GetIntegerValue(regValue.ValueName)
+		if err == nil {
+			if uint32(currentValue) == regValue.HardenedValue {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// harden RegistrySingleValueDWORD helper method
+func (regValue RegistrySingleValueDWORD) harden(harden bool) {
+	key, _, _ := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
+
+	if harden == false {
+		// Retrieve saved state.
+		value, err := retrieveOriginalRegistryDWORD(regValue.Path, regValue.ValueName)
+		if err == nil {
+			key.SetDWordValue(regValue.ValueName, value)
+		} else {
+			key.DeleteValue(regValue.ValueName)
+		}
+	} else {
+		// Save current state.
+		saveOriginalRegistryDWORD(key, regValue.Path, regValue.ValueName)
+		// Harden.
+		key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
+	}
+
+	key.Close()
+}
+
+////
+// save and restore methods
+//
 // TODO: Add error handling for all methods.
+////
 
 // Save original registry key.
 func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName string) {
@@ -28,7 +82,7 @@ func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName strin
 
 	originalValue, _, err := key.GetIntegerValue(valueName)
 	if err == nil {
-		hardentoolsKey.SetDWordValue("SavedState_" + keyName + "_" + valueName, uint32(originalValue))
+		hardentoolsKey.SetDWordValue("SavedState_"+keyName+"_"+valueName, uint32(originalValue))
 	}
 	hardentoolsKey.Close()
 }
