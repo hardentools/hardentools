@@ -17,6 +17,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"golang.org/x/sys/windows/registry"
@@ -153,7 +154,17 @@ func triggerAll(harden bool) {
 		triggerFileAssociation(harden)
 	}
 
+	showStatus()
+
 	progress.SetValue(100)
+}
+
+func showStatus() {
+	events.AppendText(fmt.Sprintf("OLE hardened? %t\n", OfficeOLE.isHardened()))
+	//		expertConfig.OfficeDDE = OfficeDDE.isHardened()
+	//		expertConfig.OfficeActiveX = OfficeActiveX.isHardened()
+	//		expertConfig.OfficeMacros = OfficeMacros.isHardened()
+
 }
 
 func main() {
