@@ -41,12 +41,33 @@ type OfficeRegistryRegExSingleDWORD struct {
 }
 
 // verify if RegistrySingleValueDWORD is already hardened (helper method)
-func (officeRegEx OfficeRegistryRegExSingleDWORD) isHardened() (isHardened bool) {
-	return false // TODO
+func (officeRegEx *OfficeRegistryRegExSingleDWORD) isHardened() (isHardened bool) {
+	var hardened = true
+
+	for _, officeVersion := range officeRegEx.OfficeVersions {
+		for _, officeApp := range officeRegEx.OfficeApps {
+			path := fmt.Sprintf(officeRegEx.PathRegEx, officeVersion, officeApp)
+			key, err := registry.OpenKey(officeRegEx.RootKey, path, registry.READ)
+			if err == nil {
+				currentValue, _, err := key.GetIntegerValue(officeRegEx.ValueName)
+				if err == nil {
+					if uint32(currentValue) != officeRegEx.HardenedValue {
+						hardened = false
+					}
+				} else {
+					hardened = false
+				}
+			} else {
+				hardened = false
+			}
+			key.Close()
+		}
+	}
+	return hardened
 }
 
 // harden OfficeRegistryRegExSingleDWORD helper method
-func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) {
+func (regValue *OfficeRegistryRegExSingleDWORD) harden(harden bool) {
 	if harden {
 		// harden
 		for _, officeVersion := range regValue.OfficeVersions {
