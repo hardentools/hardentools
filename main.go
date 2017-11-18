@@ -47,7 +47,7 @@ type ExpertConfig struct {
 	FileAssociations bool
 }
 
-var expertConfig *ExpertConfig
+var expertConfig = &ExpertConfig{true, true, true, true, true, true, true, true, true, true, true, true, true, true}
 
 var window *walk.MainWindow
 var events *walk.TextEdit
@@ -159,9 +159,9 @@ func triggerAll(harden bool) {
 func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
-	expertConfig = &ExpertConfig{true, true, true, true, true, true, true, true, true, true, true, true, true, true}
+	var status = checkStatus()
 
-	if checkStatus() == false {
+	if status == false {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
@@ -215,25 +215,25 @@ func main() {
 						Name:    "officeOleCB",
 						Text:    "Office Packager Objects (OLE)",
 						Checked: Bind("OfficeOLE"),
-						Enabled: Bind("OfficeOLE"),
+						Enabled: !(status && !OfficeOLE.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "OfficeMacros",
 						Text:    "Office Macros",
 						Checked: Bind("OfficeMacros"),
-						Enabled: Bind("OfficeMacros"),
+						Enabled: !(status && !OfficeMacros.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "OfficeActiveX",
 						Text:    "Office ActiveX",
 						Checked: Bind("OfficeActiveX"),
-						Enabled: Bind("OfficeActiveX"),
+						Enabled: !(status && !OfficeActiveX.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "OfficeDDE",
 						Text:    "Office DDE  Links",
 						Checked: Bind("OfficeDDE"),
-						Enabled: Bind("OfficeDDE"),
+						Enabled: !(status && !OfficeDDE.isHardened()) || !status,
 					},
 					CheckBox{
 						Name:    "PDFJS",
