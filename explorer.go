@@ -65,28 +65,34 @@ var FileAssociations = ExplorerAssociations{
 func (explAssoc ExplorerAssociations) harden(harden bool) error {
 	if harden == false {
 		//events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
+		var lastError error = nil
 
 		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err != nil {
-				return err
-				//events.AppendText("error occured")
-				//events.AppendText(fmt.Sprintln("%s", err))
+				lastError = err
 			}
 
 			// Step 2 (Reassociate user defaults) is not necessary, since this is automatically done by Windows on first usage
+		}
+
+		if lastError != nil {
+			return lastError
 		}
 	} else {
 		fmt.Println("Hardening by disabling potentially malicious file associations")
 
 		for _, extension := range explAssoc.extensions {
+			var openWithProgidsDoesNotExist bool = false
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
 			if err != nil {
-				fmt.Println("Open ", regKeyString, "failed")
-				return err
+				fmt.Println("Info: Open ", regKeyString, "failed")
+				// do not return an error, because it seems to be quite common that this does not exist for different extensions;
+				// just remember this for later
+				openWithProgidsDoesNotExist = true
 			}
 			defer regKey.Close()
 
@@ -99,12 +105,14 @@ func (explAssoc ExplorerAssociations) harden(harden bool) error {
 			}
 
 			// Step 2: Remove user association
-			valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
-			for _, valueName := range valueNames {
-				err3 := regKey.DeleteValue(valueName)
-				if err3 != nil {
-					fmt.Println("Removing user association ", valueName, " failed")
-					return err3
+			if !openWithProgidsDoesNotExist {
+				valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
+				for _, valueName := range valueNames {
+					err3 := regKey.DeleteValue(valueName)
+					if err3 != nil {
+						fmt.Println("Removing user association ", valueName, " failed")
+						return err3
+					}
 				}
 			}
 		}
