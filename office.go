@@ -175,7 +175,7 @@ var OfficeDDE = MultiHardenInterfaces{
 
 //// HardenInterface methods
 
-func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) {
+func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) error {
 	if harden {
 		// harden
 		for _, officeVersion := range regValue.OfficeVersions {
@@ -201,6 +201,8 @@ func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) {
 			}
 		}
 	}
+
+	return nil
 }
 
 func (officeRegEx OfficeRegistryRegExSingleDWORD) isHardened() bool {

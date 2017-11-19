@@ -107,16 +107,26 @@ func restoreAll() {
 }
 
 func triggerAll(harden bool) {
+	if harden {
+		events.AppendText("Now we are hardening ")
+	} else {
+		events.AppendText("Now we are restoring ")
+	}
+
 	for _, hardenSubject := range allHardenSubjects {
 		if expertConfig[hardenSubject.name()] == true {
-			if harden {
-				events.AppendText(fmt.Sprintf("Now we are hardening %s\n", hardenSubject.name()))
-			} else {
-				events.AppendText(fmt.Sprintf("Now we are restoring %s\n", hardenSubject.name()))
+			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.name()))
+
+			err := hardenSubject.harden(harden)
+
+			if err != nil {
+				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.name()))
+				fmt.Println(fmt.Sprintf("Error for operation %s:", hardenSubject.name()), err, "\n")
 			}
-			hardenSubject.harden(harden)
 		}
 	}
+
+	events.AppendText("\n")
 
 	progress.SetValue(100)
 
@@ -138,6 +148,14 @@ func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
 	var status = checkStatus()
+
+	/// TEST
+	/*	err := ShellExecute("runas", "notepad.exe", "/help")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error running program: %v\n", err)
+			os.Exit(1)
+		}*/
+	// Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun
 
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
@@ -176,7 +194,7 @@ func main() {
 	MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{600, 500},
+		MinSize:  Size{500, 600},
 		Layout:   VBox{},
 		DataBinder: DataBinder{
 			DataSource: expertConfig,

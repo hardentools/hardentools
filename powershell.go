@@ -46,7 +46,7 @@ var PowerShell = MultiHardenInterfaces{
 //  "1"="powershell_ise.exe"
 //  "2"="powershell.exe"
 //  "3"="cmd.exe"
-func (pwShell PowerShellDisallowRunMembers) harden(harden bool) {
+func (pwShell PowerShellDisallowRunMembers) harden(harden bool) error {
 	if harden == false {
 		// Restore.
 		//events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
@@ -63,7 +63,7 @@ func (pwShell PowerShellDisallowRunMembers) harden(harden bool) {
 
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			events.AppendText("!! OpenKey to enable Powershell and cmd failed.\n")
+			return HardenError{"!! OpenKey to enable Powershell and cmd failed.\n"}
 		}
 		defer keyDisallow.Close()
 
@@ -82,7 +82,7 @@ func (pwShell PowerShellDisallowRunMembers) harden(harden bool) {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			events.AppendText("!! CreateKey to disable powershell failed.\n")
+			return HardenError{"!! CreateKey to disable powershell failed.\n"}
 		}
 		defer keyDisallow.Close()
 
@@ -102,6 +102,7 @@ func (pwShell PowerShellDisallowRunMembers) harden(harden bool) {
 		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
 	}
 
+	return nil
 }
 
 func (pwShell PowerShellDisallowRunMembers) isHardened() bool {

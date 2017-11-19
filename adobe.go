@@ -119,7 +119,7 @@ var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
-func (adobeRegEx AdobeRegistryRegExSingleDWORD) harden(harden bool) {
+func (adobeRegEx AdobeRegistryRegExSingleDWORD) harden(harden bool) error {
 	if harden {
 		// Harden.
 		for _, adobeVersion := range adobeRegEx.AdobeVersions {
@@ -141,6 +141,8 @@ func (adobeRegEx AdobeRegistryRegExSingleDWORD) harden(harden bool) {
 			key.Close()
 		}
 	}
+
+	return nil
 }
 
 func (adobeRegEx AdobeRegistryRegExSingleDWORD) isHardened() bool {

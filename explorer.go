@@ -62,7 +62,7 @@ var FileAssociations = ExplorerAssociations{
 	shortName: "FileAssociations",
 }
 
-func (explAssoc ExplorerAssociations) harden(harden bool) {
+func (explAssoc ExplorerAssociations) harden(harden bool) error {
 	if harden == false {
 		//events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
 
@@ -71,64 +71,76 @@ func (explAssoc ExplorerAssociations) harden(harden bool) {
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err != nil {
-				events.AppendText("error occured")
-				events.AppendText(fmt.Sprintln("%s", err))
+				return err
+				//events.AppendText("error occured")
+				//events.AppendText(fmt.Sprintln("%s", err))
 			}
 
 			// Step 2 (Reassociate user defaults) is not necessary, since this is automatically done by Windows on first usage
 		}
 	} else {
-		//events.AppendText("Hardening by disabling potentially malicious file associations\n")
+		fmt.Println("Hardening by disabling potentially malicious file associations")
 
 		for _, extension := range explAssoc.extensions {
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
-			regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
+			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
+			if err != nil {
+				fmt.Println("Open ", regKeyString, "failed")
+				return err
+			}
+			defer regKey.Close()
 
 			// Step 1: Remove association (system wide default)
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
-			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
-			if err != nil {
-				events.AppendText("error occured")
-				events.AppendText(fmt.Sprintln("%s", err))
+			_, err2 := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+			if err2 != nil {
+				fmt.Println("Executing ", assocString, " failed")
+				return err2
 			}
+
 			// Step 2: Remove user association
 			valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
 			for _, valueName := range valueNames {
-				regKey.DeleteValue(valueName)
+				err3 := regKey.DeleteValue(valueName)
+				if err3 != nil {
+					fmt.Println("Removing user association ", valueName, " failed")
+					return err3
+				}
 			}
-			regKey.Close()
 		}
 	}
+	return nil
 }
 
+// this returns hardened, if only one extension is hardened (to prevent
+// restore from not beeing executed)
 func (explAssoc ExplorerAssociations) isHardened() (isHardened bool) {
-	var hardened = true
+	var hardened bool = false
 
 	for _, extension := range explAssoc.extensions {
 		regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 		regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.READ)
+		//if errOpen != nil {
+		//return false
+		//}
+		defer regKey.Close()
 
 		// Step 1: Check association (system wide default)
 		assocString := fmt.Sprintf("assoc %s", extension.ext)
-		_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		out, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		fmt.Print(assocString, " output = ", string(out[:]))
+		fmt.Println("err = ", err)
 		if err != nil {
-			//events.AppendText(extension.ext)
-			//events.AppendText(" seems to be hardened\n")
-		} else {
-			hardened = false
-			//events.AppendText(extension.ext)
-			//events.AppendText(fmt.Sprintln(" seems not to be hardened: %s\n", out))
+			hardened = true
 		}
 
 		// Step 2: Check user association
-		valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
-		if len(valueNames) > 0 {
-			hardened = false
-			//events.AppendText(extension.ext)
-			//events.AppendText(" seems NOT to be hardened\n")
-		}
-
-		regKey.Close()
+		/*valueNames, _ := regKey.ReadValueNames(100)
+		fmt.Println("ValueNames for ",regKeyString,": ",valueNames)
+		fmt.Println("len(ValueNames)=",len(valueNames))
+		if len(valueNames) < 2 {
+			hardened = true
+		}*/
 	}
 
 	return hardened

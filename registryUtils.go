@@ -17,6 +17,7 @@
 package main
 
 import (
+	"fmt"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -36,8 +37,13 @@ type RegistryMultiValue struct {
 }
 
 // harden RegistrySingleValueDWORD helper method
-func (regValue RegistrySingleValueDWORD) harden(harden bool) {
-	key, _, _ := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
+func (regValue RegistrySingleValueDWORD) harden(harden bool) error {
+	key, _, err := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
+	defer key.Close()
+
+	if err != nil {
+		return HardenError{fmt.Sprintf("Couldn't create / open registry key for write access: %s \\ %s", regValue.RootKey, regValue.Path)}
+	}
 
 	if harden == false {
 		// Restore.
@@ -46,10 +52,13 @@ func (regValue RegistrySingleValueDWORD) harden(harden bool) {
 		// Save current state.
 		saveOriginalRegistryDWORD(key, regValue.Path, regValue.ValueName)
 		// Harden.
-		key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
+		err = key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
+		if err != nil {
+			return HardenError{fmt.Sprintf("Couldn't set registry value: %s \\ %s \\ %s", regValue.RootKey, regValue.Path, regValue.ValueName)}
+		}
 	}
 
-	key.Close()
+	return nil
 }
 
 // verify if RegistrySingleValueDWORD is already hardened (helper method)
@@ -71,10 +80,14 @@ func (regValue RegistrySingleValueDWORD) name() string {
 	return regValue.shortName
 }
 
-func (regMultiValue RegistryMultiValue) harden(harden bool) {
+func (regMultiValue RegistryMultiValue) harden(harden bool) error {
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
-		singleDWORD.harden(harden)
+		err := singleDWORD.harden(harden)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (regMultiValue RegistryMultiValue) isHardened() (isHardened bool) {

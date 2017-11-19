@@ -18,9 +18,9 @@ package main
 
 // Generale interface which should be used for every harden subject
 type HardenInterface interface {
-	isHardened() bool // returns true if harden subject is already completely hardened
-	harden(bool)      // hardens the harden subject if parameter is true, restores it if parameter is false
-	name() string     // returns short name
+	isHardened() bool  // returns true if harden subject is already completely hardened
+	harden(bool) error // hardens the harden subject if parameter is true, restores it if parameter is false
+	name() string      // returns short name
 }
 
 // type for array of HardenInterfaces
@@ -29,10 +29,14 @@ type MultiHardenInterfaces struct {
 	shortName        string
 }
 
-func (mhInterfaces MultiHardenInterfaces) harden(harden bool) {
+func (mhInterfaces MultiHardenInterfaces) harden(harden bool) error {
 	for _, mhInterface := range mhInterfaces.HardenInterfaces {
-		mhInterface.harden(harden)
+		err := mhInterface.harden(harden)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (mhInterfaces MultiHardenInterfaces) isHardened() bool {
@@ -49,4 +53,13 @@ func (mhInterfaces MultiHardenInterfaces) isHardened() bool {
 
 func (mhInterfaces MultiHardenInterfaces) name() string {
 	return mhInterfaces.shortName
+}
+
+// error handling
+type HardenError struct {
+	err string
+}
+
+func (e HardenError) Error() string {
+	return e.err
 }
