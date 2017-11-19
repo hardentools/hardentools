@@ -44,10 +44,11 @@ type Extension struct {
 
 type ExplorerAssociations struct {
 	extensions []Extension
+	shortName  string
 }
 
 var FileAssociations = ExplorerAssociations{
-	[]Extension{
+	extensions: []Extension{
 		{".hta", "htafile"},
 		{".js", "JSFile"},
 		{".JSE", "JSEFile"},
@@ -58,11 +59,12 @@ var FileAssociations = ExplorerAssociations{
 		{".vbs", "VBSFile"},
 		{".VBE", "VBEFile"},
 		{".pif", "piffile"}},
+	shortName: "FileAssociations",
 }
 
-func (explAssoc *ExplorerAssociations) harden(harden bool) {
+func (explAssoc ExplorerAssociations) harden(harden bool) {
 	if harden == false {
-		events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
+		//events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
 
 		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
@@ -76,7 +78,7 @@ func (explAssoc *ExplorerAssociations) harden(harden bool) {
 			// Step 2 (Reassociate user defaults) is not necessary, since this is automatically done by Windows on first usage
 		}
 	} else {
-		events.AppendText("Hardening by disabling potentially malicious file associations\n")
+		//events.AppendText("Hardening by disabling potentially malicious file associations\n")
 
 		for _, extension := range explAssoc.extensions {
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
@@ -99,7 +101,7 @@ func (explAssoc *ExplorerAssociations) harden(harden bool) {
 	}
 }
 
-func (explAssoc *ExplorerAssociations) isHardened() (isHardened bool) {
+func (explAssoc ExplorerAssociations) isHardened() (isHardened bool) {
 	var hardened = true
 
 	for _, extension := range explAssoc.extensions {
@@ -130,4 +132,8 @@ func (explAssoc *ExplorerAssociations) isHardened() (isHardened bool) {
 	}
 
 	return hardened
+}
+
+func (explAssoc ExplorerAssociations) name() string {
+	return explAssoc.shortName
 }

@@ -27,29 +27,16 @@ type RegistrySingleValueDWORD struct {
 	Path          string
 	ValueName     string
 	HardenedValue uint32
+	shortName     string
 }
 
 type RegistryMultiValue struct {
 	ArraySingleDWORD []RegistrySingleValueDWORD
-}
-
-// verify if RegistrySingleValueDWORD is already hardened (helper method)
-func (regValue *RegistrySingleValueDWORD) isHardened() (isHardened bool) {
-	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
-
-	if err == nil {
-		currentValue, _, err := key.GetIntegerValue(regValue.ValueName)
-		if err == nil {
-			if uint32(currentValue) == regValue.HardenedValue {
-				return true
-			}
-		}
-	}
-	return false
+	shortName        string
 }
 
 // harden RegistrySingleValueDWORD helper method
-func (regValue *RegistrySingleValueDWORD) harden(harden bool) {
+func (regValue RegistrySingleValueDWORD) harden(harden bool) {
 	key, _, _ := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
 
 	if harden == false {
@@ -65,13 +52,32 @@ func (regValue *RegistrySingleValueDWORD) harden(harden bool) {
 	key.Close()
 }
 
-func (regMultiValue *RegistryMultiValue) harden(harden bool) {
+// verify if RegistrySingleValueDWORD is already hardened (helper method)
+func (regValue RegistrySingleValueDWORD) isHardened() bool {
+	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
+
+	if err == nil {
+		currentValue, _, err := key.GetIntegerValue(regValue.ValueName)
+		if err == nil {
+			if uint32(currentValue) == regValue.HardenedValue {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (regValue RegistrySingleValueDWORD) name() string {
+	return regValue.shortName
+}
+
+func (regMultiValue RegistryMultiValue) harden(harden bool) {
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
 		singleDWORD.harden(harden)
 	}
 }
 
-func (regMultiValue *RegistryMultiValue) isHardened() (isHardened bool) {
+func (regMultiValue RegistryMultiValue) isHardened() (isHardened bool) {
 	var hardened = true
 
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
@@ -81,6 +87,10 @@ func (regMultiValue *RegistryMultiValue) isHardened() (isHardened bool) {
 	}
 
 	return hardened
+}
+
+func (regMultiValue RegistryMultiValue) name() string {
+	return regMultiValue.shortName
 }
 
 ////

@@ -24,31 +24,34 @@ import (
 	"os"
 )
 
-type ExpertConfig struct {
+// allHardenSubjects contains all top level harden subjects that should
+// be considered
+var allHardenSubjects = []HardenInterface{
 	// WSH.
-	WSH bool
+	WSH,
 	// Office.
-	OfficeOLE     bool
-	OfficeMacros  bool
-	OfficeActiveX bool
-	OfficeDDE     bool
+	OfficeOLE,
+	OfficeMacros,
+	OfficeActiveX,
+	OfficeDDE,
 	// PDF.
-	PDFJS               bool
-	PDFObjects          bool
-	PDFProtectedMode    bool
-	PDFProtectedView    bool
-	PDFEnhancedSecurity bool
+	AdobePDFJS,
+	AdobePDFObjects,
+	AdobePDFProtectedMode,
+	AdobePDFProtectedView,
+	AdobePDFEnhancedSecurity,
 	// Autorun.
-	Autorun bool
+	Autorun,
 	// PowerShell.
-	PowerShell bool
+	PowerShell,
 	// UAC.
-	UAC bool
+	UAC,
 	// Explorer.
-	FileAssociations bool
+	FileAssociations,
 }
 
-var expertConfig = &ExpertConfig{true, true, true, true, true, true, true, true, true, true, true, true, true, true}
+var expertConfig map[string]bool
+var expertCompWidgetArray []Widget
 
 var window *walk.MainWindow
 var events *walk.TextEdit
@@ -104,74 +107,61 @@ func restoreAll() {
 }
 
 func triggerAll(harden bool) {
-	// WSH.
-	if expertConfig.WSH {
-		WSH.harden(harden)
+	for _, hardenSubject := range allHardenSubjects {
+		if expertConfig[hardenSubject.name()] == true {
+			if harden {
+				events.AppendText(fmt.Sprintf("Now we are hardening %s\n", hardenSubject.name()))
+			} else {
+				events.AppendText(fmt.Sprintf("Now we are restoring %s\n", hardenSubject.name()))
+			}
+			hardenSubject.harden(harden)
+		}
 	}
-	// Office.
-	if expertConfig.OfficeOLE {
-		OfficeOLE.harden(harden)
-	}
-	if expertConfig.OfficeMacros {
-		OfficeMacros.harden(harden)
-	}
-	if expertConfig.OfficeActiveX {
-		OfficeActiveX.harden(harden)
-	}
-	if expertConfig.OfficeDDE {
-		OfficeDDE.harden(harden)
-	}
-	// PDF.
-	if expertConfig.PDFJS {
-		triggerPDFJS(harden)
-	}
-	if expertConfig.PDFObjects {
-		triggerPDFObjects(harden)
-	}
-	if expertConfig.PDFProtectedMode {
-		triggerPDFProtectedMode(harden)
-	}
-	if expertConfig.PDFProtectedView {
-		triggerPDFProtectedView(harden)
-	}
-	if expertConfig.PDFEnhancedSecurity {
-		triggerPDFEnhancedSecurity(harden)
-	}
-	// Autorun.
-	if expertConfig.Autorun {
-		Autorun.harden(harden)
-	}
-	// PowerShell.
-	if expertConfig.PowerShell {
-		triggerPowerShell(harden)
-	}
-	// UAC.
-	if expertConfig.UAC {
-		UAC.harden(harden)
-	}
-	// Explorer.
-	if expertConfig.FileAssociations {
-		FileAssociations.harden(harden)
-	}
+
+	progress.SetValue(100)
 
 	showStatus()
 
-	progress.SetValue(100)
 }
 
 func showStatus() {
-	events.AppendText(fmt.Sprintf("OLE hardened? %t\n", OfficeOLE.isHardened()))
-	FileAssociations.isHardened()
-	//		expertConfig.OfficeDDE = OfficeDDE.isHardened()
-	//		expertConfig.OfficeActiveX = OfficeActiveX.isHardened()
-	//		expertConfig.OfficeMacros = OfficeMacros.isHardened()
-
+	for _, hardenSubject := range allHardenSubjects {
+		if hardenSubject.isHardened() {
+			events.AppendText(fmt.Sprintf("%s is now hardened\n", hardenSubject.name()))
+		} else {
+			events.AppendText(fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.name()))
+		}
+	}
 }
 
 func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
 	var status = checkStatus()
+
+	// build up expert settings checkboxes and map
+	expertConfig = make(map[string]bool)
+	expertCompWidgetArray = make([]Widget, len(allHardenSubjects))
+	var checkBoxArray = make([]*walk.CheckBox, len(allHardenSubjects))
+
+	for i, hardenSubject := range allHardenSubjects {
+		var subjectIsHardened = hardenSubject.isHardened()
+
+		if status == false {
+			expertConfig[hardenSubject.name()] = true // all checkboxes enabled by default in case of hardening
+		} else {
+			expertConfig[hardenSubject.name()] = subjectIsHardened // only checkboxes enabled which are hardenend
+		}
+
+		expertCompWidgetArray[i] = CheckBox{
+			AssignTo:         &checkBoxArray[i],
+			Name:             hardenSubject.name(),
+			Text:             hardenSubject.name(),
+			Checked:          expertConfig[hardenSubject.name()],
+			OnCheckedChanged: walk.EventHandler(checkBoxEventGenerator(i, hardenSubject.name())),
+			Enabled:          !(status && !subjectIsHardened) || !status,
+		}
+	}
 
 	if status == false {
 		buttonText = "Harden!"
@@ -181,14 +171,6 @@ func main() {
 		buttonText = "Restore..."
 		buttonFunc = restoreAll
 		labelText = "We have already hardened some risky features, do you want to restore them?"
-		expertConfig.OfficeOLE = OfficeOLE.isHardened()
-		expertConfig.OfficeDDE = OfficeDDE.isHardened()
-		expertConfig.OfficeActiveX = OfficeActiveX.isHardened()
-		expertConfig.OfficeMacros = OfficeMacros.isHardened()
-		expertConfig.UAC = UAC.isHardened()
-		expertConfig.WSH = WSH.isHardened()
-		expertConfig.Autorun = Autorun.isHardened()
-		expertConfig.FileAssociations = FileAssociations.isHardened()
 	}
 
 	MainWindow{
@@ -219,91 +201,25 @@ func main() {
 			HSpacer{},
 			Label{Text: "Expert Settings - change only if you now what you are doing!"},
 			Composite{
-				Layout: Grid{Columns: 3},
-				Border: true,
-				Children: []Widget{
-					CheckBox{
-						Name:    "wshCB",
-						Text:    "Windows Script Host",
-						Checked: Bind("WSH"),
-						Enabled: !(status && !WSH.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "officeOleCB",
-						Text:    "Office Packager Objects (OLE)",
-						Checked: Bind("OfficeOLE"),
-						Enabled: !(status && !OfficeOLE.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "OfficeMacros",
-						Text:    "Office Macros",
-						Checked: Bind("OfficeMacros"),
-						Enabled: !(status && !OfficeMacros.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "OfficeActiveX",
-						Text:    "Office ActiveX",
-						Checked: Bind("OfficeActiveX"),
-						Enabled: !(status && !OfficeActiveX.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "OfficeDDE",
-						Text:    "Office DDE  Links",
-						Checked: Bind("OfficeDDE"),
-						Enabled: !(status && !OfficeDDE.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "PDFJS",
-						Text:    "Acrobat Reader JavaScript",
-						Checked: Bind("PDFJS"),
-					},
-					CheckBox{
-						Name:    "PDFObjects",
-						Text:    "Acrobat Reader Embedded Objects",
-						Checked: Bind("PDFObjects"),
-					},
-					CheckBox{
-						Name:    "PDFProtectedMode",
-						Text:    "Acrobat Reader ProtectedMode",
-						Checked: Bind("PDFProtectedMode"),
-					},
-					CheckBox{
-						Name:    "PDFProtectedView",
-						Text:    "Acrobat Reader ProtectedView",
-						Checked: Bind("PDFProtectedView"),
-					},
-					CheckBox{
-						Name:    "PDFEnhancedSecurity",
-						Text:    "Acrobat Reader Enhanced Security",
-						Checked: Bind("PDFEnhancedSecurity"),
-					},
-					CheckBox{
-						Name:    "Autorun",
-						Text:    "AutoRun and AutoPlay",
-						Checked: Bind("Autorun"),
-						Enabled: !(status && !Autorun.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "UAC",
-						Text:    "UAC Prompt",
-						Checked: Bind("UAC"),
-						Enabled: !(status && !UAC.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "FileAssociations",
-						Text:    "File associations",
-						Checked: Bind("FileAssociations"),
-						Enabled: !(status && !FileAssociations.isHardened()) || !status,
-					},
-					CheckBox{
-						Name:    "PowerShell",
-						Text:    "Powershell and cmd",
-						Checked: Bind("PowerShell"),
-					},
-				},
+				Layout:   Grid{Columns: 3},
+				Border:   true,
+				Children: expertCompWidgetArray,
 			},
 		},
 	}.Create()
 
 	window.Run()
+}
+
+// generates a function that is used as an walk.EventHandler for the expert CheckBoxes
+func checkBoxEventGenerator(n int, hardenSubjName string) func() {
+	var i = n
+	var hardenSubjectName = hardenSubjName
+	return func() {
+		fmt.Print("checkboxstatuschanged: ", i, " ", hardenSubjectName)
+		x := *(expertCompWidgetArray[i]).(CheckBox).AssignTo
+		isChecked := x.CheckState()
+		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
+		fmt.Println(" expertConfig = ", expertConfig[hardenSubjectName])
+	}
 }

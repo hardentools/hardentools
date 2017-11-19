@@ -21,6 +21,24 @@ import (
 	"strconv"
 )
 
+type PowerShellDisallowRunMembers struct {
+	shortName string
+}
+
+var PowerShell = MultiHardenInterfaces{
+	shortName: "PowerShell",
+	HardenInterfaces: []HardenInterface{
+		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers"},
+
+		RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+			ValueName:     "DisallowRun",
+			HardenedValue: 0x1,
+			shortName:     "PowerShell_DisallowRun"},
+	},
+}
+
 // Disables Powershell and cmd.exe
 //  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
 //  "DisallowRun"=dword:00000001
@@ -28,17 +46,10 @@ import (
 //  "1"="powershell_ise.exe"
 //  "2"="powershell.exe"
 //  "3"="cmd.exe"
-
-func triggerPowerShell(harden bool) {
-	keyExplorerName := "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
-	keyExplorer, _, _ := registry.CreateKey(registry.CURRENT_USER, keyExplorerName, registry.ALL_ACCESS)
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
-
+func (pwShell PowerShellDisallowRunMembers) harden(harden bool) {
 	if harden == false {
-		events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
-
-		// Set DisallowRun to old value / delete if no old value saved.
-		restoreKey(keyExplorer, keyExplorerName, "DisallowRun")
+		// Restore.
+		//events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
 
 		// delete values for disallowed executables (by iterating all existing values)
 		// TODO: This only works if the hardentools values are the last
@@ -54,6 +65,7 @@ func triggerPowerShell(harden bool) {
 		if err != nil {
 			events.AppendText("!! OpenKey to enable Powershell and cmd failed.\n")
 		}
+		defer keyDisallow.Close()
 
 		for i := 1; i < 100; i++ {
 			value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
@@ -63,22 +75,16 @@ func triggerPowerShell(harden bool) {
 				keyDisallow.DeleteValue(strconv.Itoa(i))
 			}
 		}
-
-		keyDisallow.Close()
 	} else {
-		events.AppendText("Hardening by disabling Powershell and cmd\n")
+		// Harden.
+		//events.AppendText("Hardening by disabling Powershell and cmd\n")
 
-		// Save original state of "DisallowRun" value to be able to restore it.
-		saveOriginalRegistryDWORD(keyExplorer, keyExplorerName, "DisallowRun")
-
-		// Create DisallowRun key.
+		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
 			events.AppendText("!! CreateKey to disable powershell failed.\n")
 		}
-
-		// Enable DisallowRun.
-		keyExplorer.SetDWordValue("DisallowRun", 0x1)
+		defer keyDisallow.Close()
 
 		// Find starting point (only relevant if there are existing entries)
 		startingPoint := 1
@@ -94,10 +100,41 @@ func triggerPowerShell(harden bool) {
 		keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
 		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
 		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
-
-		keyDisallow.Close()
 	}
 
-	keyExplorer.Close()
-	hardentoolsKey.Close()
+}
+
+func (pwShell PowerShellDisallowRunMembers) isHardened() bool {
+	var (
+		powerShellIseFound, powerShellFound, cmdExeFound bool = false, false, false
+	)
+
+	keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.READ)
+	if err != nil {
+		return false
+	}
+	defer keyDisallow.Close()
+
+	for i := 1; i < 100; i++ {
+		value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
+
+		switch value {
+		case "powershell_ise.exe":
+			powerShellIseFound = true
+		case "powershell.exe":
+			powerShellFound = true
+		case "cmd.exe":
+			cmdExeFound = true
+		}
+	}
+
+	if powerShellIseFound && powerShellFound && cmdExeFound {
+		return true
+	}
+
+	return false
+}
+
+func (pwShell PowerShellDisallowRunMembers) name() string {
+	return pwShell.shortName
 }

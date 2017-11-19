@@ -24,4 +24,5 @@ var WSH = RegistrySingleValueDWORD{
 	RootKey:       registry.CURRENT_USER,
 	Path:          "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
 	ValueName:     "Enabled",
-	HardenedValue: 0}
+	HardenedValue: 0,
+	shortName:     "WSH"}

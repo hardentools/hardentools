@@ -38,36 +38,144 @@ type OfficeRegistryRegExSingleDWORD struct {
 	HardenedValue  uint32
 	OfficeApps     []string
 	OfficeVersions []string
+	shortName      string
 }
 
-// verify if RegistrySingleValueDWORD is already hardened (helper method)
-func (officeRegEx *OfficeRegistryRegExSingleDWORD) isHardened() (isHardened bool) {
-	var hardened = true
+//// Office Packager Objects
+// 0 - No prompt from Office when user clicks, object executes
+// 1 - Prompt from Office when user clicks, object executes
+// 2 - No prompt, Object does not execute
+var OfficeOLE = OfficeRegistryRegExSingleDWORD{
+	RootKey:        registry.CURRENT_USER,
+	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:      "PackagerPrompt",
+	HardenedValue:  2,
+	OfficeApps:     standardOfficeApps,
+	OfficeVersions: standardOfficeVersions,
+	shortName:      "OfficeOLE"}
 
-	for _, officeVersion := range officeRegEx.OfficeVersions {
-		for _, officeApp := range officeRegEx.OfficeApps {
-			path := fmt.Sprintf(officeRegEx.PathRegEx, officeVersion, officeApp)
-			key, err := registry.OpenKey(officeRegEx.RootKey, path, registry.READ)
-			if err == nil {
-				currentValue, _, err := key.GetIntegerValue(officeRegEx.ValueName)
-				if err == nil {
-					if uint32(currentValue) != officeRegEx.HardenedValue {
-						hardened = false
-					}
-				} else {
-					hardened = false
-				}
-			} else {
-				hardened = false
-			}
-			key.Close()
-		}
-	}
-	return hardened
+//// Office Macros
+// 1 - Enable all
+// 2 - Disable with notification
+// 3 - Digitally signed only
+// 4 - Disable all
+var OfficeMacros = OfficeRegistryRegExSingleDWORD{
+	RootKey:        registry.CURRENT_USER,
+	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:      "VBAWarnings",
+	HardenedValue:  4,
+	OfficeApps:     standardOfficeApps,
+	OfficeVersions: standardOfficeVersions,
+	shortName:      "OfficeMacros"}
+
+// Office ActiveX
+var OfficeActiveX = RegistrySingleValueDWORD{
+	RootKey:       registry.CURRENT_USER,
+	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
+	ValueName:     "DisableAllActiveX",
+	HardenedValue: 1,
+	shortName:     "OfficeActiveX"}
+
+//// DDE Mitigations for Word, Outlook and Excel
+// Doesn't harden OneNote for now (due to high impact).
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail] (this one is for Outlook)
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
+//    "DontUpdateLinks"=dword:00000001
+//
+// additionally only for Excel:
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
+//   "DDEAllowed"=dword:00000000
+//   "DDECleaned"=dword:00000001
+//   "Options"=dword:00000117
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\<version>\Excel\Security]
+//   WorkbookLinkWarnings(DWORD) = 2
+//
+// for Word&Outlook 2007:
+// [HKEY_CURRENT_USER\Software\Microsoft\Office\12.0\Word\Options\vpref]
+//    fNoCalclinksOnopen_90_1(DWORD)=1
+var pathRegExOptions = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
+var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
+var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
+var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
+
+var OfficeDDE = MultiHardenInterfaces{
+	HardenInterfaces: []HardenInterface{
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     pathRegExOptions,
+			ValueName:     "DontUpdateLinks",
+			HardenedValue: 1,
+			OfficeApps:    []string{"Word", "Excel"},
+			OfficeVersions: []string{
+				"14.0", // Office 2010
+				"15.0", // Office 2013
+				"16.0", // Office 2016
+			},
+			shortName: "OfficeDDE_DontUpdateLinksWordExcel"},
+
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     pathRegExWordMail,
+			ValueName:     "DontUpdateLinks",
+			HardenedValue: 1,
+			OfficeApps:    []string{"Word"},
+			OfficeVersions: []string{
+				"14.0", // Office 2010
+				"15.0", // Office 2013
+				"16.0", // Office 2016
+			},
+			shortName: "OfficeDDE_DontUpdateLinksWordMail"},
+
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExOptions,
+			ValueName:      "DDEAllowed",
+			HardenedValue:  0,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions,
+			shortName:      "OfficeDDE_DDEAllowedExcel"},
+
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExOptions,
+			ValueName:      "DDECleaned",
+			HardenedValue:  1,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions,
+			shortName:      "OfficeDDE_DDECleanedExcel"},
+
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExOptions,
+			ValueName:      "Options",
+			HardenedValue:  0x117,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions,
+			shortName:      "OfficeDDE_OptionsExcel"},
+
+		OfficeRegistryRegExSingleDWORD{
+			RootKey:        registry.CURRENT_USER,
+			PathRegEx:      pathRegExSecurity,
+			ValueName:      "WorkbookLinkWarnings",
+			HardenedValue:  2,
+			OfficeApps:     []string{"Excel"},
+			OfficeVersions: standardOfficeVersions,
+			shortName:      "OfficeDDE_WorkbookLinksExcel"},
+
+		RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          pathWord2007,
+			ValueName:     "fNoCalclinksOnopen_90_1",
+			HardenedValue: 1,
+			shortName:     "OfficeDDE_Word2007"},
+	},
+	shortName: "OfficeDDE",
 }
 
-// harden OfficeRegistryRegExSingleDWORD helper method
-func (regValue *OfficeRegistryRegExSingleDWORD) harden(harden bool) {
+//// HardenInterface methods
+
+func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) {
 	if harden {
 		// harden
 		for _, officeVersion := range regValue.OfficeVersions {
@@ -95,156 +203,31 @@ func (regValue *OfficeRegistryRegExSingleDWORD) harden(harden bool) {
 	}
 }
 
-//// Office Packager Objects
-// 0 - No prompt from Office when user clicks, object executes
-// 1 - Prompt from Office when user clicks, object executes
-// 2 - No prompt, Object does not execute
-var OfficeOLE = OfficeRegistryRegExSingleDWORD{
-	RootKey:        registry.CURRENT_USER,
-	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
-	ValueName:      "PackagerPrompt",
-	HardenedValue:  2,
-	OfficeApps:     standardOfficeApps,
-	OfficeVersions: standardOfficeVersions}
-
-//// Office Macros
-// 1 - Enable all
-// 2 - Disable with notification
-// 3 - Digitally signed only
-// 4 - Disable all
-var OfficeMacros = OfficeRegistryRegExSingleDWORD{
-	RootKey:        registry.CURRENT_USER,
-	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
-	ValueName:      "VBAWarnings",
-	HardenedValue:  4,
-	OfficeApps:     standardOfficeApps,
-	OfficeVersions: standardOfficeVersions}
-
-// Office ActiveX
-var OfficeActiveX = RegistrySingleValueDWORD{
-	RootKey:       registry.CURRENT_USER,
-	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
-	ValueName:     "DisableAllActiveX",
-	HardenedValue: 1}
-
-//// DDE Mitigations for Word, Outlook and Excel
-// Doesn't harden OneNote for now (due to high impact).
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options]
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Word\Options\WordMail] (this one is for Outlook)
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
-//    "DontUpdateLinks"=dword:00000001
-//
-// additionally only for Excel:
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\%s\Excel\Options]
-//   "DDEAllowed"=dword:00000000
-//   "DDECleaned"=dword:00000001
-//   "Options"=dword:00000117
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\<version>\Excel\Security]
-//   WorkbookLinkWarnings(DWORD) = 2
-//
-// for Word&Outlook 2007:
-// [HKEY_CURRENT_USER\Software\Microsoft\Office\12.0\Word\Options\vpref]
-//    fNoCalclinksOnopen_90_1(DWORD)=1
-var pathRegExOptions = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options"
-var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
-var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
-var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
-
-type OfficeDDEType struct {
-	ArrayRegExDWORD  []OfficeRegistryRegExSingleDWORD
-	ArraySingleDWORD []RegistrySingleValueDWORD
-}
-
-var OfficeDDE = OfficeDDEType{
-	ArrayRegExDWORD: []OfficeRegistryRegExSingleDWORD{
-		OfficeRegistryRegExSingleDWORD{
-			RootKey:       registry.CURRENT_USER,
-			PathRegEx:     pathRegExOptions,
-			ValueName:     "DontUpdateLinks",
-			HardenedValue: 1,
-			OfficeApps:    []string{"Word", "Excel"},
-			OfficeVersions: []string{
-				"14.0", // Office 2010
-				"15.0", // Office 2013
-				"16.0", // Office 2016
-			}},
-
-		OfficeRegistryRegExSingleDWORD{
-			RootKey:       registry.CURRENT_USER,
-			PathRegEx:     pathRegExWordMail,
-			ValueName:     "DontUpdateLinks",
-			HardenedValue: 1,
-			OfficeApps:    []string{"Word"},
-			OfficeVersions: []string{
-				"14.0", // Office 2010
-				"15.0", // Office 2013
-				"16.0", // Office 2016
-			}},
-
-		OfficeRegistryRegExSingleDWORD{
-			RootKey:        registry.CURRENT_USER,
-			PathRegEx:      pathRegExOptions,
-			ValueName:      "DDEAllowed",
-			HardenedValue:  0,
-			OfficeApps:     []string{"Excel"},
-			OfficeVersions: standardOfficeVersions},
-
-		OfficeRegistryRegExSingleDWORD{
-			RootKey:        registry.CURRENT_USER,
-			PathRegEx:      pathRegExOptions,
-			ValueName:      "DDECleaned",
-			HardenedValue:  1,
-			OfficeApps:     []string{"Excel"},
-			OfficeVersions: standardOfficeVersions},
-
-		OfficeRegistryRegExSingleDWORD{
-			RootKey:        registry.CURRENT_USER,
-			PathRegEx:      pathRegExOptions,
-			ValueName:      "Options",
-			HardenedValue:  0x117,
-			OfficeApps:     []string{"Excel"},
-			OfficeVersions: standardOfficeVersions},
-
-		OfficeRegistryRegExSingleDWORD{
-			RootKey:        registry.CURRENT_USER,
-			PathRegEx:      pathRegExSecurity,
-			ValueName:      "WorkbookLinkWarnings",
-			HardenedValue:  2,
-			OfficeApps:     []string{"Excel"},
-			OfficeVersions: standardOfficeVersions},
-	},
-
-	ArraySingleDWORD: []RegistrySingleValueDWORD{
-		RegistrySingleValueDWORD{
-			RootKey:       registry.CURRENT_USER,
-			Path:          pathWord2007,
-			ValueName:     "fNoCalclinksOnopen_90_1",
-			HardenedValue: 1},
-	},
-}
-
-func (regValue *OfficeDDEType) harden(harden bool) {
-	for _, officePart := range OfficeDDE.ArrayRegExDWORD {
-		officePart.harden(harden)
-	}
-	for _, officePart := range OfficeDDE.ArraySingleDWORD {
-		officePart.harden(harden)
-	}
-}
-
-func (regValue *OfficeDDEType) isHardened() (isHardened bool) {
+func (officeRegEx OfficeRegistryRegExSingleDWORD) isHardened() bool {
 	var hardened = true
 
-	for _, officePart := range OfficeDDE.ArrayRegExDWORD {
-		if !officePart.isHardened() {
-			hardened = false
+	for _, officeVersion := range officeRegEx.OfficeVersions {
+		for _, officeApp := range officeRegEx.OfficeApps {
+			path := fmt.Sprintf(officeRegEx.PathRegEx, officeVersion, officeApp)
+			key, err := registry.OpenKey(officeRegEx.RootKey, path, registry.READ)
+			if err == nil {
+				currentValue, _, err := key.GetIntegerValue(officeRegEx.ValueName)
+				if err == nil {
+					if uint32(currentValue) != officeRegEx.HardenedValue {
+						hardened = false
+					}
+				} else {
+					hardened = false
+				}
+			} else {
+				hardened = false
+			}
+			key.Close()
 		}
 	}
-	for _, officePart := range OfficeDDE.ArraySingleDWORD {
-		if !officePart.isHardened() {
-			hardened = false
-		}
-	}
-
 	return hardened
+}
+
+func (officeRegEx OfficeRegistryRegExSingleDWORD) name() string {
+	return officeRegEx.shortName
 }

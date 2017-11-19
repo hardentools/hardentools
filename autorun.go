@@ -32,16 +32,21 @@ var Autorun = RegistryMultiValue{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "NoDriveTypeAutoRun",
-			HardenedValue: 0xb5},
+			HardenedValue: 0xb5,
+			shortName:     "Autorun_NoDriveTypeAutoRun"},
 
 		RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "NoAutorun",
-			HardenedValue: 1},
+			HardenedValue: 1,
+			shortName:     "Autorun_NoAutorung"},
 
 		RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers",
 			ValueName:     "DisableAutoplay",
-			HardenedValue: 1}}}
+			HardenedValue: 1,
+			shortName:     "Autorun_Autplay"}},
+	shortName: "Autorun",
+}
