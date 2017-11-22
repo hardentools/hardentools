@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-var WSH = RegistrySingleValueDWORD{
+var WSH = &RegistrySingleValueDWORD{
 	RootKey:       registry.CURRENT_USER,
 	Path:          "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
 	ValueName:     "Enabled",

@@ -45,7 +45,7 @@ type OfficeRegistryRegExSingleDWORD struct {
 // 0 - No prompt from Office when user clicks, object executes
 // 1 - Prompt from Office when user clicks, object executes
 // 2 - No prompt, Object does not execute
-var OfficeOLE = OfficeRegistryRegExSingleDWORD{
+var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
 	RootKey:        registry.CURRENT_USER,
 	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
 	ValueName:      "PackagerPrompt",
@@ -59,7 +59,7 @@ var OfficeOLE = OfficeRegistryRegExSingleDWORD{
 // 2 - Disable with notification
 // 3 - Digitally signed only
 // 4 - Disable all
-var OfficeMacros = OfficeRegistryRegExSingleDWORD{
+var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
 	RootKey:        registry.CURRENT_USER,
 	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
 	ValueName:      "VBAWarnings",
@@ -69,7 +69,7 @@ var OfficeMacros = OfficeRegistryRegExSingleDWORD{
 	shortName:      "OfficeMacros"}
 
 // Office ActiveX
-var OfficeActiveX = RegistrySingleValueDWORD{
+var OfficeActiveX = &RegistrySingleValueDWORD{
 	RootKey:       registry.CURRENT_USER,
 	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
 	ValueName:     "DisableAllActiveX",
@@ -99,9 +99,9 @@ var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
 var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
 var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
 
-var OfficeDDE = MultiHardenInterfaces{
+var OfficeDDE = &MultiHardenInterfaces{
 	HardenInterfaces: []HardenInterface{
-		OfficeRegistryRegExSingleDWORD{
+		&OfficeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     pathRegExOptions,
 			ValueName:     "DontUpdateLinks",
@@ -114,7 +114,7 @@ var OfficeDDE = MultiHardenInterfaces{
 			},
 			shortName: "OfficeDDE_DontUpdateLinksWordExcel"},
 
-		OfficeRegistryRegExSingleDWORD{
+		&OfficeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     pathRegExWordMail,
 			ValueName:     "DontUpdateLinks",
@@ -127,7 +127,7 @@ var OfficeDDE = MultiHardenInterfaces{
 			},
 			shortName: "OfficeDDE_DontUpdateLinksWordMail"},
 
-		OfficeRegistryRegExSingleDWORD{
+		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExOptions,
 			ValueName:      "DDEAllowed",
@@ -136,7 +136,7 @@ var OfficeDDE = MultiHardenInterfaces{
 			OfficeVersions: standardOfficeVersions,
 			shortName:      "OfficeDDE_DDEAllowedExcel"},
 
-		OfficeRegistryRegExSingleDWORD{
+		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExOptions,
 			ValueName:      "DDECleaned",
@@ -145,7 +145,7 @@ var OfficeDDE = MultiHardenInterfaces{
 			OfficeVersions: standardOfficeVersions,
 			shortName:      "OfficeDDE_DDECleanedExcel"},
 
-		OfficeRegistryRegExSingleDWORD{
+		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExOptions,
 			ValueName:      "Options",
@@ -154,7 +154,7 @@ var OfficeDDE = MultiHardenInterfaces{
 			OfficeVersions: standardOfficeVersions,
 			shortName:      "OfficeDDE_OptionsExcel"},
 
-		OfficeRegistryRegExSingleDWORD{
+		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExSecurity,
 			ValueName:      "WorkbookLinkWarnings",
@@ -163,7 +163,7 @@ var OfficeDDE = MultiHardenInterfaces{
 			OfficeVersions: standardOfficeVersions,
 			shortName:      "OfficeDDE_WorkbookLinksExcel"},
 
-		RegistrySingleValueDWORD{
+		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          pathWord2007,
 			ValueName:     "fNoCalclinksOnopen_90_1",

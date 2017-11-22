@@ -25,12 +25,12 @@ type PowerShellDisallowRunMembers struct {
 	shortName string
 }
 
-var PowerShell = MultiHardenInterfaces{
+var PowerShell = &MultiHardenInterfaces{
 	shortName: "PowerShell",
 	HardenInterfaces: []HardenInterface{
 		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers"},
 
-		RegistrySingleValueDWORD{
+		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "DisallowRun",

@@ -29,7 +29,7 @@ type MultiHardenInterfaces struct {
 	shortName        string
 }
 
-func (mhInterfaces MultiHardenInterfaces) harden(harden bool) error {
+func (mhInterfaces *MultiHardenInterfaces) harden(harden bool) error {
 	for _, mhInterface := range mhInterfaces.HardenInterfaces {
 		err := mhInterface.harden(harden)
 		if err != nil {
@@ -39,7 +39,7 @@ func (mhInterfaces MultiHardenInterfaces) harden(harden bool) error {
 	return nil
 }
 
-func (mhInterfaces MultiHardenInterfaces) isHardened() bool {
+func (mhInterfaces *MultiHardenInterfaces) isHardened() bool {
 	var hardened = true
 
 	for _, mhInterface := range mhInterfaces.HardenInterfaces {
@@ -51,7 +51,7 @@ func (mhInterfaces MultiHardenInterfaces) isHardened() bool {
 	return hardened
 }
 
-func (mhInterfaces MultiHardenInterfaces) name() string {
+func (mhInterfaces *MultiHardenInterfaces) name() string {
 	return mhInterfaces.shortName
 }
 

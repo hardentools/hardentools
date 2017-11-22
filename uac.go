@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-var UAC = RegistrySingleValueDWORD{
+var UAC = &RegistrySingleValueDWORD{
 	RootKey:       registry.LOCAL_MACHINE,
 	Path:          "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
 	ValueName:     "ConsentPromptBehaviorAdmin",

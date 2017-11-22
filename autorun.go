@@ -26,23 +26,23 @@ import (
 // - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
 // - HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
 
-var Autorun = RegistryMultiValue{
-	ArraySingleDWORD: []RegistrySingleValueDWORD{
-		RegistrySingleValueDWORD{
+var Autorun = &RegistryMultiValue{
+	ArraySingleDWORD: []*RegistrySingleValueDWORD{
+		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "NoDriveTypeAutoRun",
 			HardenedValue: 0xb5,
 			shortName:     "Autorun_NoDriveTypeAutoRun"},
 
-		RegistrySingleValueDWORD{
+		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "NoAutorun",
 			HardenedValue: 1,
 			shortName:     "Autorun_NoAutorung"},
 
-		RegistrySingleValueDWORD{
+		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers",
 			ValueName:     "DisableAutoplay",

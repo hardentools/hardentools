@@ -32,12 +32,12 @@ type RegistrySingleValueDWORD struct {
 }
 
 type RegistryMultiValue struct {
-	ArraySingleDWORD []RegistrySingleValueDWORD
+	ArraySingleDWORD []*RegistrySingleValueDWORD
 	shortName        string
 }
 
 // harden RegistrySingleValueDWORD helper method
-func (regValue RegistrySingleValueDWORD) harden(harden bool) error {
+func (regValue *RegistrySingleValueDWORD) harden(harden bool) error {
 	key, _, err := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
 	defer key.Close()
 
@@ -62,7 +62,7 @@ func (regValue RegistrySingleValueDWORD) harden(harden bool) error {
 }
 
 // verify if RegistrySingleValueDWORD is already hardened (helper method)
-func (regValue RegistrySingleValueDWORD) isHardened() bool {
+func (regValue *RegistrySingleValueDWORD) isHardened() bool {
 	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
 
 	if err == nil {
@@ -76,7 +76,7 @@ func (regValue RegistrySingleValueDWORD) isHardened() bool {
 	return false
 }
 
-func (regValue RegistrySingleValueDWORD) name() string {
+func (regValue *RegistrySingleValueDWORD) name() string {
 	return regValue.shortName
 }
 
@@ -90,7 +90,7 @@ func (regMultiValue RegistryMultiValue) harden(harden bool) error {
 	return nil
 }
 
-func (regMultiValue RegistryMultiValue) isHardened() (isHardened bool) {
+func (regMultiValue *RegistryMultiValue) isHardened() (isHardened bool) {
 	var hardened = true
 
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
@@ -102,7 +102,7 @@ func (regMultiValue RegistryMultiValue) isHardened() (isHardened bool) {
 	return hardened
 }
 
-func (regMultiValue RegistryMultiValue) name() string {
+func (regMultiValue *RegistryMultiValue) name() string {
 	return regMultiValue.shortName
 }
 

@@ -39,7 +39,7 @@ type AdobeRegistryRegExSingleDWORD struct {
 // bEnableJS possible values:
 // 0 - Disable AcroJS
 // 1 - Enable AcroJS
-var AdobePDFJS = AdobeRegistryRegExSingleDWORD{
+var AdobePDFJS = &AdobeRegistryRegExSingleDWORD{
 	RootKey:       registry.CURRENT_USER,
 	PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs",
 	ValueName:     "bEnableJS",
@@ -52,14 +52,14 @@ var AdobePDFJS = AdobeRegistryRegExSingleDWORD{
 // the opening of non-PDF documents
 var AdobePDFObjects = &MultiHardenInterfaces{
 	HardenInterfaces: []HardenInterface{
-		AdobeRegistryRegExSingleDWORD{
+		&AdobeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals",
 			ValueName:     "bAllowOpenFile",
 			HardenedValue: 0,
 			AdobeVersions: standardAdobeVersions,
 			shortName:     "AdobePDFObjects_bAllowOpenFile"},
-		AdobeRegistryRegExSingleDWORD{
+		&AdobeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals",
 			ValueName:     "bSecureOpenFile",
@@ -74,7 +74,7 @@ var AdobePDFObjects = &MultiHardenInterfaces{
 // (HKEY_LOCAL_USER\Software\Adobe\Acrobat Reader<version>\Privileged -> DWORD „bProtectedMode“)
 // 0 - Disable Protected Mode
 // 1 - Enable Protected Mode
-var AdobePDFProtectedMode = AdobeRegistryRegExSingleDWORD{
+var AdobePDFProtectedMode = &AdobeRegistryRegExSingleDWORD{
 	RootKey:       registry.CURRENT_USER,
 	PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Privileged",
 	ValueName:     "bProtectedMode",
@@ -86,7 +86,7 @@ var AdobePDFProtectedMode = AdobeRegistryRegExSingleDWORD{
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\<version>\TrustManager -> iProtectedView)
 // 0 - Disable Protected View
 // 1 - Enable Protected View
-var AdobePDFProtectedView = AdobeRegistryRegExSingleDWORD{
+var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
 	RootKey:       registry.CURRENT_USER,
 	PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
 	ValueName:     "iProtectedView",
@@ -100,14 +100,14 @@ var AdobePDFProtectedView = AdobeRegistryRegExSingleDWORD{
 var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 	shortName: "AdobePDFEnhancedSecurity",
 	HardenInterfaces: []HardenInterface{
-		AdobeRegistryRegExSingleDWORD{
+		&AdobeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
 			ValueName:     "bEnhancedSecurityInBrowser",
 			HardenedValue: 1,
 			AdobeVersions: standardAdobeVersions,
 			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityInBrowser"},
-		AdobeRegistryRegExSingleDWORD{
+		&AdobeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
 			ValueName:     "bEnhancedSecurityStandalone",
@@ -119,7 +119,7 @@ var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
-func (adobeRegEx AdobeRegistryRegExSingleDWORD) harden(harden bool) error {
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) harden(harden bool) error {
 	if harden {
 		// Harden.
 		for _, adobeVersion := range adobeRegEx.AdobeVersions {
@@ -145,7 +145,7 @@ func (adobeRegEx AdobeRegistryRegExSingleDWORD) harden(harden bool) error {
 	return nil
 }
 
-func (adobeRegEx AdobeRegistryRegExSingleDWORD) isHardened() bool {
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) isHardened() bool {
 	var hardened = true
 
 	for _, adobeVersion := range adobeRegEx.AdobeVersions {
@@ -168,6 +168,6 @@ func (adobeRegEx AdobeRegistryRegExSingleDWORD) isHardened() bool {
 	return hardened
 }
 
-func (adobeRegEx AdobeRegistryRegExSingleDWORD) name() string {
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) name() string {
 	return adobeRegEx.shortName
 }
