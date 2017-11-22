@@ -64,6 +64,7 @@ func checkStatus() bool {
 	if err != nil {
 		return false
 	}
+	defer key.Close()
 
 	value, _, err := key.GetIntegerValue("Harden")
 	if err != nil {
@@ -82,6 +83,7 @@ func markStatus(hardened bool) {
 	if err != nil {
 		panic(err)
 	}
+	defer key.Close()
 
 	if hardened {
 		key.SetDWordValue("Harden", 1)
