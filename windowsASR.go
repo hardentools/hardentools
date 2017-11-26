@@ -21,43 +21,90 @@ package main
 //# Set-MpPreference -AttackSurfaceReductionRules_Ids <rule ID 1>,<rule ID 2>,<rule ID 3>,<rule ID 4> -AttackSurfaceReductionRules_Actions Enabled, Enabled, Disabled, AuditMode
 
 import (
+	"fmt"
 	"golang.org/x/sys/windows/registry"
+	"os/exec"
 	"strings"
 )
 
+var ruleIDs = []string{
+	//Block executable content from email client and webmail
+	"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550",
+	//Block Office applications from creating child processes
+	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A",
+	// Block Office applications from creating executable content
+	"3B576869-A4EC-4529-8536-B80A7769E899",
+	// Block Office applications from injecting code into other processes
+	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84",
+	// Block JavaScript or VBScript from launching downloaded executable content
+	"D3E037E1-3EB8-44C8-A917-57927947596D",
+	// Block execution of potentially obfuscated scripts
+	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC",
+	// Block Win32 API calls from Office macro
+	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B",
+}
+
 // data type for a RegEx Path / Single Value DWORD combination
-type WindowsASR struct {
+type WindowsASRStruct struct {
 	shortName   string
 	displayName string
 }
 
+var WindowsASR = &WindowsASRStruct{
+	shortName:   "WindowsASR",
+	displayName: "Windows ASR (ab Win 10/1709)",
+}
+
 //// HardenInterface methods
 
-func (asr WindowsASR) harden(harden bool) error {
+func (asr WindowsASRStruct) harden(harden bool) error {
 	if harden {
 		// harden
-
+		fmt.Println("Test")
+		if checkWindowsVersion() {
+			for _, ruleID := range ruleIDs {
+				psString := fmt.Sprintf("\"Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions Enabled\"", ruleID)
+				fmt.Println("Executing: ", psString)
+				_, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
+				if err != nil {
+					fmt.Println("Executing ", psString, " failed")
+					return err
+				}
+			}
+		} else {
+			fmt.Println("Not hardening Windows ASR, since Windows it too old (need at least Windows 10 - 1709)")
+		}
 	} else {
 		// restore
+		if checkWindowsVersion() {
 
+		} else {
+			fmt.Println("Not restoring Windows ASR, since Windows it too old (need at least Windows 10 - 1709")
+		}
 	}
 
 	return nil
 }
 
-func (asr WindowsASR) isHardened() bool {
+func (asr WindowsASRStruct) isHardened() bool {
 	var hardened = false
+
+	if checkWindowsVersion() {
+
+	} else {
+		fmt.Println("Windows ASR can not be hardened, since Windows it too old (need at least Windows 10 - 1709")
+		return false
+	}
 
 	return hardened
 }
 
-func (asr WindowsASR) name() string {
+func (asr WindowsASRStruct) name() string {
 	return asr.shortName
 }
 
 func checkWindowsVersion() bool {
-
-	k, err := registry.OpenKey(registry.LOCAL_MACHINE, `SOFTWARE\Microsoft\Windows NT\CurrentVersion`, registry.QUERY_VALUE)
+	k, err := registry.OpenKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", registry.QUERY_VALUE)
 	if err != nil {
 		return false
 	}
@@ -65,7 +112,7 @@ func checkWindowsVersion() bool {
 
 	maj, _, err := k.GetIntegerValue("CurrentMajorVersionNumber")
 	if err != nil {
-		log.Fatal(err)
+		return false
 	}
 	if maj < 10 {
 		return false
@@ -73,7 +120,7 @@ func checkWindowsVersion() bool {
 
 	min, _, err := k.GetIntegerValue("CurrentMinorVersionNumber")
 	if err != nil {
-		log.Fatal(err)
+		return false
 	}
 	if min < 0 {
 		return false
@@ -81,9 +128,9 @@ func checkWindowsVersion() bool {
 
 	cb, _, err := k.GetStringValue("CurrentBuild")
 	if err != nil {
-		log.Fatal(err)
+		return false
 	}
-	if cb < 15254 {
+	if strings.Compare(cb, "15254") < 0 {
 		return false
 	}
 
