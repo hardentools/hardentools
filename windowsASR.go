@@ -41,7 +41,7 @@ const ruleIDEnumeration =
 	// Block execution of potentially obfuscated scripts
 	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC," +
 	// Block Win32 API calls from Office macro
-	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B,"
+	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B"
 const enabledEnumeration = "Enabled,Enabled,Enabled,Enabled,Enabled,Enabled,Enabled"
 
 // data type for a RegEx Path / Single Value DWORD combination
@@ -62,9 +62,13 @@ func (asr WindowsASRStruct) harden(harden bool) error {
 		// harden
 		fmt.Println("Test")
 		if checkWindowsVersion() {
-			psString := fmt.Sprintf("\"Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s\"", ruleIDEnumeration, enabledEnumeration)
-			fmt.Println("Executing: ", psString)
-			_, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
+			// TODO: this command seems correct already
+			psString := fmt.Sprintf("{Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s}", ruleIDEnumeration, enabledEnumeration)
+			fmt.Println("Executing: PowerShell.exe -Command ", psString)
+
+			// TODO: executing the above command this way doesn't seem to work!"
+			out, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
+			fmt.Println(" output = ", string(out[:]))
 			if err != nil {
 				fmt.Println("Executing ", psString, " failed")
 				return err
