@@ -27,22 +27,22 @@ import (
 	"strings"
 )
 
-var ruleIDs = []string{
-	//Block executable content from email client and webmail
-	"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550",
+const ruleIDEnumeration =
+//Block executable content from email client and webmail
+"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550," +
 	//Block Office applications from creating child processes
-	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A",
+	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A," +
 	// Block Office applications from creating executable content
-	"3B576869-A4EC-4529-8536-B80A7769E899",
+	"3B576869-A4EC-4529-8536-B80A7769E899," +
 	// Block Office applications from injecting code into other processes
-	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84",
+	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84," +
 	// Block JavaScript or VBScript from launching downloaded executable content
-	"D3E037E1-3EB8-44C8-A917-57927947596D",
+	"D3E037E1-3EB8-44C8-A917-57927947596D," +
 	// Block execution of potentially obfuscated scripts
-	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC",
+	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC," +
 	// Block Win32 API calls from Office macro
-	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B",
-}
+	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B,"
+const enabledEnumeration = "Enabled,Enabled,Enabled,Enabled,Enabled,Enabled,Enabled"
 
 // data type for a RegEx Path / Single Value DWORD combination
 type WindowsASRStruct struct {
@@ -62,14 +62,12 @@ func (asr WindowsASRStruct) harden(harden bool) error {
 		// harden
 		fmt.Println("Test")
 		if checkWindowsVersion() {
-			for _, ruleID := range ruleIDs {
-				psString := fmt.Sprintf("\"Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions Enabled\"", ruleID)
-				fmt.Println("Executing: ", psString)
-				_, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
-				if err != nil {
-					fmt.Println("Executing ", psString, " failed")
-					return err
-				}
+			psString := fmt.Sprintf("\"Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s\"", ruleIDEnumeration, enabledEnumeration)
+			fmt.Println("Executing: ", psString)
+			_, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
+			if err != nil {
+				fmt.Println("Executing ", psString, " failed")
+				return err
 			}
 		} else {
 			fmt.Println("Not hardening Windows ASR, since Windows it too old (need at least Windows 10 - 1709)")
