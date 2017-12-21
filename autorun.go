@@ -49,4 +49,5 @@ var Autorun = &RegistryMultiValue{
 			HardenedValue: 1,
 			shortName:     "Autorun_Autplay"}},
 	shortName: "Autorun",
+	longName:  "AutoRun and AutoPlay",
 }

@@ -25,4 +25,6 @@ var WSH = &RegistrySingleValueDWORD{
 	Path:          "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
 	ValueName:     "Enabled",
 	HardenedValue: 0,
-	shortName:     "WSH"}
+	shortName:     "WSH",
+	longName:      "Windows Script Host",
+	description:   "Windows Script Host"}

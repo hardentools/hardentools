@@ -22,13 +22,17 @@ import (
 )
 
 type PowerShellDisallowRunMembers struct {
-	shortName string
+	shortName   string
+	longName    string
+	description string
 }
 
 var PowerShell = &MultiHardenInterfaces{
-	shortName: "PowerShell",
-	HardenInterfaces: []HardenInterface{
-		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers"},
+	shortName:   "PowerShell",
+	longName:    "Powershell and cmd.exe",
+	description: "Disables Powershell, Powershell ISE and cmd.exe",
+	hardenInterfaces: []HardenInterface{
+		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers"},
 
 		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
@@ -46,7 +50,7 @@ var PowerShell = &MultiHardenInterfaces{
 //  "1"="powershell_ise.exe"
 //  "2"="powershell.exe"
 //  "3"="cmd.exe"
-func (pwShell PowerShellDisallowRunMembers) harden(harden bool) error {
+func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
 		//events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
@@ -105,7 +109,7 @@ func (pwShell PowerShellDisallowRunMembers) harden(harden bool) error {
 	return nil
 }
 
-func (pwShell PowerShellDisallowRunMembers) isHardened() bool {
+func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 	var (
 		powerShellIseFound, powerShellFound, cmdExeFound bool = false, false, false
 	)
@@ -136,6 +140,14 @@ func (pwShell PowerShellDisallowRunMembers) isHardened() bool {
 	return false
 }
 
-func (pwShell PowerShellDisallowRunMembers) name() string {
+func (pwShell PowerShellDisallowRunMembers) Name() string {
 	return pwShell.shortName
+}
+
+func (pwShell PowerShellDisallowRunMembers) LongName() string {
+	return pwShell.longName
+}
+
+func (pwShell PowerShellDisallowRunMembers) Description() string {
+	return pwShell.description
 }

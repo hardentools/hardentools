@@ -18,20 +18,24 @@ package main
 
 // Generale interface which should be used for every harden subject
 type HardenInterface interface {
-	isHardened() bool  // returns true if harden subject is already completely hardened
-	harden(bool) error // hardens the harden subject if parameter is true, restores it if parameter is false
-	name() string      // returns short name
+	IsHardened() bool    // returns true if harden subject is already completely hardened
+	Harden(bool) error   // hardens the harden subject if parameter is true, restores it if parameter is false
+	Name() string        // returns short name
+	LongName() string    // returns long name
+	Description() string // returns description
 }
 
 // type for array of HardenInterfaces
 type MultiHardenInterfaces struct {
-	HardenInterfaces []HardenInterface
+	hardenInterfaces []HardenInterface
 	shortName        string
+	longName         string
+	description      string
 }
 
-func (mhInterfaces *MultiHardenInterfaces) harden(harden bool) error {
-	for _, mhInterface := range mhInterfaces.HardenInterfaces {
-		err := mhInterface.harden(harden)
+func (mhInterfaces *MultiHardenInterfaces) Harden(harden bool) error {
+	for _, mhInterface := range mhInterfaces.hardenInterfaces {
+		err := mhInterface.Harden(harden)
 		if err != nil {
 			return err
 		}
@@ -39,11 +43,11 @@ func (mhInterfaces *MultiHardenInterfaces) harden(harden bool) error {
 	return nil
 }
 
-func (mhInterfaces *MultiHardenInterfaces) isHardened() bool {
+func (mhInterfaces *MultiHardenInterfaces) IsHardened() bool {
 	var hardened = true
 
-	for _, mhInterface := range mhInterfaces.HardenInterfaces {
-		if !mhInterface.isHardened() {
+	for _, mhInterface := range mhInterfaces.hardenInterfaces {
+		if !mhInterface.IsHardened() {
 			hardened = false
 		}
 	}
@@ -51,8 +55,16 @@ func (mhInterfaces *MultiHardenInterfaces) isHardened() bool {
 	return hardened
 }
 
-func (mhInterfaces *MultiHardenInterfaces) name() string {
+func (mhInterfaces *MultiHardenInterfaces) Name() string {
 	return mhInterfaces.shortName
+}
+
+func (mhInterfaces *MultiHardenInterfaces) LongName() string {
+	return mhInterfaces.longName
+}
+
+func (mhInterfaces *MultiHardenInterfaces) Description() string {
+	return mhInterfaces.description
 }
 
 // error handling

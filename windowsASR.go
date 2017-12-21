@@ -47,17 +47,19 @@ const enabledEnumeration = "Enabled,Enabled,Enabled,Enabled,Enabled,Enabled,Enab
 // data type for a RegEx Path / Single Value DWORD combination
 type WindowsASRStruct struct {
 	shortName   string
-	displayName string
+	longName    string
+	description string
 }
 
 var WindowsASR = &WindowsASRStruct{
 	shortName:   "WindowsASR",
-	displayName: "Windows ASR (ab Win 10/1709)",
+	longName:    "Windows ASR (needs Win 10/1709)",
+	description: "Windows Attack Surface Reduction (ASR) (needs Win 10/1709)",
 }
 
 //// HardenInterface methods
 
-func (asr WindowsASRStruct) harden(harden bool) error {
+func (asr WindowsASRStruct) Harden(harden bool) error {
 	if harden {
 		// harden
 		fmt.Println("Test")
@@ -88,7 +90,7 @@ func (asr WindowsASRStruct) harden(harden bool) error {
 	return nil
 }
 
-func (asr WindowsASRStruct) isHardened() bool {
+func (asr WindowsASRStruct) IsHardened() bool {
 	var hardened = false
 
 	if checkWindowsVersion() {
@@ -101,8 +103,16 @@ func (asr WindowsASRStruct) isHardened() bool {
 	return hardened
 }
 
-func (asr WindowsASRStruct) name() string {
+func (asr WindowsASRStruct) Name() string {
 	return asr.shortName
+}
+
+func (asr WindowsASRStruct) LongName() string {
+	return asr.longName
+}
+
+func (asr WindowsASRStruct) Description() string {
+	return asr.description
 }
 
 func checkWindowsVersion() bool {

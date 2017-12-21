@@ -39,6 +39,8 @@ type OfficeRegistryRegExSingleDWORD struct {
 	OfficeApps     []string
 	OfficeVersions []string
 	shortName      string
+	longName       string
+	description    string
 }
 
 //// Office Packager Objects
@@ -52,7 +54,8 @@ var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
 	HardenedValue:  2,
 	OfficeApps:     standardOfficeApps,
 	OfficeVersions: standardOfficeVersions,
-	shortName:      "OfficeOLE"}
+	shortName:      "OfficeOLE",
+	longName:       "Office Packager Objects (OLE)"}
 
 //// Office Macros
 // 1 - Enable all
@@ -66,7 +69,8 @@ var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
 	HardenedValue:  4,
 	OfficeApps:     standardOfficeApps,
 	OfficeVersions: standardOfficeVersions,
-	shortName:      "OfficeMacros"}
+	shortName:      "OfficeMacros",
+	longName:       "Office Macros"}
 
 // Office ActiveX
 var OfficeActiveX = &RegistrySingleValueDWORD{
@@ -74,7 +78,8 @@ var OfficeActiveX = &RegistrySingleValueDWORD{
 	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
 	ValueName:     "DisableAllActiveX",
 	HardenedValue: 1,
-	shortName:     "OfficeActiveX"}
+	shortName:     "OfficeActiveX",
+	longName:      "Office ActiveX"}
 
 //// DDE Mitigations for Word, Outlook and Excel
 // Doesn't harden OneNote for now (due to high impact).
@@ -100,7 +105,7 @@ var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
 var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
 
 var OfficeDDE = &MultiHardenInterfaces{
-	HardenInterfaces: []HardenInterface{
+	hardenInterfaces: []HardenInterface{
 		&OfficeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     pathRegExOptions,
@@ -171,11 +176,12 @@ var OfficeDDE = &MultiHardenInterfaces{
 			shortName:     "OfficeDDE_Word2007"},
 	},
 	shortName: "OfficeDDE",
+	longName:  "Office DDE  Links",
 }
 
 //// HardenInterface methods
 
-func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) error {
+func (regValue OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	if harden {
 		// harden
 		for _, officeVersion := range regValue.OfficeVersions {
@@ -205,7 +211,7 @@ func (regValue OfficeRegistryRegExSingleDWORD) harden(harden bool) error {
 	return nil
 }
 
-func (officeRegEx OfficeRegistryRegExSingleDWORD) isHardened() bool {
+func (officeRegEx OfficeRegistryRegExSingleDWORD) IsHardened() bool {
 	var hardened = true
 
 	for _, officeVersion := range officeRegEx.OfficeVersions {
@@ -230,6 +236,14 @@ func (officeRegEx OfficeRegistryRegExSingleDWORD) isHardened() bool {
 	return hardened
 }
 
-func (officeRegEx OfficeRegistryRegExSingleDWORD) name() string {
+func (officeRegEx OfficeRegistryRegExSingleDWORD) Name() string {
 	return officeRegEx.shortName
+}
+
+func (officeRegEx OfficeRegistryRegExSingleDWORD) LongName() string {
+	return officeRegEx.longName
+}
+
+func (officeRegEx OfficeRegistryRegExSingleDWORD) Description() string {
+	return officeRegEx.description
 }

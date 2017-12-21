@@ -25,4 +25,5 @@ var UAC = &RegistrySingleValueDWORD{
 	Path:          "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
 	ValueName:     "ConsentPromptBehaviorAdmin",
 	HardenedValue: 2,
-	shortName:     "UAC"}
+	shortName:     "UAC",
+	longName:      "UAC Prompt"}

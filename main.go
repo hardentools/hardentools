@@ -48,6 +48,8 @@ var allHardenSubjects = []HardenInterface{
 	UAC,
 	// Explorer.
 	FileAssociations,
+	// Windows 10 / 1709 ASR
+	//WindowsASR,
 }
 
 var expertConfig map[string]bool
@@ -116,14 +118,14 @@ func triggerAll(harden bool) {
 	}
 
 	for _, hardenSubject := range allHardenSubjects {
-		if expertConfig[hardenSubject.name()] == true {
-			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.name()))
+		if expertConfig[hardenSubject.Name()] == true {
+			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.Name()))
 
-			err := hardenSubject.harden(harden)
+			err := hardenSubject.Harden(harden)
 
 			if err != nil {
-				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.name()))
-				fmt.Println(fmt.Sprintf("Error for operation %s:", hardenSubject.name()), err, "\n")
+				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.Name()))
+				fmt.Println(fmt.Sprintf("Error for operation %s:", hardenSubject.Name()), err, "\n")
 			}
 		}
 	}
@@ -138,10 +140,10 @@ func triggerAll(harden bool) {
 
 func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
-		if hardenSubject.isHardened() {
-			events.AppendText(fmt.Sprintf("%s is now hardened\n", hardenSubject.name()))
+		if hardenSubject.IsHardened() {
+			events.AppendText(fmt.Sprintf("%s is now hardened\n", hardenSubject.Name()))
 		} else {
-			events.AppendText(fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.name()))
+			events.AppendText(fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.Name()))
 		}
 	}
 }
@@ -165,20 +167,20 @@ func main() {
 	var checkBoxArray = make([]*walk.CheckBox, len(allHardenSubjects))
 
 	for i, hardenSubject := range allHardenSubjects {
-		var subjectIsHardened = hardenSubject.isHardened()
+		var subjectIsHardened = hardenSubject.IsHardened()
 
 		if status == false {
-			expertConfig[hardenSubject.name()] = true // all checkboxes enabled by default in case of hardening
+			expertConfig[hardenSubject.Name()] = true // all checkboxes enabled by default in case of hardening
 		} else {
-			expertConfig[hardenSubject.name()] = subjectIsHardened // only checkboxes enabled which are hardenend
+			expertConfig[hardenSubject.Name()] = subjectIsHardened // only checkboxes enabled which are hardenend
 		}
 
 		expertCompWidgetArray[i] = CheckBox{
 			AssignTo:         &checkBoxArray[i],
-			Name:             hardenSubject.name(),
-			Text:             hardenSubject.name(),
-			Checked:          expertConfig[hardenSubject.name()],
-			OnCheckedChanged: walk.EventHandler(checkBoxEventGenerator(i, hardenSubject.name())),
+			Name:             hardenSubject.Name(),
+			Text:             hardenSubject.LongName(),
+			Checked:          expertConfig[hardenSubject.Name()],
+			OnCheckedChanged: walk.EventHandler(checkBoxEventGenerator(i, hardenSubject.Name())),
 			Enabled:          !(status && !subjectIsHardened) || !status,
 		}
 	}
