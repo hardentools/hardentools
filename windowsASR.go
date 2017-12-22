@@ -23,6 +23,7 @@ package main
 import (
 	"fmt"
 	"golang.org/x/sys/windows/registry"
+	"io"
 	"os/exec"
 	"strings"
 )
@@ -65,12 +66,16 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 		fmt.Println("Test")
 		if checkWindowsVersion() {
 			// TODO: this command seems correct already
-			psString := fmt.Sprintf("{Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s}", ruleIDEnumeration, enabledEnumeration)
+			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, enabledEnumeration)
 			fmt.Println("Executing: PowerShell.exe -Command ", psString)
 
 			// TODO: executing the above command this way doesn't seem to work!"
-			out, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
-			fmt.Println(" output = ", string(out[:]))
+			_, stdout, stderr, err := StartProcess("PowerShell.exe", "-Command", psString)
+			//out, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
+			fmt.Println(" stdout = ", stdout)
+			//fmt.Println(" stdin = ", stdin)
+			fmt.Println(" stderr = ", stderr)
+			fmt.Println(" error = ", err)
 			if err != nil {
 				fmt.Println("Executing ", psString, " failed")
 				return err
@@ -81,7 +86,7 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 	} else {
 		// restore
 		if checkWindowsVersion() {
-
+			// TODO
 		} else {
 			fmt.Println("Not restoring Windows ASR, since Windows it too old (need at least Windows 10 - 1709")
 		}
@@ -94,7 +99,7 @@ func (asr WindowsASRStruct) IsHardened() bool {
 	var hardened = false
 
 	if checkWindowsVersion() {
-
+		// TODO
 	} else {
 		fmt.Println("Windows ASR can not be hardened, since Windows it too old (need at least Windows 10 - 1709")
 		return false
@@ -147,4 +152,55 @@ func checkWindowsVersion() bool {
 	}
 
 	return true
+}
+
+// from https://github.com/gorillalabs/go-powershell/blob/master/backend/local.go
+// MIT Licence:
+// Copyright (c) 2017, Gorillalabs
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+// http://www.opensource.org/licenses/MIT
+func StartProcess(cmd string, args ...string) (io.Writer, io.Reader, io.Reader, error) {
+	command := exec.Command(cmd, args...)
+
+	stdin, err := command.StdinPipe()
+	if err != nil {
+		return nil, nil, nil, HardenError{"Could not get hold of the PowerShell's stdin stream"}
+	}
+
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		return nil, nil, nil, HardenError{"Could not get hold of the PowerShell's stdout stream"}
+	}
+
+	stderr, err := command.StderrPipe()
+	if err != nil {
+		return nil, nil, nil, HardenError{"Could not get hold of the PowerShell's stderr stream"}
+	}
+
+	err = command.Start()
+	if err != nil {
+		return nil, nil, nil, HardenError{"Could not spawn PowerShell process"}
+	}
+
+	err = command.Wait()
+
+	return stdin, stdout, stderr, err
 }

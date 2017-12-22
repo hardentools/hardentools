@@ -43,8 +43,10 @@ type Extension struct {
 }
 
 type ExplorerAssociations struct {
-	extensions []Extension
-	shortName  string
+	extensions  []Extension
+	shortName   string
+	longName    string
+	description string
 }
 
 var FileAssociations = ExplorerAssociations{
@@ -60,9 +62,10 @@ var FileAssociations = ExplorerAssociations{
 		{".VBE", "VBEFile"},
 		{".pif", "piffile"}},
 	shortName: "FileAssociations",
+	longName:  "File associations",
 }
 
-func (explAssoc ExplorerAssociations) harden(harden bool) error {
+func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	if harden == false {
 		//events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
 		var lastError error = nil
@@ -122,7 +125,7 @@ func (explAssoc ExplorerAssociations) harden(harden bool) error {
 
 // this returns hardened, if only one extension is hardened (to prevent
 // restore from not beeing executed)
-func (explAssoc ExplorerAssociations) isHardened() (isHardened bool) {
+func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 	var hardened bool = false
 
 	for _, extension := range explAssoc.extensions {
@@ -154,6 +157,14 @@ func (explAssoc ExplorerAssociations) isHardened() (isHardened bool) {
 	return hardened
 }
 
-func (explAssoc ExplorerAssociations) name() string {
+func (explAssoc ExplorerAssociations) Name() string {
 	return explAssoc.shortName
+}
+
+func (explAssoc ExplorerAssociations) LongName() string {
+	return explAssoc.longName
+}
+
+func (explAssoc ExplorerAssociations) Description() string {
+	return explAssoc.description
 }

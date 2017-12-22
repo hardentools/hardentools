@@ -28,7 +28,7 @@ import (
 // be considered
 var allHardenSubjects = []HardenInterface{
 	// WSH.
-	WSH,
+	/*WSH,
 	// Office.
 	OfficeOLE,
 	OfficeMacros,
@@ -47,9 +47,9 @@ var allHardenSubjects = []HardenInterface{
 	// UAC.
 	UAC,
 	// Explorer.
-	FileAssociations,
+	FileAssociations,*/
 	// Windows 10 / 1709 ASR
-	//WindowsASR,
+	WindowsASR,
 }
 
 var expertConfig map[string]bool
