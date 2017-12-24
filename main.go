@@ -18,17 +18,18 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"golang.org/x/sys/windows/registry"
-	"os"
 )
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
 var allHardenSubjects = []HardenInterface{
 	// WSH.
-	/*WSH,
+	WSH,
 	// Office.
 	OfficeOLE,
 	OfficeMacros,
@@ -47,9 +48,9 @@ var allHardenSubjects = []HardenInterface{
 	// UAC.
 	UAC,
 	// Explorer.
-	FileAssociations,*/
+	FileAssociations,
 	// Windows 10 / 1709 ASR
-	WindowsASR,
+	//WindowsASR,
 }
 
 var expertConfig map[string]bool
