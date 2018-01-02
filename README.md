@@ -22,8 +22,6 @@ Then, you will see the main Hardentools window. It's very simple, you just click
 
 In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Restore" button. Similarly, click it and wait for the modifications to be reverted.
 
-In the future, we will create the ability to select or deselect certain modifications Hardentools is configured to make.
-
 **Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
 ## What this tool does NOT
