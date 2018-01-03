@@ -20,19 +20,10 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func triggerUAC(harden bool) {
-	keyName := "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
-	key, _ := registry.OpenKey(registry.LOCAL_MACHINE, keyName, registry.ALL_ACCESS)
-	valueName := "ConsentPromptBehaviorAdmin"
-
-	if harden == false {
-		events.AppendText("Restoring original UAC settings\n")
-		restoreKey(key, keyName, valueName)
-	} else {
-		events.AppendText("Hardening by setting UAC to prompt for consent on secure desktops\n")
-		saveOriginalRegistryDWORD(key, keyName, valueName)
-		key.SetDWordValue(valueName, 2)
-	}
-
-	key.Close()
-}
+var UAC = &RegistrySingleValueDWORD{
+	RootKey:       registry.LOCAL_MACHINE,
+	Path:          "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+	ValueName:     "ConsentPromptBehaviorAdmin",
+	HardenedValue: 2,
+	shortName:     "UAC",
+	longName:      "UAC Prompt"}

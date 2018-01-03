@@ -17,37 +17,44 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"golang.org/x/sys/windows/registry"
-	"os"
 )
 
-type ExpertConfig struct {
+// allHardenSubjects contains all top level harden subjects that should
+// be considered
+var allHardenSubjects = []HardenInterface{
 	// WSH.
-	WSH bool
+	WSH,
 	// Office.
-	OfficeOLE     bool
-	OfficeMacros  bool
-	OfficeActiveX bool
-	OfficeDDE     bool
+	OfficeOLE,
+	OfficeMacros,
+	OfficeActiveX,
+	OfficeDDE,
 	// PDF.
-	PDFJS               bool
-	PDFObjects          bool
-	PDFProtectedMode    bool
-	PDFProtectedView    bool
-	PDFEnhancedSecurity bool
+	AdobePDFJS,
+	AdobePDFObjects,
+	AdobePDFProtectedMode,
+	AdobePDFProtectedView,
+	AdobePDFEnhancedSecurity,
 	// Autorun.
-	Autorun bool
+	Autorun,
 	// PowerShell.
-	PowerShell bool
+	PowerShell,
 	// UAC.
-	UAC bool
+	UAC,
 	// Explorer.
-	FileAssociations bool
+	FileAssociations,
+	// Windows 10 / 1709 ASR
+	//WindowsASR,
 }
 
-var expertConfig = &ExpertConfig{true, true, true, true, true, true, true, true, true, true, true, true, true, true}
+var expertConfig map[string]bool
+var expertCompWidgetArray []Widget
 
 var window *walk.MainWindow
 var events *walk.TextEdit
@@ -60,6 +67,7 @@ func checkStatus() bool {
 	if err != nil {
 		return false
 	}
+	defer key.Close()
 
 	value, _, err := key.GetIntegerValue("Harden")
 	if err != nil {
@@ -78,6 +86,7 @@ func markStatus(hardened bool) {
 	if err != nil {
 		panic(err)
 	}
+	defer key.Close()
 
 	if hardened {
 		key.SetDWordValue("Harden", 1)
@@ -103,65 +112,81 @@ func restoreAll() {
 }
 
 func triggerAll(harden bool) {
-	//events.AppendText("expertConfig = "+expertConfig)
-	// WSH.
-	if expertConfig.WSH {
-		triggerWSH(harden)
-	}
-	// Office.
-	if expertConfig.OfficeOLE {
-		triggerOfficeOLE(harden)
-	}
-	if expertConfig.OfficeMacros {
-		triggerOfficeMacros(harden)
-	}
-	if expertConfig.OfficeActiveX {
-		triggerOfficeActiveX(harden)
-	}
-	if expertConfig.OfficeDDE {
-		triggerOfficeDDE(harden)
-	}
-	// PDF.
-	if expertConfig.PDFJS {
-		triggerPDFJS(harden)
-	}
-	if expertConfig.PDFObjects {
-		triggerPDFObjects(harden)
-	}
-	if expertConfig.PDFProtectedMode {
-		triggerPDFProtectedMode(harden)
-	}
-	if expertConfig.PDFProtectedView {
-		triggerPDFProtectedView(harden)
-	}
-	if expertConfig.PDFEnhancedSecurity {
-		triggerPDFEnhancedSecurity(harden)
-	}
-	// Autorun.
-	if expertConfig.Autorun {
-		triggerAutorun(harden)
-	}
-	// PowerShell.
-	if expertConfig.PowerShell {
-		triggerPowerShell(harden)
-	}
-	// UAC.
-	if expertConfig.UAC {
-		triggerUAC(harden)
-	}
-	// Explorer.
-	if expertConfig.FileAssociations {
-		triggerFileAssociation(harden)
+	if harden {
+		events.AppendText("Now we are hardening ")
+	} else {
+		events.AppendText("Now we are restoring ")
 	}
 
+	for _, hardenSubject := range allHardenSubjects {
+		if expertConfig[hardenSubject.Name()] == true {
+			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.Name()))
+
+			err := hardenSubject.Harden(harden)
+
+			if err != nil {
+				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.Name()))
+				fmt.Println(fmt.Sprintf("Error for operation %s:", hardenSubject.Name()), err, "\n")
+			}
+		}
+	}
+
+	events.AppendText("\n")
+
 	progress.SetValue(100)
+
+	showStatus()
+
+}
+
+func showStatus() {
+	for _, hardenSubject := range allHardenSubjects {
+		if hardenSubject.IsHardened() {
+			events.AppendText(fmt.Sprintf("%s is now hardened\n", hardenSubject.Name()))
+		} else {
+			events.AppendText(fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.Name()))
+		}
+	}
 }
 
 func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
+	var status = checkStatus()
 
-	if checkStatus() == false {
+	/// TEST
+	/*	err := ShellExecute("runas", "notepad.exe", "/help")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error running program: %v\n", err)
+			os.Exit(1)
+		}*/
+	// Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun
+
+	// build up expert settings checkboxes and map
+	expertConfig = make(map[string]bool)
+	expertCompWidgetArray = make([]Widget, len(allHardenSubjects))
+	var checkBoxArray = make([]*walk.CheckBox, len(allHardenSubjects))
+
+	for i, hardenSubject := range allHardenSubjects {
+		var subjectIsHardened = hardenSubject.IsHardened()
+
+		if status == false {
+			expertConfig[hardenSubject.Name()] = true // all checkboxes enabled by default in case of hardening
+		} else {
+			expertConfig[hardenSubject.Name()] = subjectIsHardened // only checkboxes enabled which are hardenend
+		}
+
+		expertCompWidgetArray[i] = CheckBox{
+			AssignTo:         &checkBoxArray[i],
+			Name:             hardenSubject.Name(),
+			Text:             hardenSubject.LongName(),
+			Checked:          expertConfig[hardenSubject.Name()],
+			OnCheckedChanged: walk.EventHandler(checkBoxEventGenerator(i, hardenSubject.Name())),
+			Enabled:          !(status && !subjectIsHardened) || !status,
+		}
+	}
+
+	if status == false {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
@@ -174,7 +199,7 @@ func main() {
 	MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{600, 500},
+		MinSize:  Size{500, 600},
 		Layout:   VBox{},
 		DataBinder: DataBinder{
 			DataSource: expertConfig,
@@ -199,83 +224,25 @@ func main() {
 			HSpacer{},
 			Label{Text: "Expert Settings - change only if you now what you are doing!"},
 			Composite{
-				Layout: Grid{Columns: 3},
-				Border: true,
-				Children: []Widget{
-					CheckBox{
-						Name:    "wshCB",
-						Text:    "Windows Script Host",
-						Checked: Bind("WSH"),
-					},
-					CheckBox{
-						Name:    "officeOleCB",
-						Text:    "Office Packager Objects (OLE)",
-						Checked: Bind("OfficeOLE"),
-					},
-					CheckBox{
-						Name:    "OfficeMacros",
-						Text:    "Office Macros",
-						Checked: Bind("OfficeMacros"),
-					},
-					CheckBox{
-						Name:    "OfficeActiveX",
-						Text:    "Office ActiveX",
-						Checked: Bind("OfficeActiveX"),
-					},
-					CheckBox{
-						Name:    "OfficeDDE",
-						Text:    "Office DDE  Links",
-						Checked: Bind("OfficeDDE"),
-					},
-					CheckBox{
-						Name:    "PDFJS",
-						Text:    "Acrobat Reader JavaScript",
-						Checked: Bind("PDFJS"),
-					},
-					CheckBox{
-						Name:    "PDFObjects",
-						Text:    "Acrobat Reader Embedded Objects",
-						Checked: Bind("PDFObjects"),
-					},
-					CheckBox{
-						Name:    "PDFProtectedMode",
-						Text:    "Acrobat Reader ProtectedMode",
-						Checked: Bind("PDFProtectedMode"),
-					},
-					CheckBox{
-						Name:    "PDFProtectedView",
-						Text:    "Acrobat Reader ProtectedView",
-						Checked: Bind("PDFProtectedView"),
-					},
-					CheckBox{
-						Name:    "PDFEnhancedSecurity",
-						Text:    "Acrobat Reader Enhanced Security",
-						Checked: Bind("PDFEnhancedSecurity"),
-					},
-					CheckBox{
-						Name:    "Autorun",
-						Text:    "AutoRun and AutoPlay",
-						Checked: Bind("Autorun"),
-					},
-					CheckBox{
-						Name:    "UAC",
-						Text:    "UAC Prompt",
-						Checked: Bind("UAC"),
-					},
-					CheckBox{
-						Name:    "FileAssociations",
-						Text:    "File associations",
-						Checked: Bind("FileAssociations"),
-					},
-					CheckBox{
-						Name:    "PowerShell",
-						Text:    "Powershell and cmd",
-						Checked: Bind("PowerShell"),
-					},
-				},
+				Layout:   Grid{Columns: 3},
+				Border:   true,
+				Children: expertCompWidgetArray,
 			},
 		},
 	}.Create()
 
 	window.Run()
+}
+
+// generates a function that is used as an walk.EventHandler for the expert CheckBoxes
+func checkBoxEventGenerator(n int, hardenSubjName string) func() {
+	var i = n
+	var hardenSubjectName = hardenSubjName
+	return func() {
+		fmt.Print("checkboxstatuschanged: ", i, " ", hardenSubjectName)
+		x := *(expertCompWidgetArray[i]).(CheckBox).AssignTo
+		isChecked := x.CheckState()
+		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
+		fmt.Println(" expertConfig = ", expertConfig[hardenSubjectName])
+	}
 }

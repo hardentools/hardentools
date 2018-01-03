@@ -21,134 +21,173 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-var adobeVersions = []string{
+var standardAdobeVersions = []string{
 	"DC", // Acrobat Reader DC
 	"XI", // Acrobat Reader XI
 }
 
-func _hardenAdobe(pathRegEx string, valueName string, value uint32) {
-	for _, adobeVersion := range adobeVersions {
-		path := fmt.Sprintf(pathRegEx, adobeVersion)
-		key, _, _ := registry.CreateKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
-
-		saveOriginalRegistryDWORD(key, path, valueName)
-
-		key.SetDWordValue(valueName, value)
-		key.Close()
-	}
-}
-
-func _restoreAdobe(pathRegEx string, valueName string) {
-	for _, adobeVersion := range adobeVersions {
-		path := fmt.Sprintf(pathRegEx, adobeVersion)
-		key, _ := registry.OpenKey(registry.CURRENT_USER, path, registry.ALL_ACCESS)
-
-		restoreKey(key, path, valueName)
-		key.Close()
-	}
+// data type for a RegEx Path / Single Value DWORD combination
+type AdobeRegistryRegExSingleDWORD struct {
+	RootKey       registry.Key
+	PathRegEx     string
+	ValueName     string
+	HardenedValue uint32
+	AdobeVersions []string
+	shortName     string
+	longName      string
+	description   string
 }
 
 // bEnableJS possible values:
 // 0 - Disable AcroJS
 // 1 - Enable AcroJS
-
-func triggerPDFJS(harden bool) {
-	var value uint32
-	var valueName = "bEnableJS"
-	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs"
-
-	if harden == false {
-		events.AppendText("Restoring original settings for Acrobat Reader JavaScript\n")
-		_restoreAdobe(pathRegEx, valueName)
-	} else {
-		events.AppendText("Hardening by disabling Acrobat Reader JavaScript\n")
-		value = 0 // Disable AcroJS
-		_hardenAdobe(pathRegEx, valueName, value)
-	}
-}
+var AdobePDFJS = &AdobeRegistryRegExSingleDWORD{
+	RootKey:       registry.CURRENT_USER,
+	PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\JSPrefs",
+	ValueName:     "bEnableJS",
+	HardenedValue: 0, // Disable AcroJS
+	AdobeVersions: standardAdobeVersions,
+	shortName:     "AdobePDFJS",
+	longName:      "Acrobat Reader JavaScript",
+	description:   "Disables Acrobat Reader JavaScript"}
 
 // bAllowOpenFile set to 0 and
 // bSecureOpenFile set to 1 to disable
 // the opening of non-PDF documents
-
-func triggerPDFObjects(harden bool) {
-	var allowValue uint32
-	var secureValue uint32
-	var allowValueName = "bAllowOpenFile"
-	var secureValueName = "bSecureOpenFile"
-	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals"
-
-	if harden == false {
-		events.AppendText("Restoring original settings for embedded objects in PDFs\n")
-		_restoreAdobe(pathRegEx, allowValueName)
-		_restoreAdobe(pathRegEx, secureValueName)
-	} else {
-		events.AppendText("Hardening by disabling embedded objects in PDFs\n")
-		allowValue = 0
-		secureValue = 1
-		_hardenAdobe(pathRegEx, allowValueName, allowValue)
-		_hardenAdobe(pathRegEx, secureValueName, secureValue)
-	}
+var AdobePDFObjects = &MultiHardenInterfaces{
+	hardenInterfaces: []HardenInterface{
+		&AdobeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals",
+			ValueName:     "bAllowOpenFile",
+			HardenedValue: 0,
+			AdobeVersions: standardAdobeVersions,
+			shortName:     "AdobePDFObjects_bAllowOpenFile"},
+		&AdobeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals",
+			ValueName:     "bSecureOpenFile",
+			HardenedValue: 1,
+			AdobeVersions: standardAdobeVersions,
+			shortName:     "AdobePDFObjects_bSecureOpenFile"},
+	},
+	shortName:   "AdobePDFObjects",
+	longName:    "Acrobat Reader Embedded Objects",
+	description: "Disables Acrobat Reader embedded objects",
 }
 
 // Switch on the Protected Mode setting under "Security (Enhanced)" (enabled by default in current versions)
 // (HKEY_LOCAL_USER\Software\Adobe\Acrobat Reader<version>\Privileged -> DWORD „bProtectedMode“)
 // 0 - Disable Protected Mode
 // 1 - Enable Protected Mode
-
-func triggerPDFProtectedMode(harden bool) {
-	var value uint32
-	var valueName = "bProtectedMode"
-	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Privileged"
-
-	if harden == false {
-		events.AppendText("Restoring original settings for Acrobat Reader Protected Mode\n")
-		_restoreAdobe(pathRegEx, valueName)
-	} else {
-		events.AppendText("Hardening by enabling Acrobat Reader Protected Mode\n")
-		value = 1
-		_hardenAdobe(pathRegEx, valueName, value)
-	}
-}
+var AdobePDFProtectedMode = &AdobeRegistryRegExSingleDWORD{
+	RootKey:       registry.CURRENT_USER,
+	PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Privileged",
+	ValueName:     "bProtectedMode",
+	HardenedValue: 1,
+	AdobeVersions: standardAdobeVersions,
+	shortName:     "AdobePDFProtectedMode",
+	longName:      "Acrobat Reader Protected Mode",
+	description:   "Enables Acrobat Reader Protected Mode"}
 
 // Switch on Protected View for all files from untrusted sources
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\<version>\TrustManager -> iProtectedView)
 // 0 - Disable Protected View
 // 1 - Enable Protected View
-
-func triggerPDFProtectedView(harden bool) {
-	var value uint32
-	var valueName = "iProtectedView"
-	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager"
-
-	if harden == false {
-		events.AppendText("Restoring original settings for Acrobat Reader Protected View\n")
-		_restoreAdobe(pathRegEx, valueName)
-	} else {
-		events.AppendText("Hardening by enabling Acrobat Reader Protected View\n")
-		value = 1
-		_hardenAdobe(pathRegEx, valueName, value)
-	}
-}
+var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
+	RootKey:       registry.CURRENT_USER,
+	PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
+	ValueName:     "iProtectedView",
+	HardenedValue: 1,
+	AdobeVersions: standardAdobeVersions,
+	shortName:     "AdobePDFProtectedView",
+	longName:      "Acrobat Reader Protected View",
+	description:   "Enables Acrobat Reader Protected View"}
 
 // Switch on Enhanced Security setting under "Security (Enhanced)"
 // (enabled by default in current versions)
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\DC\TrustManager -> bEnhancedSecurityInBrowser = 1 & bEnhancedSecurityStandalone = 1)
+var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
+	shortName:   "AdobePDFEnhancedSecurity",
+	longName:    "Acrobat Reader Enhanced Security",
+	description: "Enables Acrobat Reader Enhanced Security",
+	hardenInterfaces: []HardenInterface{
+		&AdobeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
+			ValueName:     "bEnhancedSecurityInBrowser",
+			HardenedValue: 1,
+			AdobeVersions: standardAdobeVersions,
+			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityInBrowser"},
+		&AdobeRegistryRegExSingleDWORD{
+			RootKey:       registry.CURRENT_USER,
+			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
+			ValueName:     "bEnhancedSecurityStandalone",
+			HardenedValue: 1,
+			AdobeVersions: standardAdobeVersions,
+			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityStandalone"},
+	},
+}
 
-func triggerPDFEnhancedSecurity(harden bool) {
-	var value uint32
-	var valueName = "bEnhancedSecurityInBrowser"
-	var valueName2 = "bEnhancedSecurityStandalone"
-	var pathRegEx = "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager"
+//// HardenInterface methods
 
-	if harden == false {
-		events.AppendText("Restoring original settings for Acrobat Reader Enhanced Security\n")
-		_restoreAdobe(pathRegEx, valueName)
-		_restoreAdobe(pathRegEx, valueName2)
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
+	if harden {
+		// Harden.
+		for _, adobeVersion := range adobeRegEx.AdobeVersions {
+			path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
+			key, _, _ := registry.CreateKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
+
+			saveOriginalRegistryDWORD(key, path, adobeRegEx.ValueName)
+
+			key.SetDWordValue(adobeRegEx.ValueName, adobeRegEx.HardenedValue)
+			key.Close()
+		}
 	} else {
-		events.AppendText("Hardening by enabling Acrobat Reader Enhanced Security\n")
-		value = 1
-		_hardenAdobe(pathRegEx, valueName, value)
-		_hardenAdobe(pathRegEx, valueName2, value)
+		// Restore.
+		for _, adobeVersion := range adobeRegEx.AdobeVersions {
+			path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
+			key, _ := registry.OpenKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
+
+			restoreKey(key, path, adobeRegEx.ValueName)
+			key.Close()
+		}
 	}
+
+	return nil
+}
+
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
+	var hardened = true
+
+	for _, adobeVersion := range adobeRegEx.AdobeVersions {
+		path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
+		key, err := registry.OpenKey(adobeRegEx.RootKey, path, registry.READ)
+		if err == nil {
+			currentValue, _, err := key.GetIntegerValue(adobeRegEx.ValueName)
+			if err == nil {
+				if uint32(currentValue) != adobeRegEx.HardenedValue {
+					hardened = false
+				}
+			} else {
+				hardened = false
+			}
+		} else {
+			hardened = false
+		}
+		key.Close()
+	}
+	return hardened
+}
+
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Name() string {
+	return adobeRegEx.shortName
+}
+
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) LongName() string {
+	return adobeRegEx.longName
+}
+
+func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Description() string {
+	return adobeRegEx.description
 }
