@@ -16,33 +16,34 @@
 
 package main
 
-//# https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
-//# https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/enable-attack-surface-reduction
-//# Set-MpPreference -AttackSurfaceReductionRules_Ids <rule ID 1>,<rule ID 2>,<rule ID 3>,<rule ID 4> -AttackSurfaceReductionRules_Actions Enabled, Enabled, Disabled, AuditMode
+/**
+Windows Defender Attack Surface Reduction (ASR)
+needs Windows 10 >= 1709
+
+More details here:
+	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
+	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/enable-attack-surface-reduction
+	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction
+
+	One can use the "ExploitGuard ASR test tool" or https://demo.wd.microsoft.com/?ocid=cx-wddocs-testground from Microsoft (see third link) to verify that ASR is working
+*/
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows/registry"
-	"io"
 	"os/exec"
 	"strings"
+
+	"golang.org/x/sys/windows/registry"
 )
 
-const ruleIDEnumeration =
-//Block executable content from email client and webmail
-"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550," +
-	//Block Office applications from creating child processes
-	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A," +
-	// Block Office applications from creating executable content
-	"3B576869-A4EC-4529-8536-B80A7769E899," +
-	// Block Office applications from injecting code into other processes
-	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84," +
-	// Block JavaScript or VBScript from launching downloaded executable content
-	"D3E037E1-3EB8-44C8-A917-57927947596D," +
-	// Block execution of potentially obfuscated scripts
-	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC," +
-	// Block Win32 API calls from Office macro
-	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B"
+const ruleIDEnumeration = "BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550," + //Block executable content from email client and webmail
+	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A," + //Block Office applications from creating child processes
+	"3B576869-A4EC-4529-8536-B80A7769E899," + // Block Office applications from creating executable content
+	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84," + // Block Office applications from injecting code into other processes
+	"D3E037E1-3EB8-44C8-A917-57927947596D," + // Block JavaScript or VBScript from launching downloaded executable content
+	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC," + // Block execution of potentially obfuscated scripts
+	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B" // Block Win32 API calls from Office macro
+
 const enabledEnumeration = "Enabled,Enabled,Enabled,Enabled,Enabled,Enabled,Enabled"
 
 // data type for a RegEx Path / Single Value DWORD combination
@@ -65,17 +66,10 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 		// harden
 		fmt.Println("Test")
 		if checkWindowsVersion() {
-			// TODO: this command seems correct already
 			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, enabledEnumeration)
 			fmt.Println("Executing: PowerShell.exe -Command ", psString)
-
-			// TODO: executing the above command this way doesn't seem to work!"
-			_, stdout, stderr, err := StartProcess("PowerShell.exe", "-Command", psString)
-			//out, err := exec.Command("PowerShell.exe", "-Command", psString).Output()
-			fmt.Println(" stdout = ", stdout)
-			//fmt.Println(" stdin = ", stdin)
-			fmt.Println(" stderr = ", stderr)
-			fmt.Println(" error = ", err)
+			output, err := executeCommand("PowerShell.exe", "-Command", psString)
+			fmt.Print(output)
 			if err != nil {
 				fmt.Println("Executing ", psString, " failed")
 				return err
@@ -86,7 +80,16 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 	} else {
 		// restore
 		if checkWindowsVersion() {
-			// TODO
+			// This is how we switch off ASR again:
+			//   Remove-MpPreference -AttackSurfaceReductionRules_Ids <ID1>, <ID2>, ...
+			psString := fmt.Sprintf("Remove-MpPreference -AttackSurfaceReductionRules_Ids %s", ruleIDEnumeration)
+			fmt.Println("Executing: PowerShell.exe -Command ", psString)
+			output, err := executeCommand("PowerShell.exe", "-Command", psString)
+			fmt.Print(output)
+			if err != nil {
+				fmt.Println("Executing ", psString, " failed")
+				return err
+			}
 		} else {
 			fmt.Println("Not restoring Windows ASR, since Windows it too old (need at least Windows 10 - 1709")
 		}
@@ -100,6 +103,66 @@ func (asr WindowsASRStruct) IsHardened() bool {
 
 	if checkWindowsVersion() {
 		// TODO
+
+		// call "$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids"
+		psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
+		fmt.Println("Executing: PowerShell.exe -Command ", psString)
+		ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+		fmt.Print(ruleIDsOut)
+		if err != nil {
+			fmt.Println("Executing ", psString, " failed")
+			return false
+		}
+
+		// call "$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions"
+		psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
+		fmt.Println("Executing: PowerShell.exe -Command ", psString)
+		ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+		fmt.Print(ruleActionsOut)
+		if err != nil {
+			fmt.Println("Executing ", psString, " failed")
+			return false
+		}
+
+		// verify if all relevant ruleIDs are there
+		ruleIDs := strings.Split(ruleIDsOut, "\r\n")
+		ruleActions := strings.Split(ruleActionsOut, "\r\n")
+
+		for i, ruleID := range ruleIDs {
+			if len(ruleID) > 0 {
+				fmt.Printf("ruleID %d = %s with action = %s\n", i, ruleID, ruleActions[i])
+			}
+		}
+
+		return true // just fo testing, needs to be removed
+
+		/* Unmodifed State in Windows 10 / 1709:
+			   PS> Get-MpPreference
+			    AttackSurfaceReductionOnlyExclusions          :
+			    AttackSurfaceReductionRules_Actions           :
+			    AttackSurfaceReductionRules_Ids               :
+
+		      Modified State:
+			    PS > $prefs = Get-MpPreference
+				PS > $prefs.AttackSurfaceReductionOnlyExclusions
+				PS > $prefs.AttackSurfaceReductionRules_Actions
+					1
+					1
+					1
+					1
+					1
+					1
+					1
+				PS > $prefs.AttackSurfaceReductionRules_Ids
+					3B576869-A4EC-4529-8536-B80A7769E899
+					5BEB7EFE-FD9A-4556-801D-275E5FFC04CC
+					75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
+					92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B
+					BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550
+					D3E037E1-3EB8-44C8-A917-57927947596D
+					D4F940AB-401B-4EFC-AADC-AD5F3C50688A
+		*/
+
 	} else {
 		fmt.Println("Windows ASR can not be hardened, since Windows it too old (need at least Windows 10 - 1709")
 		return false
@@ -154,53 +217,10 @@ func checkWindowsVersion() bool {
 	return true
 }
 
-// from https://github.com/gorillalabs/go-powershell/blob/master/backend/local.go
-// MIT Licence:
-// Copyright (c) 2017, Gorillalabs
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-// http://www.opensource.org/licenses/MIT
-func StartProcess(cmd string, args ...string) (io.Writer, io.Reader, io.Reader, error) {
+func executeCommand(cmd string, args ...string) (string, error) {
+	var out []byte
 	command := exec.Command(cmd, args...)
+	out, err := command.CombinedOutput()
 
-	stdin, err := command.StdinPipe()
-	if err != nil {
-		return nil, nil, nil, HardenError{"Could not get hold of the PowerShell's stdin stream"}
-	}
-
-	stdout, err := command.StdoutPipe()
-	if err != nil {
-		return nil, nil, nil, HardenError{"Could not get hold of the PowerShell's stdout stream"}
-	}
-
-	stderr, err := command.StderrPipe()
-	if err != nil {
-		return nil, nil, nil, HardenError{"Could not get hold of the PowerShell's stderr stream"}
-	}
-
-	err = command.Start()
-	if err != nil {
-		return nil, nil, nil, HardenError{"Could not spawn PowerShell process"}
-	}
-
-	err = command.Wait()
-
-	return stdin, stdout, stderr, err
+	return string(out), err
 }
