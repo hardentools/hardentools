@@ -50,7 +50,7 @@ var allHardenSubjects = []HardenInterface{
 	// Explorer.
 	FileAssociations,
 	// Windows 10 / 1709 ASR
-	//WindowsASR,
+	WindowsASR,
 }
 
 var expertConfig map[string]bool
