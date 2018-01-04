@@ -49,6 +49,7 @@ var allHardenSubjects = []HardenInterface{
 	UAC,
 	// Explorer.
 	FileAssociations,
+	ShowFileExt,
 	// Windows 10 / 1709 ASR
 	WindowsASR,
 }
