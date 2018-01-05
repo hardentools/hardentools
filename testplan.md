@@ -5,63 +5,78 @@
 ## Generic Windows Features
 
 ### Disable Windows Script Host
-What it does:
-
+#### What it does:
 Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
-Test:
-
+#### Test:
 Create .js and .vbs file with some arbitrary text (or valid code) and try to execute them.
 
-Expected result before hardening:
-
+**Expected result before hardening:**
 Script is executed or runtime error due to malformed script is shown
 
-Expected result after hardening:
-
+**Expected result after hardening:**
 There should appear a "Windows Script Host" dialog that says that WSH is deactivated.
 
 ### Disabling AutoRun and AutoPlay
-What it does:
-
+#### What it does:
 Disables AutoRun / AutoPlay for all devices. For example, this should prevent applicatons from automatically executing when you plug a USB stick into your computer.
 
 #### Test AutoRun:
 Create autorun.inf on USB Stick that executes a arbitrary executable on the stick. Plug in USB Stick.
 
-Expected result before hardening:
-
+**Expected result before hardening:**
 Depending on the Windows version nothing happens (AutoRun is disabled by default)
 or the executable is started or the executable is an option in the AutoPlay dialog (see below)
 
-Expected result after hardening:
-
+**Expected result after hardening:**
 No dialog appears, no explorer windows opens, no executable starts.
 The stick can only be accessed by opening it manuallys.
 
 #### Test AutoPlay:
 Plugin an USB Stick that has no autorun.inf in the base directory.
 
-Expected result before hardening:
-
+**Expected result before hardening:**
 An AutoPlay windows is opened automatically that asks the user what he wants to do (open explorer, import pictures, ...). Depending on the settings also an explorer windows might appear automatically (without AutoPLay window)
 
-Expected result after hardening:
-
+**Expected result after hardening:**
 No dialog appears, no explorer windows opens.
 The stick can only be accessed by opening it manuallys.
 
+### Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer
+#### What it does:
+You will not be able to use the terminal by starting cmd.exe and it should prevent the use of PowerShell by malicious code trying to infect the system.
+
+#### Test:
+Open every one of the following executables from explorer or Windows Start Menu:
+- powershell.exe (32 and 64 bit versions if available)
+- powershell_ise.exe (32 and 64 bit versions if available)
+- cmd.exe
+
+**Expected result before hardening:**
+Executables starts
+
+**Expected result after hardening:**
+Nothing happens (windows doesn't react on mouse click)
+
+
+### Disable file extensions mainly used for malicious purposes
+#### What it does:
+Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
+
+#### Test:
+Create a file for every extension mentioned above (with the extension, empty text file is sufficient)
+
+**Expected result before hardening:**
+The file is shown in explorer with the appropriate icon for its extension. Upon starting the file, it is tried to open the file (corresponding error message is shown if it is not of the appropriate file type).
+
+**Expected result after hardening:**
+The file is shown in explorer with only the empty icon for unknown file types. Upon starting the file a dialog is presented which program to use.
 
 
 ### TODO from here on
 
-
-
-- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. You will not be able to use the terminal and it should prevent the use of PowerShell by malicious code trying to infect the system.
-
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
-- **Disable file extensions mainly used for malicious purposes**. Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
 - **Shows file extensions and hidden files in explorer**.
 
