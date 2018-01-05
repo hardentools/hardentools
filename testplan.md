@@ -32,7 +32,7 @@ Create autorun.inf on USB Stick that executes a arbitrary executable on the stic
 Expected result before hardening:
 
 Depending on the Windows version nothing happens (AutoRun is disabled by default)
-or the executable is started
+or the executable is started or the executable is an option in the AutoPlay dialog (see below)
 
 Expected result after hardening:
 
