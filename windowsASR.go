@@ -48,7 +48,7 @@ var ruleIDEnumeration = strings.Join(ruleIdArray, ",")
 var actionsArray = []string{"Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled"}
 var actionsEnumeration = strings.Join(actionsArray, ",")
 
-// data type for a RegEx Path / Single Value DWORD combination
+// struct for HardenInterface implementation
 type WindowsASRStruct struct {
 	shortName   string
 	longName    string
@@ -62,11 +62,15 @@ var WindowsASR = &WindowsASRStruct{
 }
 
 //// HardenInterface methods
-
 func (asr WindowsASRStruct) Harden(harden bool) error {
 	if harden {
 		// harden (but only if we have at least Windows 10 - 1709)
 		if checkWindowsVersion() {
+			// TODO: Better use Add-MpPreference (if there is already configuration
+			//  existing? Then we would have to check what settings are present
+			//  and change / remove them accordingly.
+
+			// Set the settings for AttackSurfaceReduction using Set-MpPreference
 			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, actionsEnumeration)
 			_, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
@@ -93,14 +97,12 @@ func (asr WindowsASRStruct) IsHardened() bool {
 	var hardened = false
 
 	if checkWindowsVersion() {
-		// call "$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids"
 		psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
 		ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
 		if err != nil {
 			return false // in case command does not work we assume we are not hardened
 		}
 
-		// call "$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions"
 		psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
 		ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
 		if err != nil {

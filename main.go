@@ -27,6 +27,7 @@ import (
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
+// Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun, WindowsASR
 var allHardenSubjects = []HardenInterface{
 	// WSH.
 	WSH,
@@ -155,14 +156,6 @@ func main() {
 	var buttonFunc func()
 	var status = checkStatus()
 
-	/// TEST
-	/*	err := ShellExecute("runas", "notepad.exe", "/help")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error running program: %v\n", err)
-			os.Exit(1)
-		}*/
-	// Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun
-
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
 	expertCompWidgetArray = make([]Widget, len(allHardenSubjects))
@@ -174,7 +167,7 @@ func main() {
 		if status == false {
 			expertConfig[hardenSubject.Name()] = true // all checkboxes enabled by default in case of hardening
 		} else {
-			expertConfig[hardenSubject.Name()] = subjectIsHardened // only checkboxes enabled which are hardenend
+			expertConfig[hardenSubject.Name()] = subjectIsHardened // restore: only checkboxes enabled which are hardenend
 		}
 
 		expertCompWidgetArray[i] = CheckBox{
@@ -240,10 +233,8 @@ func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 	var i = n
 	var hardenSubjectName = hardenSubjName
 	return func() {
-		fmt.Print("checkboxstatuschanged: ", i, " ", hardenSubjectName)
 		x := *(expertCompWidgetArray[i]).(CheckBox).AssignTo
 		isChecked := x.CheckState()
 		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
-		fmt.Println(" expertConfig = ", expertConfig[hardenSubjectName])
 	}
 }
