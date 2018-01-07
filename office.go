@@ -18,6 +18,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -181,18 +184,38 @@ var OfficeDDE = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
+// hardens OfficeRegistryRegExSingleDWORD registry values
 func (regValue OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	if harden {
 		// harden
 		for _, officeVersion := range regValue.OfficeVersions {
 			for _, officeApp := range regValue.OfficeApps {
 				path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
-				key, _, _ := registry.CreateKey(regValue.RootKey, path, registry.ALL_ACCESS)
+				err := HardenDwordValue(regValue.RootKey, path, regValue.ValueName, regValue.HardenedValue)
+				if err != nil {
+					return err
+				}
+				/*key, _, err := registry.CreateKey(regValue.RootKey, path, registry.ALL_ACCESS)
+				if err != nil {
+					log.Println("Could not open/create registry key " + path)
+					return err
+				}
+				defer key.Close()
+
 				// Save current state.
-				saveOriginalRegistryDWORD(key, path, regValue.ValueName)
+				err = saveOriginalRegistryDWORD(regValue.RootKey, path, regValue.ValueName)
+				if err != nil {
+					log.Fatal("error during save original registry key")
+					return err
+				}
+
 				// Harden.
-				key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
-				key.Close()
+				log.Println("Hardening registry value " + regValue.ValueName + " = " + strconv.FormatUint(uint64(regValue.HardenedValue), 16))
+				err = key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
+				if err != nil {
+					log.Println("Error when hardening registry value " + regValue.ValueName + " = " + strconv.FormatUint(uint64(regValue.HardenedValue), 16))
+					return err
+				}*/
 			}
 		}
 	} else {
@@ -201,9 +224,14 @@ func (regValue OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 			for _, officeApp := range regValue.OfficeApps {
 				path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
 				key, _ := registry.OpenKey(regValue.RootKey, path, registry.ALL_ACCESS)
+				defer key.Close()
+
 				// restore previous state
-				restoreKey(key, path, regValue.ValueName)
-				key.Close()
+				err := restoreKey(regValue.RootKey, path, regValue.ValueName)
+				if err != nil {
+					log.Println("Error when restoring registry value " + path + "\\" + regValue.ValueName + " = " + strconv.FormatUint(uint64(regValue.HardenedValue), 16))
+					return err
+				}
 			}
 		}
 	}

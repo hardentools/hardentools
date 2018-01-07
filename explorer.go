@@ -18,8 +18,9 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows/registry"
 	"os/exec"
+
+	"golang.org/x/sys/windows/registry"
 )
 
 // What better not to disable:
@@ -92,7 +93,8 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
 			if err != nil {
-				fmt.Println("Info: Open ", regKeyString, "failed")
+				//fmt.Println("Info: Open ", regKeyString, "failed")
+
 				// do not return an error, because it seems to be quite common that this does not exist for different extensions;
 				// just remember this for later
 				openWithProgidsDoesNotExist = true
@@ -103,7 +105,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
 			_, err2 := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err2 != nil {
-				fmt.Println("Executing ", assocString, " failed")
+				//fmt.Println("Executing ", assocString, " failed")
 				return err2
 			}
 
@@ -113,7 +115,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 				for _, valueName := range valueNames {
 					err3 := regKey.DeleteValue(valueName)
 					if err3 != nil {
-						fmt.Println("Removing user association ", valueName, " failed")
+						//fmt.Println("Removing user association ", valueName, " failed")
 						return err3
 					}
 				}
@@ -138,9 +140,9 @@ func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 
 		// Step 1: Check association (system wide default)
 		assocString := fmt.Sprintf("assoc %s", extension.ext)
-		out, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
-		fmt.Print(assocString, " output = ", string(out[:]))
-		fmt.Println("err = ", err)
+		_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		//fmt.Print(assocString, " output = ", string(out[:]))
+		//fmt.Println("err = ", err)
 		if err != nil {
 			hardened = true
 		}

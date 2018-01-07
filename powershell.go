@@ -17,8 +17,10 @@
 package main
 
 import (
-	"golang.org/x/sys/windows/registry"
+	"errors"
 	"strconv"
+
+	"golang.org/x/sys/windows/registry"
 )
 
 type PowerShellDisallowRunMembers struct {
@@ -67,7 +69,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return HardenError{"!! OpenKey to enable Powershell and cmd failed.\n"}
+			return errors.New("!! OpenKey to enable Powershell and cmd failed.\n")
 		}
 		defer keyDisallow.Close()
 
@@ -86,7 +88,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return HardenError{"!! CreateKey to disable powershell failed.\n"}
+			return errors.New("!! CreateKey to disable powershell failed.\n")
 		}
 		defer keyDisallow.Close()
 

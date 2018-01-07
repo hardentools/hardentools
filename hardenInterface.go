@@ -66,12 +66,3 @@ func (mhInterfaces *MultiHardenInterfaces) LongName() string {
 func (mhInterfaces *MultiHardenInterfaces) Description() string {
 	return mhInterfaces.description
 }
-
-// error handling
-type HardenError struct {
-	err string
-}
-
-func (e HardenError) Error() string {
-	return e.err
-}

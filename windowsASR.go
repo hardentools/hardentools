@@ -29,6 +29,7 @@ More details here:
 */
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -74,7 +75,7 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, actionsEnumeration)
 			_, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
-				return HardenError{"!! Executing powershell cmdlet Set-MpPreference failed.\n"}
+				return errors.New("!! Executing powershell cmdlet Set-MpPreference failed.\n")
 			}
 		}
 	} else {
@@ -85,7 +86,7 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			psString := fmt.Sprintf("Remove-MpPreference -AttackSurfaceReductionRules_Ids %s", ruleIDEnumeration)
 			_, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
-				return HardenError{"!! Executing powershell cmdlet Remove-MpPreference failed.\n"}
+				return errors.New("!! Executing powershell cmdlet Remove-MpPreference failed.\n")
 			}
 		}
 	}

@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -136,21 +137,34 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
 		// Harden.
 		for _, adobeVersion := range adobeRegEx.AdobeVersions {
 			path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
-			key, _, _ := registry.CreateKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
+			err := HardenDwordValue(adobeRegEx.RootKey, path, adobeRegEx.ValueName, adobeRegEx.HardenedValue)
+			if err != nil {
+				return err
+			}
+			/*
+				key, _, _ := registry.CreateKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
+				defer key.Close()
 
-			saveOriginalRegistryDWORD(key, path, adobeRegEx.ValueName)
+				err := saveOriginalRegistryDWORD(adobeRegEx.RootKey, path, adobeRegEx.ValueName)
+				if err != nil {
+					return err
+				}
 
-			key.SetDWordValue(adobeRegEx.ValueName, adobeRegEx.HardenedValue)
-			key.Close()
+				err = key.SetDWordValue(adobeRegEx.ValueName, adobeRegEx.HardenedValue)
+				if err != nil {
+					log.Println("Error when hardening registry value " + adobeRegEx.ValueName + " = " + strconv.FormatUint(uint64(adobeRegEx.HardenedValue), 16))
+					return err
+				}*/
 		}
 	} else {
 		// Restore.
 		for _, adobeVersion := range adobeRegEx.AdobeVersions {
 			path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
-			key, _ := registry.OpenKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
 
-			restoreKey(key, path, adobeRegEx.ValueName)
-			key.Close()
+			err := restoreKey(adobeRegEx.RootKey, path, adobeRegEx.ValueName)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
