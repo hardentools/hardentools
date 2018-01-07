@@ -18,6 +18,9 @@ package main
 
 import (
 	"fmt"
+	"io"
+	//	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/lxn/walk"
@@ -63,6 +66,24 @@ var events *walk.TextEdit
 var progress *walk.ProgressBar
 
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
+
+// Loggers for log output (we only need info and trace, errors have to be
+// displayed in the GUI)
+var (
+	Trace *log.Logger
+	Info  *log.Logger
+)
+
+// inits logger
+func InitLogging(traceHandle io.Writer, infoHandle io.Writer) {
+	Trace = log.New(traceHandle,
+		"TRACE: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+
+	Info = log.New(infoHandle,
+		"INFO: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
+}
 
 func checkStatus() bool {
 	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
@@ -125,10 +146,11 @@ func triggerAll(harden bool) {
 			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.Name()))
 
 			err := hardenSubject.Harden(harden)
-
 			if err != nil {
 				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.Name()))
-				fmt.Println(fmt.Sprintf("Error for operation %s:", hardenSubject.Name()), err, "\n")
+				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
+			} else {
+				Info.Printf("Hardening %s has been successful", hardenSubject.Name())
 			}
 		}
 	}
@@ -144,9 +166,13 @@ func triggerAll(harden bool) {
 func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
-			events.AppendText(fmt.Sprintf("%s is now hardened\n", hardenSubject.Name()))
+			eventText := fmt.Sprintf("%s is now hardened\n", hardenSubject.Name())
+			events.AppendText(eventText)
+			Info.Print(eventText)
 		} else {
-			events.AppendText(fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.Name()))
+			eventText := fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.Name())
+			events.AppendText(eventText)
+			Info.Print(eventText)
 		}
 	}
 }
@@ -155,6 +181,10 @@ func main() {
 	var labelText, buttonText, eventsText string
 	var buttonFunc func()
 	var status = checkStatus()
+
+	// Init logging
+	InitLogging(os.Stdout, os.Stdout) // use this for developing/testing
+	//InitLogging(ioutil.Discard, os.Stdout)  // use this for production use
 
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)

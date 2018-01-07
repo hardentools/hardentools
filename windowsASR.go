@@ -63,6 +63,7 @@ var WindowsASR = &WindowsASRStruct{
 }
 
 //// HardenInterface methods
+
 func (asr WindowsASRStruct) Harden(harden bool) error {
 	if harden {
 		// harden (but only if we have at least Windows 10 - 1709)
@@ -94,6 +95,32 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 	return nil
 }
 
+/* Unmodifed State in Windows 10 / 1709:
+	   PS> Get-MpPreference
+	    AttackSurfaceReductionOnlyExclusions          :
+	    AttackSurfaceReductionRules_Actions           :
+	    AttackSurfaceReductionRules_Ids               :
+
+      Modified State:
+	    PS > $prefs = Get-MpPreference
+		PS > $prefs.AttackSurfaceReductionOnlyExclusions
+		PS > $prefs.AttackSurfaceReductionRules_Actions
+			1
+			1
+			1
+			1
+			1
+			1
+			1
+		PS > $prefs.AttackSurfaceReductionRules_Ids
+			3B576869-A4EC-4529-8536-B80A7769E899
+			5BEB7EFE-FD9A-4556-801D-275E5FFC04CC
+			75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
+			92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B
+			BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550
+			D3E037E1-3EB8-44C8-A917-57927947596D
+			D4F940AB-401B-4EFC-AADC-AD5F3C50688A
+*/
 func (asr WindowsASRStruct) IsHardened() bool {
 	var hardened = false
 
@@ -115,12 +142,12 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		currentRuleIDs := strings.Split(ruleIDsOut, "\r\n")
 		currentRuleActions := strings.Split(ruleActionsOut, "\r\n")
 
-		// just some debug
-		/*for i, ruleIDdebug := range currentRuleIDs {
+		// just some debug output
+		for i, ruleIDdebug := range currentRuleIDs {
 			if len(ruleIDdebug) > 0 {
-				fmt.Printf("ruleID %d = %s with action = %s\n", i, ruleIDdebug, currentRuleActions[i])
+				Trace.Printf("ruleID %d = %s with action = %s\n", i, ruleIDdebug, currentRuleActions[i])
 			}
-		}*/
+		}
 
 		// compare to hardened state
 		for i, ruleIdHardened := range ruleIdArray {
@@ -147,34 +174,6 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		}
 
 		return true // seems all relevant hardening is in place
-
-		/* Unmodifed State in Windows 10 / 1709:
-			   PS> Get-MpPreference
-			    AttackSurfaceReductionOnlyExclusions          :
-			    AttackSurfaceReductionRules_Actions           :
-			    AttackSurfaceReductionRules_Ids               :
-
-		      Modified State:
-			    PS > $prefs = Get-MpPreference
-				PS > $prefs.AttackSurfaceReductionOnlyExclusions
-				PS > $prefs.AttackSurfaceReductionRules_Actions
-					1
-					1
-					1
-					1
-					1
-					1
-					1
-				PS > $prefs.AttackSurfaceReductionRules_Ids
-					3B576869-A4EC-4529-8536-B80A7769E899
-					5BEB7EFE-FD9A-4556-801D-275E5FFC04CC
-					75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
-					92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B
-					BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550
-					D3E037E1-3EB8-44C8-A917-57927947596D
-					D4F940AB-401B-4EFC-AADC-AD5F3C50688A
-		*/
-
 	} else {
 		// Windows ASR can not be hardened, since Windows it too old (need at least Windows 10 - 1709)
 		return false

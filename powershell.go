@@ -18,6 +18,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"golang.org/x/sys/windows/registry"
@@ -55,7 +56,6 @@ var PowerShell = &MultiHardenInterfaces{
 func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
-		//events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
 
 		// delete values for disallowed executables (by iterating all existing values)
 		// TODO: This only works if the hardentools values are the last
@@ -67,6 +67,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		//       with the hardentools created ones (it has to be decided
 		//       if this is a bug or a feature
 
+		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
 			return errors.New("!! OpenKey to enable Powershell and cmd failed.\n")
@@ -78,12 +79,17 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 
 			switch value {
 			case "powershell_ise.exe", "powershell.exe", "cmd.exe":
-				keyDisallow.DeleteValue(strconv.Itoa(i))
+				err := keyDisallow.DeleteValue(strconv.Itoa(i))
+				if err != nil {
+					errorText := fmt.Sprintf("Could not restore %s by deleting corresponding registry value due to error: %s", value, err.Error())
+					return errors.New(errorText)
+				} else {
+					Trace.Printf("Restored %s by deleting corresponding registry value", value)
+				}
 			}
 		}
 	} else {
 		// Harden.
-		//events.AppendText("Hardening by disabling Powershell and cmd\n")
 
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
@@ -103,9 +109,20 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		}
 
 		// Set values.
-		keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
-		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
-		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
+		if err != nil {
+			return errors.New("!! Could not disable PowerShell ISE due to error " + err.Error())
+		}
+
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
+		if err != nil {
+			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+		}
+
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
+		if err != nil {
+			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
+		}
 	}
 
 	return nil
@@ -118,6 +135,7 @@ func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 
 	keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.READ)
 	if err != nil {
+		Info.Printf("Could not open registry key Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun due to error %s", err.Error())
 		return false
 	}
 	defer keyDisallow.Close()

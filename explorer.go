@@ -66,16 +66,19 @@ var FileAssociations = ExplorerAssociations{
 	longName:  "File associations",
 }
 
+// Harden/Restore explorer associations
 func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	if harden == false {
-		//events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
+		// Restore.
 		var lastError error = nil
 
 		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
+			// TODO: only reassoc extensions that were also there before hardening
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err != nil {
+				Trace.Println("Error during reassociation of file extension " + extension.ext + ": " + err.Error())
 				lastError = err
 			}
 
@@ -83,17 +86,17 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 		}
 
 		if lastError != nil {
-			return lastError
+			return nil // just return nil for now, since errors are quite normal
+			//return lastError
 		}
 	} else {
-		fmt.Println("Hardening by disabling potentially malicious file associations")
-
+		// Harden.
 		for _, extension := range explAssoc.extensions {
 			var openWithProgidsDoesNotExist bool = false
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
 			if err != nil {
-				//fmt.Println("Info: Open ", regKeyString, "failed")
+				Trace.Println("Could not open: CURRENT_USER\\", regKeyString)
 
 				// do not return an error, because it seems to be quite common that this does not exist for different extensions;
 				// just remember this for later
@@ -105,7 +108,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
 			_, err2 := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err2 != nil {
-				//fmt.Println("Executing ", assocString, " failed")
+				Info.Println("Executing ", assocString, " failed")
 				return err2
 			}
 
@@ -115,7 +118,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 				for _, valueName := range valueNames {
 					err3 := regKey.DeleteValue(valueName)
 					if err3 != nil {
-						//fmt.Println("Removing user association ", valueName, " failed")
+						Info.Println("Removing user association ", valueName, " failed")
 						return err3
 					}
 				}
@@ -125,35 +128,23 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	return nil
 }
 
-// this returns hardened, if only one extension is hardened (to prevent
-// restore from not beeing executed)
+// this returns hardened, even if only one extension is hardened (to prevent
+// restore from not beeing executed), due to errors in hardening quite common
 func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 	var hardened bool = false
 
 	for _, extension := range explAssoc.extensions {
-		regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
-		regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.READ)
-		//if errOpen != nil {
-		//return false
-		//}
-		defer regKey.Close()
-
-		// Step 1: Check association (system wide default)
+		// Check only system wide association (system wide default), since
+		// user settings are restored automatically when user first opens such
+		// a file
 		assocString := fmt.Sprintf("assoc %s", extension.ext)
-		_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
-		//fmt.Print(assocString, " output = ", string(out[:]))
-		//fmt.Println("err = ", err)
+		out, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 		if err != nil {
+			Trace.Printf("isHardened?: (ok) %s (output = %s)(error=%s)", assocString, string(out[:]), err.Error())
 			hardened = true
+		} else {
+			Trace.Printf("isHardened?: (not) %s (output = %s)", assocString, string(out[:]))
 		}
-
-		// Step 2: Check user association
-		/*valueNames, _ := regKey.ReadValueNames(100)
-		fmt.Println("ValueNames for ",regKeyString,": ",valueNames)
-		fmt.Println("len(ValueNames)=",len(valueNames))
-		if len(valueNames) < 2 {
-			hardened = true
-		}*/
 	}
 
 	return hardened
