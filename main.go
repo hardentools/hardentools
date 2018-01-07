@@ -183,7 +183,13 @@ func main() {
 	var status = checkStatus()
 
 	// Init logging
-	InitLogging(os.Stdout, os.Stdout) // use this for developing/testing
+	var logpath = "hardentools.log"
+	var logfile, err = os.Create(logpath)
+	if err != nil {
+		// do nothing for now
+		//panic(err)
+	}
+	InitLogging(logfile, logfile) // use this for developing/testing
 	//InitLogging(ioutil.Discard, os.Stdout)  // use this for production use
 
 	// build up expert settings checkboxes and map

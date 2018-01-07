@@ -78,6 +78,8 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			if err != nil {
 				return errors.New("!! Executing powershell cmdlet Set-MpPreference failed.\n")
 			}
+		} else {
+			Info.Println("Windows ASR not activated, since it needs at least Windows 10 - 1709")
 		}
 	} else {
 		// restore (but only if we have at least Windows 10 - 1709)
