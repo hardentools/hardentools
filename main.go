@@ -163,7 +163,7 @@ func triggerAll(harden bool) {
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.Name()))
+				events.AppendText(fmt.Sprintf("\n!! %s %s FAILED !!\n", outputString, hardenSubject.Name()))
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
 				Info.Printf("%s %s has been successful", outputString, hardenSubject.Name())
@@ -194,7 +194,7 @@ func showStatus() {
 }
 
 func main() {
-	var labelText, buttonText, eventsText string
+	var labelText, buttonText, eventsText, expertSettingsText string
 	var buttonFunc func()
 	var status = checkStatus()
 
@@ -206,7 +206,7 @@ func main() {
 		//panic(err)
 	}
 	InitLogging(logfile, logfile) // use this for developing/testing
-	//InitLogging(ioutil.Discard, os.Stdout)  // use this for production use
+	//InitLogging(ioutil.Discard, logfile)  // use this for production use
 
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
@@ -220,11 +220,13 @@ func main() {
 		if status == false {
 			// all checkboxes checked by default, disabled only if subject is already hardened
 			expertConfig[hardenSubject.Name()] = !subjectIsHardened
+
 			// only enable, if not already hardenend
 			enableField = !subjectIsHardened
 		} else {
 			// restore: only checkboxes checked which are hardenend
 			expertConfig[hardenSubject.Name()] = subjectIsHardened
+
 			// disable all, since the user must restore all settings because otherwise
 			// consecutive execution of hardentools might fail (e.g. starting powershell
 			// or cmd commands) or might be ineffectiv (settings are already hardened) or
@@ -247,10 +249,12 @@ func main() {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
+		expertSettingsText = "Expert Settings - change only if you now what you are doing! Disabled settings are already hardened."
 	} else {
 		buttonText = "Restore..."
 		buttonFunc = restoreAll
 		labelText = "We have already hardened some risky features, do you want to restore them?"
+		expertSettingsText = "The following hardened features are going to be restored:"
 	}
 
 	MainWindow{
@@ -279,7 +283,7 @@ func main() {
 			},
 			HSpacer{},
 			HSpacer{},
-			Label{Text: "Expert Settings - change only if you now what you are doing! Disabled settings are already hardened."},
+			Label{Text: expertSettingsText},
 			Composite{
 				Layout:   Grid{Columns: 3},
 				Border:   true,
