@@ -105,16 +105,29 @@ func checkStatus() bool {
 }
 
 func markStatus(hardened bool) {
-	key, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.WRITE)
-	if err != nil {
-		panic(err)
-	}
-	defer key.Close()
 
 	if hardened {
-		key.SetDWordValue("Harden", 1)
+		key, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+		if err != nil {
+			Info.Println(err.Error())
+			panic(err)
+		}
+		defer key.Close()
+
+		// set value that states that we have hardened the system
+		err = key.SetDWordValue("Harden", 1)
+		if err != nil {
+			Info.Println(err.Error())
+			walk.MsgBox(window, "ERROR", "Could not set hardentools registry keys - restore will not work!", walk.MsgBoxIconExclamation)
+			panic(err)
+		}
 	} else {
-		key.SetDWordValue("Harden", 0)
+		// on restore delete all hardentools registry keys afterwards
+		err := registry.DeleteKey(registry.CURRENT_USER, hardentoolsKeyPath)
+		if err != nil {
+			Info.Println(err.Error())
+			events.AppendText("Could not remove hardentools registry keys - nothing to worry about.")
+		}
 	}
 }
 
@@ -135,10 +148,13 @@ func restoreAll() {
 }
 
 func triggerAll(harden bool) {
+	var outputString string
 	if harden {
 		events.AppendText("Now we are hardening ")
+		outputString = "Hardening"
 	} else {
 		events.AppendText("Now we are restoring ")
+		outputString = "Restoring"
 	}
 
 	for _, hardenSubject := range allHardenSubjects {
@@ -150,7 +166,7 @@ func triggerAll(harden bool) {
 				events.AppendText(fmt.Sprintf("!! Operation for %s FAILED !!\n", hardenSubject.Name()))
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
-				Info.Printf("Hardening %s has been successful", hardenSubject.Name())
+				Info.Printf("%s %s has been successful", outputString, hardenSubject.Name())
 			}
 		}
 	}
@@ -199,11 +215,22 @@ func main() {
 
 	for i, hardenSubject := range allHardenSubjects {
 		var subjectIsHardened = hardenSubject.IsHardened()
+		var enableField bool
 
 		if status == false {
-			expertConfig[hardenSubject.Name()] = true // all checkboxes enabled by default in case of hardening
+			// all checkboxes checked by default, disabled only if subject is already hardened
+			expertConfig[hardenSubject.Name()] = !subjectIsHardened
+			// only enable, if not already hardenend
+			enableField = !subjectIsHardened
 		} else {
-			expertConfig[hardenSubject.Name()] = subjectIsHardened // restore: only checkboxes enabled which are hardenend
+			// restore: only checkboxes checked which are hardenend
+			expertConfig[hardenSubject.Name()] = subjectIsHardened
+			// disable all, since the user must restore all settings because otherwise
+			// consecutive execution of hardentools might fail (e.g. starting powershell
+			// or cmd commands) or might be ineffectiv (settings are already hardened) or
+			// hardened settings might get saved as "before" settings, so user
+			// can't revert to the state "before"
+			enableField = false
 		}
 
 		expertCompWidgetArray[i] = CheckBox{
@@ -212,7 +239,7 @@ func main() {
 			Text:             hardenSubject.LongName(),
 			Checked:          expertConfig[hardenSubject.Name()],
 			OnCheckedChanged: walk.EventHandler(checkBoxEventGenerator(i, hardenSubject.Name())),
-			Enabled:          !(status && !subjectIsHardened) || !status,
+			Enabled:          enableField,
 		}
 	}
 
@@ -252,7 +279,7 @@ func main() {
 			},
 			HSpacer{},
 			HSpacer{},
-			Label{Text: "Expert Settings - change only if you now what you are doing!"},
+			Label{Text: "Expert Settings - change only if you now what you are doing! Disabled settings are already hardened."},
 			Composite{
 				Layout:   Grid{Columns: 3},
 				Border:   true,
