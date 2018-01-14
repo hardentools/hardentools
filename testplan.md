@@ -56,7 +56,7 @@ Open every one of the following executables from explorer or Windows Start Menu:
 Executables starts
 
 **Expected result after hardening:**
-Nothing happens (windows doesn't react on mouse click)
+Nothing happens (windows doesn't react on mouse click) or displays error message
 
 
 ### Disable file extensions mainly used for malicious purposes
@@ -64,7 +64,7 @@ Nothing happens (windows doesn't react on mouse click)
 Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
 #### Test:
-Create a file for every extension mentioned above (with the extension, empty text file is sufficient)
+Create a file for every extension mentioned above (empty text file is sufficient)
 
 **Expected result before hardening:**
 The file is shown in explorer with the appropriate icon for its extension. Upon starting the file, it is tried to open the file (corresponding error message is shown if it is not of the appropriate file type).
@@ -104,3 +104,6 @@ The file is shown in explorer with only the empty icon for unknown file types. U
 
 - **Switch on Enhanced Security** (enabled by default in current versions)
 
+## Test Restore
+
+TODO: also test partial harden and restore (and that multiple times)

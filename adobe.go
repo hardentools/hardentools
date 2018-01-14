@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -131,51 +132,54 @@ var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
+// Hardens / Restores AdobeRegistryRegExSingleDWORD registry keys
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
-	if harden {
-		// Harden.
-		for _, adobeVersion := range adobeRegEx.AdobeVersions {
-			path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
-			key, _, _ := registry.CreateKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
+	// Harden.
+	for _, adobeVersion := range adobeRegEx.AdobeVersions {
+		path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
 
-			saveOriginalRegistryDWORD(key, path, adobeRegEx.ValueName)
-
-			key.SetDWordValue(adobeRegEx.ValueName, adobeRegEx.HardenedValue)
-			key.Close()
+		// build a RegistrySingleValueDWORD so we can reuse the Harden() method
+		var singleDWORD = &RegistrySingleValueDWORD{
+			RootKey:       adobeRegEx.RootKey,
+			Path:          path,
+			ValueName:     adobeRegEx.ValueName,
+			HardenedValue: adobeRegEx.HardenedValue,
+			shortName:     adobeRegEx.shortName,
+			longName:      adobeRegEx.longName,
+			description:   adobeRegEx.description,
 		}
-	} else {
-		// Restore.
-		for _, adobeVersion := range adobeRegEx.AdobeVersions {
-			path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
-			key, _ := registry.OpenKey(adobeRegEx.RootKey, path, registry.ALL_ACCESS)
 
-			restoreKey(key, path, adobeRegEx.ValueName)
-			key.Close()
+		// call RegistrySingleValueDWORD Harden method to Harden or Restore.
+		err := singleDWORD.Harden(harden)
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
+// checks if AdobeRegistryRegExSingleDWORD is hardened
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
 	var hardened = true
 
 	for _, adobeVersion := range adobeRegEx.AdobeVersions {
 		path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
-		key, err := registry.OpenKey(adobeRegEx.RootKey, path, registry.READ)
-		if err == nil {
-			currentValue, _, err := key.GetIntegerValue(adobeRegEx.ValueName)
-			if err == nil {
-				if uint32(currentValue) != adobeRegEx.HardenedValue {
-					hardened = false
-				}
-			} else {
-				hardened = false
-			}
-		} else {
+
+		// build a RegistrySingleValueDWORD so we can reuse the isHardened() method
+		var singleDWORD = &RegistrySingleValueDWORD{
+			RootKey:       adobeRegEx.RootKey,
+			Path:          path,
+			ValueName:     adobeRegEx.ValueName,
+			HardenedValue: adobeRegEx.HardenedValue,
+			shortName:     adobeRegEx.shortName,
+			longName:      adobeRegEx.longName,
+			description:   adobeRegEx.description,
+		}
+
+		if !singleDWORD.IsHardened() {
 			hardened = false
 		}
-		key.Close()
 	}
 	return hardened
 }

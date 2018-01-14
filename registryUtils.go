@@ -17,12 +17,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+
 	"golang.org/x/sys/windows/registry"
 )
 
-// data type for a single DWORD value that suffices for hardening
-// a distinct setting
+// data type for a single registry DWORD value that suffices for hardening
+// a distinct setting or as part of an RegistryMultiValue
 type RegistrySingleValueDWORD struct {
 	RootKey       registry.Key
 	Path          string
@@ -33,6 +35,8 @@ type RegistrySingleValueDWORD struct {
 	description   string
 }
 
+// data type for multiple SingleValueDWORDs
+// use if a single hardening needs multiple RegistrySingleValueDWORD to be modified
 type RegistryMultiValue struct {
 	ArraySingleDWORD []*RegistrySingleValueDWORD
 	shortName        string
@@ -40,32 +44,20 @@ type RegistryMultiValue struct {
 	description      string
 }
 
-// harden RegistrySingleValueDWORD helper method
+// harden function for RegistrySingleValueDWORD struct
 func (regValue *RegistrySingleValueDWORD) Harden(harden bool) error {
-	key, _, err := registry.CreateKey(regValue.RootKey, regValue.Path, registry.WRITE)
-	defer key.Close()
-
-	if err != nil {
-		return HardenError{fmt.Sprintf("Couldn't create / open registry key for write access: %s \\ %s", regValue.RootKey, regValue.Path)}
-	}
-
 	if harden == false {
 		// Restore.
-		restoreKey(key, regValue.Path, regValue.ValueName)
+		return restoreKey(regValue.RootKey, regValue.Path, regValue.ValueName)
 	} else {
-		// Save current state.
-		saveOriginalRegistryDWORD(key, regValue.Path, regValue.ValueName)
 		// Harden.
-		err = key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
-		if err != nil {
-			return HardenError{fmt.Sprintf("Couldn't set registry value: %s \\ %s \\ %s", regValue.RootKey, regValue.Path, regValue.ValueName)}
-		}
+		return hardenKey(regValue.RootKey, regValue.Path, regValue.ValueName, regValue.HardenedValue)
 	}
 
 	return nil
 }
 
-// verify if RegistrySingleValueDWORD is already hardened (helper method)
+// verify if harden object of type RegistrySingleValueDWORD is already hardened
 func (regValue *RegistrySingleValueDWORD) IsHardened() bool {
 	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
 
@@ -73,10 +65,14 @@ func (regValue *RegistrySingleValueDWORD) IsHardened() bool {
 		currentValue, _, err := key.GetIntegerValue(regValue.ValueName)
 		if err == nil {
 			if uint32(currentValue) == regValue.HardenedValue {
+				Trace.Printf("IsHardened?: (OK) %s\\%s = %d", regValue.Path, regValue.ValueName, currentValue)
 				return true
+			} else {
+				Trace.Printf("IsHardened?: (not) %s\\%s = %d (hardened value = %d)", regValue.Path, regValue.ValueName, currentValue, regValue.HardenedValue)
 			}
 		}
 	}
+	Trace.Printf("IsHardened?: (not) %s\\%s (not found)", regValue.Path, regValue.ValueName)
 	return false
 }
 
@@ -92,16 +88,19 @@ func (regValue *RegistrySingleValueDWORD) Description() string {
 	return regValue.description
 }
 
+// harden function for RegistryMultiValue struct
 func (regMultiValue RegistryMultiValue) Harden(harden bool) error {
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
 		err := singleDWORD.Harden(harden)
 		if err != nil {
+			Info.Println("Could not harden " + singleDWORD.Name() + " due to error: " + err.Error())
 			return err
 		}
 	}
 	return nil
 }
 
+// verify if harden object of type RegistryMultiValue is already hardened
 func (regMultiValue *RegistryMultiValue) IsHardened() (isHardened bool) {
 	var hardened = true
 
@@ -128,39 +127,139 @@ func (regMultiValue *RegistryMultiValue) Description() string {
 
 ////
 // save and restore methods
-//
-// TODO: Add error handling for all methods.
-////
 
-// Save original registry key.
-func saveOriginalRegistryDWORD(key registry.Key, keyName string, valueName string) {
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
-
-	originalValue, _, err := key.GetIntegerValue(valueName)
-	if err == nil {
-		hardentoolsKey.SetDWordValue("SavedState_"+keyName+"_"+valueName, uint32(originalValue)) // TODO: add RootKey here (LOCAL_MACHINE vs. LOCAL_USER) - needed for future improvements
+// helper method for saving original registry key.
+func saveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName string) error {
+	// open hardentools root key
+	hardentoolsKey, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+	if err != nil {
+		return err
 	}
-	hardentoolsKey.Close()
+	defer hardentoolsKey.Close()
+
+	// get value of registry key to save
+	keyToSave, err := registry.OpenKey(rootKey, keyName, registry.READ)
+	if err != nil {
+		Info.Println("Could not open registry key to save due to error: " + err.Error())
+		return err
+	}
+	defer keyToSave.Close()
+
+	// now finally get value to save
+	originalValue, _, err := keyToSave.GetIntegerValue(valueName)
+	if err != nil {
+		Info.Println("Could not retrieve value of registry key to save (" + keyName + ", " + valueName + ") due to error: " + err.Error())
+		return nil // nothing to save (no error, normal behaviour if registry key was not set)
+	} else {
+		// get name of root ke (e.g. CURRENT_USER)
+		rootKeyName, err := getRootKeyName(rootKey)
+		if err != nil {
+			return err
+		}
+
+		// save value
+		Trace.Println("Saving value for: " + "SavedState_" + rootKeyName + "\\" + keyName + "_" + valueName)
+		err = hardentoolsKey.SetDWordValue("SavedState_"+rootKeyName+"\\"+keyName+"_"+valueName, uint32(originalValue))
+		if err != nil {
+			Info.Println("Could not save state")
+		}
+		return err
+	}
 }
 
-// Restore registry key from saved state.
-func retrieveOriginalRegistryDWORD(keyName string, valueName string) (value uint32, err error) {
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+// helper method for restoring registry key from saved state.
+func retrieveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName string) (value uint32, err error) {
+	// open hardentools root key
+	hardentoolsKey, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+	if err != nil {
+		return 0, err
+	}
+	defer hardentoolsKey.Close()
 
-	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + keyName + "_" + valueName) // TODO: evaluate RootKey here (LOCAL_MACHINE vs. LOCAL_USER) - needed for future improvements
-	hardentoolsKey.Close()
-	if err == nil {
+	// get rootKeyName
+	rootKeyName, err := getRootKeyName(rootKey)
+	if err != nil {
+		Info.Println("Could not get rootKeyName")
+		return 0, err
+	}
+
+	// get saved state
+	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + rootKeyName + "\\" + keyName + "_" + valueName)
+	if err != nil {
+		return 0, err
+	} else {
 		return uint32(value64), nil
 	}
-	return 0, err
 }
 
-// Helper method for restoring original state.
-func restoreKey(key registry.Key, keyName string, valueName string) {
-	value, err := retrieveOriginalRegistryDWORD(keyName, valueName)
-	if err == nil {
-		key.SetDWordValue(valueName, value)
-	} else {
-		key.DeleteValue(valueName)
+// Helper method for restoring original state of a DWORD registry key.
+func restoreKey(rootKey registry.Key, keyName string, valueName string) (err error) {
+	// open key to be restored
+	key, err := registry.OpenKey(rootKey, keyName, registry.ALL_ACCESS)
+	if err != nil {
+		Info.Println("Could not open registry key " + keyName + " due to error: " + err.Error())
+		return err
 	}
+	defer key.Close()
+
+	// get original state value
+	value, err := retrieveOriginalRegistryDWORD(rootKey, keyName, valueName)
+	if err == nil {
+		Info.Printf("Restore: Restoring registry value %s\\%s = %d", keyName, valueName, value)
+		err = key.SetDWordValue(valueName, value)
+	} else {
+		Info.Println("Restore: Could not get saved reg. value, deleting " + keyName + "\\" + valueName)
+		err = key.DeleteValue(valueName)
+	}
+	return err
+}
+
+// get root key name (LOCAL_MACHINE vs. LOCAL_USER)
+func getRootKeyName(rootKey registry.Key) (rootKeyName string, err error) {
+	// this is kind of a hack, since registry.Key doesn't allow to get the
+	// name of the key itself
+
+	switch rootKey {
+	case registry.CLASSES_ROOT:
+		rootKeyName = "CLASSES_ROOT"
+	case registry.CURRENT_USER:
+		rootKeyName = "CURRENT_USER"
+	case registry.LOCAL_MACHINE:
+		rootKeyName = "LOCAL_MACHINE"
+	case registry.USERS:
+		rootKeyName = "USERS"
+	case registry.CURRENT_CONFIG:
+		rootKeyName = "CURRENT_CONFIG"
+	case registry.PERFORMANCE_DATA:
+		rootKeyName = "PERFORMANCE_DATA"
+	default:
+		// invalid rootKey?
+		Info.Println("Invalid rootKey provided to save registry function")
+		err = errors.New("Invalid rootKey provided to save registry function")
+	}
+
+	return
+}
+
+// harden Dword value including saving the original state
+func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValue uint32) error {
+	rootKeyName, _ := getRootKeyName(rootKey)
+	key, _, err := registry.CreateKey(rootKey, path, registry.WRITE)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Couldn't create / open registry key for write access: %s\\%s", rootKeyName, path))
+	}
+	defer key.Close()
+
+	// Save current state.
+	err = saveOriginalRegistryDWORD(rootKey, path, valueName)
+	if err != nil {
+		return err
+	}
+	// Harden.
+	err = key.SetDWordValue(valueName, hardenedValue)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Couldn't set registry value: %s \\ %s \\ %s", rootKeyName, path, valueName))
+	}
+
+	return nil
 }

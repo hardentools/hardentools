@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -181,29 +182,28 @@ var OfficeDDE = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
+// hardens OfficeRegistryRegExSingleDWORD registry values
 func (regValue OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
-	if harden {
-		// harden
-		for _, officeVersion := range regValue.OfficeVersions {
-			for _, officeApp := range regValue.OfficeApps {
-				path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
-				key, _, _ := registry.CreateKey(regValue.RootKey, path, registry.ALL_ACCESS)
-				// Save current state.
-				saveOriginalRegistryDWORD(key, path, regValue.ValueName)
-				// Harden.
-				key.SetDWordValue(regValue.ValueName, regValue.HardenedValue)
-				key.Close()
+
+	for _, officeVersion := range regValue.OfficeVersions {
+		for _, officeApp := range regValue.OfficeApps {
+			path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
+
+			// build a RegistrySingleValueDWORD so we can reuse the Harden() method
+			var singleDWORD = &RegistrySingleValueDWORD{
+				RootKey:       regValue.RootKey,
+				Path:          path,
+				ValueName:     regValue.ValueName,
+				HardenedValue: regValue.HardenedValue,
+				shortName:     regValue.shortName,
+				longName:      regValue.longName,
+				description:   regValue.description,
 			}
-		}
-	} else {
-		// restore
-		for _, officeVersion := range regValue.OfficeVersions {
-			for _, officeApp := range regValue.OfficeApps {
-				path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
-				key, _ := registry.OpenKey(regValue.RootKey, path, registry.ALL_ACCESS)
-				// restore previous state
-				restoreKey(key, path, regValue.ValueName)
-				key.Close()
+
+			// call RegistrySingleValueDWORD Harden method to Harden or Restore.
+			err := singleDWORD.Harden(harden)
+			if err != nil {
+				return err
 			}
 		}
 	}
@@ -217,20 +217,18 @@ func (officeRegEx OfficeRegistryRegExSingleDWORD) IsHardened() bool {
 	for _, officeVersion := range officeRegEx.OfficeVersions {
 		for _, officeApp := range officeRegEx.OfficeApps {
 			path := fmt.Sprintf(officeRegEx.PathRegEx, officeVersion, officeApp)
-			key, err := registry.OpenKey(officeRegEx.RootKey, path, registry.READ)
-			if err == nil {
-				currentValue, _, err := key.GetIntegerValue(officeRegEx.ValueName)
-				if err == nil {
-					if uint32(currentValue) != officeRegEx.HardenedValue {
-						hardened = false
-					}
-				} else {
-					hardened = false
-				}
-			} else {
+
+			// build a RegistrySingleValueDWORD so we can reuse the isHardened() method
+			var singleDWORD = &RegistrySingleValueDWORD{
+				RootKey:       officeRegEx.RootKey,
+				Path:          path,
+				ValueName:     officeRegEx.ValueName,
+				HardenedValue: officeRegEx.HardenedValue,
+			}
+
+			if !singleDWORD.IsHardened() {
 				hardened = false
 			}
-			key.Close()
 		}
 	}
 	return hardened

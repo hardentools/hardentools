@@ -29,6 +29,7 @@ More details here:
 */
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -62,6 +63,7 @@ var WindowsASR = &WindowsASRStruct{
 }
 
 //// HardenInterface methods
+
 func (asr WindowsASRStruct) Harden(harden bool) error {
 	if harden {
 		// harden (but only if we have at least Windows 10 - 1709)
@@ -74,8 +76,10 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, actionsEnumeration)
 			_, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
-				return HardenError{"!! Executing powershell cmdlet Set-MpPreference failed.\n"}
+				return errors.New("!! Executing powershell cmdlet Set-MpPreference failed.\n")
 			}
+		} else {
+			Info.Println("Windows ASR not activated, since it needs at least Windows 10 - 1709")
 		}
 	} else {
 		// restore (but only if we have at least Windows 10 - 1709)
@@ -85,7 +89,7 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			psString := fmt.Sprintf("Remove-MpPreference -AttackSurfaceReductionRules_Ids %s", ruleIDEnumeration)
 			_, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
-				return HardenError{"!! Executing powershell cmdlet Remove-MpPreference failed.\n"}
+				return errors.New("!! Executing powershell cmdlet Remove-MpPreference failed.\n")
 			}
 		}
 	}
@@ -93,6 +97,32 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 	return nil
 }
 
+/* Unmodifed State in Windows 10 / 1709:
+	   PS> Get-MpPreference
+	    AttackSurfaceReductionOnlyExclusions          :
+	    AttackSurfaceReductionRules_Actions           :
+	    AttackSurfaceReductionRules_Ids               :
+
+      Modified State:
+	    PS > $prefs = Get-MpPreference
+		PS > $prefs.AttackSurfaceReductionOnlyExclusions
+		PS > $prefs.AttackSurfaceReductionRules_Actions
+			1
+			1
+			1
+			1
+			1
+			1
+			1
+		PS > $prefs.AttackSurfaceReductionRules_Ids
+			3B576869-A4EC-4529-8536-B80A7769E899
+			5BEB7EFE-FD9A-4556-801D-275E5FFC04CC
+			75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
+			92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B
+			BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550
+			D3E037E1-3EB8-44C8-A917-57927947596D
+			D4F940AB-401B-4EFC-AADC-AD5F3C50688A
+*/
 func (asr WindowsASRStruct) IsHardened() bool {
 	var hardened = false
 
@@ -114,12 +144,12 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		currentRuleIDs := strings.Split(ruleIDsOut, "\r\n")
 		currentRuleActions := strings.Split(ruleActionsOut, "\r\n")
 
-		// just some debug
-		/*for i, ruleIDdebug := range currentRuleIDs {
+		// just some debug output
+		for i, ruleIDdebug := range currentRuleIDs {
 			if len(ruleIDdebug) > 0 {
-				fmt.Printf("ruleID %d = %s with action = %s\n", i, ruleIDdebug, currentRuleActions[i])
+				Trace.Printf("ruleID %d = %s with action = %s\n", i, ruleIDdebug, currentRuleActions[i])
 			}
-		}*/
+		}
 
 		// compare to hardened state
 		for i, ruleIdHardened := range ruleIdArray {
@@ -146,34 +176,6 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		}
 
 		return true // seems all relevant hardening is in place
-
-		/* Unmodifed State in Windows 10 / 1709:
-			   PS> Get-MpPreference
-			    AttackSurfaceReductionOnlyExclusions          :
-			    AttackSurfaceReductionRules_Actions           :
-			    AttackSurfaceReductionRules_Ids               :
-
-		      Modified State:
-			    PS > $prefs = Get-MpPreference
-				PS > $prefs.AttackSurfaceReductionOnlyExclusions
-				PS > $prefs.AttackSurfaceReductionRules_Actions
-					1
-					1
-					1
-					1
-					1
-					1
-					1
-				PS > $prefs.AttackSurfaceReductionRules_Ids
-					3B576869-A4EC-4529-8536-B80A7769E899
-					5BEB7EFE-FD9A-4556-801D-275E5FFC04CC
-					75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
-					92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B
-					BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550
-					D3E037E1-3EB8-44C8-A917-57927947596D
-					D4F940AB-401B-4EFC-AADC-AD5F3C50688A
-		*/
-
 	} else {
 		// Windows ASR can not be hardened, since Windows it too old (need at least Windows 10 - 1709)
 		return false
