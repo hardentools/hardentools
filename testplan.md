@@ -28,29 +28,26 @@ Disables AutoRun / AutoPlay for all devices. For example, this should prevent ap
 
 **Expected result before hardening:**
 
-* Depending on the Windows version nothing happens (AutoRun is disabled by default)
-or the executable is started or the executable is an option in the AutoPlay dialog (see below)
+* Depending on the Windows version nothing happens (AutoRun is disabled by default) or the executable is started or the executable is an option in the AutoPlay dialog (see below)
 
 **Expected result after hardening:**
 
-* No dialog appears, no explorer windows opens, no executable starts.
-The stick can only be accessed by opening it manuallys.
+* No dialog appears, no explorer windows opens, no executable starts. The stick can only be accessed by opening it manually.
 
 #### Test AutoPlay:
 Plugin an USB Stick that has no autorun.inf in the base directory.
 
 **Expected result before hardening:**
 
-* An AutoPlay windows is opened automatically that asks the user what he wants to do (open explorer, import pictures, ...). Depending on the settings also an explorer windows might appear automatically (without AutoPLay window)
+* An AutoPlay window opens automatically that asks the user what he wants to do (open explorer, import pictures, ...). Depending on the settings also an explorer window might appear automatically (without AutoPLay window)
 
 **Expected result after hardening:**
 
-* No dialog appears, no explorer windows opens.
-The stick can only be accessed by opening it manuallys.
+* No dialog appears, no explorer windows opens. The stick can only be accessed by opening it manually.
 
 ### Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer
 #### What it does:
-You will not be able to use the terminal by starting cmd.exe and it should prevent the use of PowerShell by malicious code trying to infect the system.
+You will not be able to use the terminal by starting cmd.exe and it should prevent the usage of PowerShell by malicious code trying to infect the system.
 
 #### Test steps:
 Open every one of the following executables from explorer or Windows Start Menu:
@@ -60,7 +57,7 @@ Open every one of the following executables from explorer or Windows Start Menu:
 
 **Expected result before hardening:**
 
-* Executables starts
+* Executables start
 
 **Expected result after hardening:**
 
@@ -82,7 +79,7 @@ Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vb
 **Expected result after hardening:**
 
 * The file is shown in explorer with only the empty icon for unknown file types.
-* Upon starting the file a dialog is presented which program to use.
+* Upon double clicking the file a dialog is presented which program to use.
 
 ### Sets User Account Control (UAC) to always ask for permission
 #### What it does:
@@ -94,8 +91,7 @@ Sets User Account Control (UAC) to always ask for permission (even on configurat
 
 **Expected result before hardening:**
 
-* Opening the UAC settings usually doesn't trigger an UAC dialog, the setting is not on the
-highest of the four available settings (standard is the second highest)
+* Opening the UAC settings usually doesn't trigger an UAC dialog and the setting is not on the highest of the four available settings (standard is the second highest)
 * Opening the Windows task manager doesn't trigger an UAC dialog
 
 **Expected result after hardening:**
@@ -108,7 +104,7 @@ highest of the four available settings (standard is the second highest)
 Shows file extensions and hidden files in explorer
 
 #### Test steps:
-Open explorer and verify if file extensions like .txt .pdf and so on are shown in the filename in explorer
+Open Windows explorer and verify if file extensions like .txt, .pdf and so on are shown in the filename in explorer
 
 **Expected result before hardening:**
 
@@ -224,7 +220,7 @@ How to generate malicious DDE documents:
 
 **Expected result after hardening:**
 
-* Executable is not executed, user is not asked anything
+* Executable is not executed; user is not asked anything
 
 
 ## Acrobat Reader
@@ -358,6 +354,7 @@ doing only a partial hardening.
 * Execute hardentools again and restore settings
 * Verify if all hardened settings are reverted to the original settings
 * Verify if only the hardened settings are affected upon restore
+* Repeat the above procedure with a different set of settings
 
 **Note:** This does not apply for the following settings, since they are currently always reverted to the default state:
 * Windows ASR settings
