@@ -341,10 +341,9 @@ doing a complete hardening.
 * Execute hardentools again and restore settings
 * Verify if all settings are reverted to the original settings
 
-**Note:**
-* This does not apply for the following settings, since they are currently always reverted to the default state:
-** Windows ASR settings
-** Disable file extensions mainly used for malicious purposes
+**Note:** This does not apply for the following settings, since they are currently always reverted to the default state:
+* Windows ASR settings
+* Disable file extensions mainly used for malicious purposes
 
 
 ### Partial Harden & Restore
@@ -360,7 +359,6 @@ doing only a partial hardening.
 * Verify if all hardened settings are reverted to the original settings
 * Verify if only the hardened settings are affected upon restore
 
-**Note:**
-* This does not apply for the following settings, since they are currently always reverted to the default state:
-** Windows ASR settings
-** Disable file extensions mainly used for malicious purposes
+**Note:** This does not apply for the following settings, since they are currently always reverted to the default state:
+* Windows ASR settings
+* Disable file extensions mainly used for malicious purposes
