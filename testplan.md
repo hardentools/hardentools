@@ -9,37 +9,43 @@
 Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
 #### Test:
-Create .js and .vbs file with some arbitrary text (or valid code) and try to execute them.
+* Create .js and .vbs file with some arbitrary text (or valid code) and try to execute them.
 
 **Expected result before hardening:**
-Script is executed or runtime error due to malformed script is shown
+
+* Script is executed or runtime error due to malformed script is shown
 
 **Expected result after hardening:**
-There should appear a "Windows Script Host" dialog that says that WSH is deactivated.
+
+* There should appear a "Windows Script Host" dialog that says that WSH is deactivated.
 
 ### Disabling AutoRun and AutoPlay
 #### What it does:
 Disables AutoRun / AutoPlay for all devices. For example, this should prevent applicatons from automatically executing when you plug a USB stick into your computer.
 
 #### Test AutoRun:
-Create autorun.inf on USB Stick that executes a arbitrary executable on the stick. Plug in USB Stick.
+* Create autorun.inf on USB Stick that executes a arbitrary executable on the stick. Plug in USB Stick.
 
 **Expected result before hardening:**
-Depending on the Windows version nothing happens (AutoRun is disabled by default)
+
+* Depending on the Windows version nothing happens (AutoRun is disabled by default)
 or the executable is started or the executable is an option in the AutoPlay dialog (see below)
 
 **Expected result after hardening:**
-No dialog appears, no explorer windows opens, no executable starts.
+
+* No dialog appears, no explorer windows opens, no executable starts.
 The stick can only be accessed by opening it manuallys.
 
 #### Test AutoPlay:
 Plugin an USB Stick that has no autorun.inf in the base directory.
 
 **Expected result before hardening:**
-An AutoPlay windows is opened automatically that asks the user what he wants to do (open explorer, import pictures, ...). Depending on the settings also an explorer windows might appear automatically (without AutoPLay window)
+
+* An AutoPlay windows is opened automatically that asks the user what he wants to do (open explorer, import pictures, ...). Depending on the settings also an explorer windows might appear automatically (without AutoPLay window)
 
 **Expected result after hardening:**
-No dialog appears, no explorer windows opens.
+
+* No dialog appears, no explorer windows opens.
 The stick can only be accessed by opening it manuallys.
 
 ### Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer
@@ -48,15 +54,17 @@ You will not be able to use the terminal by starting cmd.exe and it should preve
 
 #### Test:
 Open every one of the following executables from explorer or Windows Start Menu:
-- powershell.exe (32 and 64 bit versions if available)
-- powershell_ise.exe (32 and 64 bit versions if available)
-- cmd.exe
+* powershell.exe (32 and 64 bit versions if available)
+* powershell_ise.exe (32 and 64 bit versions if available)
+* cmd.exe
 
 **Expected result before hardening:**
-Executables starts
+
+* Executables starts
 
 **Expected result after hardening:**
-Nothing happens (windows doesn't react on mouse click) or displays error message
+
+* Nothing happens (windows doesn't react on mouse click) or displays error message
 
 
 ### Disable file extensions mainly used for malicious purposes
@@ -64,30 +72,36 @@ Nothing happens (windows doesn't react on mouse click) or displays error message
 Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
 #### Test:
-Create a file for every extension mentioned above (empty text file is sufficient)
+* Create a file for every extension mentioned above (empty text file is sufficient)
 
 **Expected result before hardening:**
-The file is shown in explorer with the appropriate icon for its extension. Upon starting the file, it is tried to open the file (corresponding error message is shown if it is not of the appropriate file type).
+
+* The file is shown in explorer with the appropriate icon for its extension.
+* Upon starting the file, it is tried to open the file (corresponding error message is shown if it is not of the appropriate file type).
 
 **Expected result after hardening:**
-The file is shown in explorer with only the empty icon for unknown file types. Upon starting the file a dialog is presented which program to use.
+
+* The file is shown in explorer with only the empty icon for unknown file types.
+* Upon starting the file a dialog is presented which program to use.
 
 ### Sets User Account Control (UAC) to always ask for permission
 #### What it does:
 Sets User Account Control (UAC) to always ask for permission (even on configuration changes only) and to use "secure desktop"
 
 #### Test:
-1.) Check UAC (User Account Control) settings in Windows System Settings.
-2.) Open Task Manager
+* Check UAC (User Account Control) settings in Windows System Settings.
+* Open Task Manager
 
 **Expected result before hardening:**
-1.) Opening the UAC settings usually doesn't trigger an UAC dialog, the setting is not on the
+
+* Opening the UAC settings usually doesn't trigger an UAC dialog, the setting is not on the
 highest of the four available settings (standard is the second highest)
-2.) Opening the Windows task manager doesn't trigger an UAC dialog
+* Opening the Windows task manager doesn't trigger an UAC dialog
 
 **Expected result after hardening:**
-1.) Opening the UAC settings triggers an UAC dialog and the setting is on the highest setting. During the UAC dialog the desktop is dimmed.
-2.) Opening the Windows task manager does trigger an UAC dialog. During the UAC dialog the desktop is dimmed.
+
+* Opening the UAC settings triggers an UAC dialog and the setting is on the highest setting. During the UAC dialog the desktop is dimmed.
+* Opening the Windows task manager does trigger an UAC dialog. During the UAC dialog the desktop is dimmed.
 
 ### Shows file extensions and hidden files in explorer
 #### What it does:
@@ -97,10 +111,12 @@ Shows file extensions and hidden files in explorer
 Open explorer and verify if file extensions like .txt .pdf and so on are shown in the filename in explorer
 
 **Expected result before hardening:**
-File extensions are not shown
+
+* File extensions are not shown
 
 **Expected result after hardening:**
-File extensions are shown
+
+* File extensions are shown
 
 ### Windows Defender Attack Surface Reduction (ASR)
 #### What it does:
@@ -111,7 +127,9 @@ Windows Defender Attack Surface Reduction (ASR) enables varios remediations star
 * Block JavaScript or VBScript from launching downloaded executable content
 * Block execution of potentially obfuscated scripts, Block Win32 API calls from Office macro)
 
+
 More details can be found here:
+
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/enable-attack-surface-reduction
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction
@@ -144,10 +162,12 @@ Macros are at times used by Microsoft Office users to script and automate certai
 * Open the Word document and verify if the macro is executed
 
 **Expected result before hardening:**
-Macros are executed, perhaps office asks the user if macros should be activated
+
+* Macros are executed, perhaps office asks the user if macros should be activated
 
 **Expected result after hardening:**
-Macros are not executed and the user is not asked if macros should be activated
+
+* Macros are not executed and the user is not asked if macros should be activated
 
 
 ### Disable OLE object execution
@@ -161,10 +181,12 @@ Microsoft Office applications are able to embed so called "OLE objects" and exec
 * Open the Word document and verify if the OLE object is displayed or executed
 
 **Expected result before hardening:**
-OLE objects work
+
+* OLE objects work
 
 **Expected result after hardening:**
-OLE objects are not shown/executed
+
+* OLE objects are not shown/executed
 
 ### Disabling ActiveX
 #### What it does:
@@ -177,10 +199,12 @@ Disables ActiveX Controls for all Office applications.
 * Open the Word document and verify if the code is executed
 
 **Expected result before hardening:**
-ActiveX code is executed, perhaps office asks the user if code should be executed
+
+* ActiveX code is executed, perhaps office asks the user if code should be executed
 
 **Expected result after hardening:**
-ActiveX code is not executed
+
+* ActiveX code is not executed
 
 ### Disable DDE
 #### What it does:
@@ -195,10 +219,12 @@ How to generate malicious DDE documents:
 * https://null-byte.wonderhowto.com/how-to/exploit-dde-microsoft-office-defend-against-dde-based-attacks-0180706/
 
 **Expected result before hardening:**
-Executable is executed after user approves with "Yes"
+
+* Executable is executed after user approves with "Yes"
 
 **Expected result after hardening:**
-Executable is not executed, user is not asked anything
+
+* Executable is not executed, user is not asked anything
 
 
 
