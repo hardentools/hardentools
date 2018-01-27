@@ -8,7 +8,7 @@
 #### What it does:
 Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
-#### Test:
+#### Test steps:
 * Create .js and .vbs file with some arbitrary text (or valid code) and try to execute them.
 
 **Expected result before hardening:**
@@ -52,7 +52,7 @@ The stick can only be accessed by opening it manuallys.
 #### What it does:
 You will not be able to use the terminal by starting cmd.exe and it should prevent the use of PowerShell by malicious code trying to infect the system.
 
-#### Test:
+#### Test steps:
 Open every one of the following executables from explorer or Windows Start Menu:
 * powershell.exe (32 and 64 bit versions if available)
 * powershell_ise.exe (32 and 64 bit versions if available)
@@ -71,7 +71,7 @@ Open every one of the following executables from explorer or Windows Start Menu:
 #### What it does:
 Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
-#### Test:
+#### Test steps:
 * Create a file for every extension mentioned above (empty text file is sufficient)
 
 **Expected result before hardening:**
@@ -88,7 +88,7 @@ Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vb
 #### What it does:
 Sets User Account Control (UAC) to always ask for permission (even on configuration changes only) and to use "secure desktop"
 
-#### Test:
+#### Test steps:
 * Check UAC (User Account Control) settings in Windows System Settings.
 * Open Task Manager
 
@@ -107,7 +107,7 @@ highest of the four available settings (standard is the second highest)
 #### What it does:
 Shows file extensions and hidden files in explorer
 
-#### Test:
+#### Test steps:
 Open explorer and verify if file extensions like .txt .pdf and so on are shown in the filename in explorer
 
 **Expected result before hardening:**
@@ -135,7 +135,7 @@ More details can be found here:
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction
 * Test page (requires MS Login): https://demo.wd.microsoft.com/?ocid=cx-wddocs-testground
 
-#### Test:
+#### Test steps:
 * Please download the "Exploit Guard Evaluation Package" from Microsoft (via download link on https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction)
 * Extract ZIP contents
 * Open the "ExploitGuard ASR test tool x64" executable (if Windows Defender Smartscreen tries to block this executable you have to select "more info" to be able to select the execute anyhow button)
@@ -155,7 +155,7 @@ More details can be found here:
 #### What it does:
 Macros are at times used by Microsoft Office users to script and automate certain activities, especially calculations with Microsoft Excel. However, macros are currently a security plague, and they are widely used as a vehicle for compromise. With Hardentools, macros are disabled and the "Enable this Content" notification is disabled too, to prevent users from being tricked.
 
-#### Test:
+#### Test steps:
 * Prepare an Excel, Powerpoint and Word document with a Macro that does some action (e.g. showing an dialog/creating a text in the document)
 * Open the Excel document and verify if the macro is executed
 * Open the Powerpoint document and verify if the macro is executed
@@ -174,7 +174,7 @@ Macros are at times used by Microsoft Office users to script and automate certai
 #### What it does:
 Microsoft Office applications are able to embed so called "OLE objects" and execute them, at times also automatically (for example through PowerPoint animations). Windows executables, such as spyware, can also be embedded and executed as an object. Hardentools entirely disables this functionality.
 
-#### Test:
+#### Test steps:
 * Prepare an Excel, Powerpoint and Word document with an embedded OLE Object
 * Open the Excel document and verify if the OLE object is displayed or executed
 * Open the Powerpoint document and verify if the OLE object is displayed or executed
@@ -192,7 +192,7 @@ Microsoft Office applications are able to embed so called "OLE objects" and exec
 #### What it does:
 Disables ActiveX Controls for all Office applications.
 
-#### Test:
+#### Test steps:
 * Prepare an Excel, Powerpoint and Word document with a ActiveX code that does some action (e.g. showing an dialog/creating a text in the document)
 * Open the Excel document and verify if the code is executed
 * Open the Powerpoint document and verify if the code is executed
@@ -210,7 +210,7 @@ Disables ActiveX Controls for all Office applications.
 #### What it does:
 Disables DDE for Word and Excel
 
-#### Test:
+#### Test steps:
 * Prepare an Excel and Word document with a DDE code that tries do execute some executable (e.g. calc.exe)
 * Open the Excel document and verify if the executable is executed
 * Open the Word document and verify if the executable is executed
@@ -227,101 +227,140 @@ How to generate malicious DDE documents:
 * Executable is not executed, user is not asked anything
 
 
-
-### TODO from here on
-### 
-### 
-
-
-
-
 ## Acrobat Reader
 
-- **Disable JavaScript in PDF documents**. Acrobat Reader allows to execute JavaScript code from within PDF documents. This is widely abused for exploitation and malicious activity.
-### Headline
+### Disable JavaScript in PDF documents
 #### What it does:
-<description>
+Acrobat Reader allows to execute JavaScript code from within PDF documents. This is widely abused for exploitation and malicious activity.
 
-#### Test:
-<test steps>
+#### Test steps:
+* Prepare an PDF document with embedded JavaScript code that tries do does some action (e.g. showing an dialog)
+* Open the PDF document with Adobe Acrobat Reader and verify if the executable is executed
 
 **Expected result before hardening:**
-<xxx>
+
+* JavaScript is executed
 
 **Expected result after hardening:**
-<xxx>
 
-- **Disable execution of objects embedded in PDF documents**. Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
-### Headline
+* Javacript is not executed
+
+### Disable execution of objects embedded in PDF documents
 #### What it does:
-<description>
+Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
 
-#### Test:
-<test steps>
+#### Test steps:
+* Prepare an PDF document with an embedded object
+* Open the PDF document and verify if the embedded object is executed
 
 **Expected result before hardening:**
-<xxx>
+
+* Embedded object is executed
 
 **Expected result after hardening:**
-<xxx>
 
-- **Switch on the Protected Mode** (enabled by default in current versions)
-### Headline
+* Embedded object is not executed
+
+### Switch on the Protected Mode
 #### What it does:
-<description>
+This is enabled by default in current versions. It prevents PDF files to write to
+the registry or open executables on the client
 
-#### Test:
-<test steps>
+#### Test steps:
+* Open Adobe Reader and disable Protected Mode (if enabled)
+* Harden using Hardentools
+* Download PDF file from the Internet
+* Open downloaded file on Adobe Reader
+* Verify if Protected Mode is enabled for this file
 
 **Expected result before hardening:**
-<xxx>
+* Protected Mode is disabled
 
 **Expected result after hardening:**
-<xxx>
+* Protected Mode is enabled
 
 
-- **Switch on Protected View** for all files from untrusted sources
-### Headline
+### Switch on Protected View
 #### What it does:
-<description>
+Switches on Protected View for all files from untrusted sources
 
-#### Test:
-<test steps>
+#### Test steps:
+* Download PDF file from the Internet
+* Open downloaded file on Adobe Reader
+* Verify if Protected View is enabled for this file
 
 **Expected result before hardening:**
-<xxx>
+* Protected View is not enabled
 
 **Expected result after hardening:**
-<xxx>
+* Protected View is enabled, user can deactivate Protected View manually (via yellow message bar)
 
 
-- **Switch on Enhanced Security** (enabled by default in current versions)
-### Headline
+### Switch on Enhanced Security
 #### What it does:
-<description>
+Switches on Enhanced Security (enabled by default in current versions)
 
-#### Test:
-<test steps>
+
+With enhanced security enabled, your application “hardens” itself against risky actions by doing the 
+following for any document not specifically trusted: 
+* Prevents cross domain access. It forces requests for new content to adhere to a “same-origin” policy; that is, access to web pages and other resources originating from a domain other than your calling document is prohibited. 
+* Prohibits script and data injection via an FDF, XFDF, and XDP NOT returned as the result of a post from the PDF.
+* Blocks stream access to XObjects such as external images. 
+* Stops silent printing to a file or hardware printer. 
+* Prevents execution of high privilege JavaScript.
+
+Enhanced Security is specifically designed to let you decide what content to trust and help you selectively 
+bypass those restrictions for trusted files, folders, and hosts. These trusted domains--called privileged 
+locations--are exempt from enhanced security rules.
+
+#### Test steps:
+* Open Adobe Reader and disable enhanced security (if enabled)
+* Harden using Hardentools
+* Verify if Enhanced Security is enabled
 
 **Expected result before hardening:**
-<xxx>
+
+* Enhanced Security is disabled
 
 **Expected result after hardening:**
-<xxx>
+
+* Enhanced Security is enabled
 
 
-## Test Restore
-### Headline
+
+## Restore Original Settings
+### Complete Harden & Restore
 #### What it does:
-<description>
+You can harden all (default) settings with hardentools or just a manual subset. In this
+testcase we are testing the restore of the original settings on the system when
+doing a complete hardening.
 
-#### Test:
-<test steps>
+#### Test steps:
+* Write down the status of all the settings (see testcases above) before hardening.
+* Execute hardentools and harden all settings
+* Execute hardentools again and restore settings
+* Verify if all settings are reverted to the original settings
 
-**Expected result before hardening:**
-<xxx>
+**Note:**
+* This does not apply for the following settings, since they are currently always reverted to the default state:
+** Windows ASR settings
+** Disable file extensions mainly used for malicious purposes
 
-**Expected result after hardening:**
-<xxx>
 
-TODO: also test partial harden and restore (and that multiple times)
+### Partial Harden & Restore
+#### What it does:
+You can harden all (default) settings with hardentools or just a manual subset. In this
+testcase we are testing the restore of the original settings on the system when
+doing only a partial hardening.
+
+#### Test steps:
+* Write down the status of all the settings (see testcases above) before hardening.
+* Execute hardentools and harden a specific subset of settings only
+* Execute hardentools again and restore settings
+* Verify if all hardened settings are reverted to the original settings
+* Verify if only the hardened settings are affected upon restore
+
+**Note:**
+* This does not apply for the following settings, since they are currently always reverted to the default state:
+** Windows ASR settings
+** Disable file extensions mainly used for malicious purposes
