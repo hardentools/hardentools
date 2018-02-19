@@ -18,7 +18,10 @@ package main
 
 /**
 Windows Defender Attack Surface Reduction (ASR)
-needs Windows 10 >= 1709
+needs the following prerequisites to work:
+ Windows 10 >= 1709
+ Endpoints are using Windows Defender Antivirus as the sole antivirus protection app. Using any other antivirus app will cause Windows Defender AV to disable itself.
+ Real-time protection is enabled.
 
 More details here:
 	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
@@ -74,9 +77,14 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 
 			// Set the settings for AttackSurfaceReduction using Set-MpPreference
 			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, actionsEnumeration)
-			_, err := executeCommand("PowerShell.exe", "-Command", psString)
+			Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
+			out, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
+				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
+				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
 				return errors.New("!! Executing powershell cmdlet Set-MpPreference failed.\n")
+			} else {
+				Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 			}
 		} else {
 			Info.Println("Windows ASR not activated, since it needs at least Windows 10 - 1709")
@@ -87,9 +95,14 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			// This is how we switch off ASR again:
 			//   Remove-MpPreference -AttackSurfaceReductionRules_Ids <ID1>, <ID2>, ...
 			psString := fmt.Sprintf("Remove-MpPreference -AttackSurfaceReductionRules_Ids %s", ruleIDEnumeration)
-			_, err := executeCommand("PowerShell.exe", "-Command", psString)
+			Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
+			out, err := executeCommand("PowerShell.exe", "-Command", psString)
 			if err != nil {
+				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
+				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
 				return errors.New("!! Executing powershell cmdlet Remove-MpPreference failed.\n")
+			} else {
+				Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 			}
 		}
 	}
@@ -130,12 +143,16 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
 		ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
 		if err != nil {
+			Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
+			Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleIDsOut)
 			return false // in case command does not work we assume we are not hardened
 		}
 
 		psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
 		ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
 		if err != nil {
+			Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
+			Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleActionsOut)
 			return false // in case command does not work we assume we are not hardened
 		}
 
