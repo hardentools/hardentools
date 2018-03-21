@@ -34,7 +34,6 @@ More details here:
 import (
 	"errors"
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"golang.org/x/sys/windows/registry"
@@ -246,13 +245,4 @@ func checkWindowsVersion() bool {
 	}
 
 	return true
-}
-
-// helper method for executing powershell commands
-func executeCommand(cmd string, args ...string) (string, error) {
-	var out []byte
-	command := exec.Command(cmd, args...)
-	out, err := command.CombinedOutput()
-
-	return string(out), err
 }

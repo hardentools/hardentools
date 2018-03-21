@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -76,7 +75,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 			// Step 1: Reassociate system wide default
 			// TODO: only reassoc extensions that were also there before hardening
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
-			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+			_, err := executeCommand("cmd.exe", "/E:ON", "/C", assocString)
 			if err != nil {
 				Trace.Println("Error during reassociation of file extension " + extension.ext + ": " + err.Error())
 				lastError = err
@@ -106,7 +105,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 
 			// Step 1: Remove association (system wide default)
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
-			_, err2 := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+			_, err2 := executeCommand("cmd.exe", "/E:ON", "/C", assocString)
 			if err2 != nil {
 				Info.Println("Executing ", assocString, " failed")
 				return err2
@@ -138,7 +137,7 @@ func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 		// user settings are restored automatically when user first opens such
 		// a file
 		assocString := fmt.Sprintf("assoc %s", extension.ext)
-		out, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		out, err := executeCommand("cmd.exe", "/E:ON", "/C", assocString)
 		if err != nil {
 			Trace.Printf("isHardened?: (ok) %s (output = %s)(error=%s)", assocString, string(out[:]), err.Error())
 			hardened = true
