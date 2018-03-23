@@ -39,14 +39,14 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-var ruleIdArray = []string{"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550", //Block executable content from email client and webmail
+var ruleIDArray = []string{"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550", //Block executable content from email client and webmail
 	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A", //Block Office applications from creating child processes
 	"3B576869-A4EC-4529-8536-B80A7769E899", // Block Office applications from creating executable content
 	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84", // Block Office applications from injecting code into other processes
 	"D3E037E1-3EB8-44C8-A917-57927947596D", // Block JavaScript or VBScript from launching downloaded executable content
 	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC", // Block execution of potentially obfuscated scripts
 	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B"} // Block Win32 API calls from Office macro
-var ruleIDEnumeration = strings.Join(ruleIdArray, ",")
+var ruleIDEnumeration = strings.Join(ruleIDArray, ",")
 
 var actionsArray = []string{"Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled"}
 var actionsEnumeration = strings.Join(actionsArray, ",")
@@ -82,9 +82,8 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
 				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
 				return errors.New("!! Executing powershell cmdlet Set-MpPreference failed.\n")
-			} else {
-				Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 			}
+			Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 		} else {
 			Info.Println("Windows ASR not activated, since it needs at least Windows 10 - 1709")
 		}
@@ -100,9 +99,8 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
 				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
 				return errors.New("!! Executing powershell cmdlet Remove-MpPreference failed.\n")
-			} else {
-				Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 			}
+			Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 		}
 	}
 
@@ -168,12 +166,12 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		}
 
 		// compare to hardened state
-		for i, ruleIdHardened := range ruleIdArray {
+		for i, ruleIDHardened := range ruleIDArray {
 			// check if rule exists by iterating over all ruleIDs
 			var existsAndEqual = false
 
 			for j, currentRuleID := range currentRuleIDs {
-				if ruleIdHardened == currentRuleID {
+				if ruleIDHardened == currentRuleID {
 					// verify if setting is the same (TODO: currently works only with "Enabled")
 					if currentRuleActions[j] == "1" && actionsArray[i] == "Enabled" {
 						// everything is fine

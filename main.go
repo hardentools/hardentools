@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	"github.com/lxn/walk"
-	. "github.com/lxn/walk/declarative"
+	"github.com/lxn/walk/declarative"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -66,7 +66,7 @@ var allHardenSubjects = []HardenInterface{
 }
 
 var expertConfig map[string]bool
-var expertCompWidgetArray []Widget
+var expertCompWidgetArray []declarative.Widget
 
 var window *walk.MainWindow
 var events *walk.TextEdit
@@ -79,8 +79,8 @@ var (
 	Info  *log.Logger
 )
 
-// inits loggers
-func InitLogging(traceHandle io.Writer, infoHandle io.Writer) {
+// initLogging inits loggers
+func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 	Trace = log.New(traceHandle,
 		"TRACE: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
@@ -230,24 +230,24 @@ func main() {
 					panic(err)
 				}
 
-				InitLogging(ioutil.Discard, logfile)
+				initLogging(ioutil.Discard, logfile)
 			} else if strings.EqualFold(f.Value.String(), "Trace") {
 				var logfile, err = os.Create(logpath)
 				if err != nil {
 					panic(err)
 				}
 
-				InitLogging(logfile, logfile)
+				initLogging(logfile, logfile)
 			} else {
 				// Off
-				InitLogging(ioutil.Discard, ioutil.Discard)
+				initLogging(ioutil.Discard, ioutil.Discard)
 			}
 		}
 	})
 
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
-	expertCompWidgetArray = make([]Widget, len(allHardenSubjects))
+	expertCompWidgetArray = make([]declarative.Widget, len(allHardenSubjects))
 	var checkBoxArray = make([]*walk.CheckBox, len(allHardenSubjects))
 
 	for i, hardenSubject := range allHardenSubjects {
@@ -272,7 +272,7 @@ func main() {
 			enableField = false
 		}
 
-		expertCompWidgetArray[i] = CheckBox{
+		expertCompWidgetArray[i] = declarative.CheckBox{
 			AssignTo:         &checkBoxArray[i],
 			Name:             hardenSubject.Name(),
 			Text:             hardenSubject.LongName(),
@@ -296,35 +296,35 @@ func main() {
 	}
 
 	// build up main GUI window
-	MainWindow{
+	declarative.MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{500, 600},
-		Layout:   VBox{},
-		DataBinder: DataBinder{
+		MinSize:  declarative.Size{500, 600},
+		Layout:   declarative.VBox{},
+		DataBinder: declarative.DataBinder{
 			DataSource: expertConfig,
 			AutoSubmit: true,
 		},
-		Children: []Widget{
-			Label{Text: labelText},
-			PushButton{
+		Children: []declarative.Widget{
+			declarative.Label{Text: labelText},
+			declarative.PushButton{
 				Text:      buttonText,
 				OnClicked: buttonFunc,
 			},
-			ProgressBar{
+			declarative.ProgressBar{
 				AssignTo: &progress,
 			},
-			TextEdit{
+			declarative.TextEdit{
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
-				MinSize:  Size{500, 250},
+				MinSize:  declarative.Size{500, 250},
 			},
-			HSpacer{},
-			HSpacer{},
-			Label{Text: expertSettingsText},
-			Composite{
-				Layout:   Grid{Columns: 3},
+			declarative.HSpacer{},
+			declarative.HSpacer{},
+			declarative.Label{Text: expertSettingsText},
+			declarative.Composite{
+				Layout:   declarative.Grid{Columns: 3},
 				Border:   true,
 				Children: expertCompWidgetArray,
 			},
@@ -341,7 +341,7 @@ func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 	var i = n
 	var hardenSubjectName = hardenSubjName
 	return func() {
-		x := *(expertCompWidgetArray[i]).(CheckBox).AssignTo
+		x := *(expertCompWidgetArray[i]).(declarative.CheckBox).AssignTo
 		isChecked := x.CheckState()
 		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
 	}

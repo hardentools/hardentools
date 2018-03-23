@@ -69,7 +69,7 @@ var FileAssociations = ExplorerAssociations{
 func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
-		var lastError error = nil
+		var lastError error
 
 		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
@@ -91,7 +91,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	} else {
 		// Harden.
 		for _, extension := range explAssoc.extensions {
-			var openWithProgidsDoesNotExist bool = false
+			var openWithProgidsDoesNotExist = false
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
 			if err != nil {
@@ -130,7 +130,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 // this returns hardened, even if only one extension is hardened (to prevent
 // restore from not beeing executed), due to errors in hardening quite common
 func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
-	var hardened bool = false
+	var hardened = false
 
 	for _, extension := range explAssoc.extensions {
 		// Check only system wide association (system wide default), since

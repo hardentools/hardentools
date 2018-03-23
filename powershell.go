@@ -70,7 +70,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("!! OpenKey to enable Powershell and cmd failed.\n")
+			return errors.New("!! OpenKey to enable Powershell and cmd failed\n")
 		}
 		defer keyDisallow.Close()
 
@@ -83,9 +83,8 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 				if err != nil {
 					errorText := fmt.Sprintf("Could not restore %s by deleting corresponding registry value due to error: %s", value, err.Error())
 					return errors.New(errorText)
-				} else {
-					Trace.Printf("Restored %s by deleting corresponding registry value", value)
 				}
+				Trace.Printf("Restored %s by deleting corresponding registry value", value)
 			}
 		}
 	} else {
@@ -94,7 +93,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("!! CreateKey to disable powershell failed.\n")
+			return errors.New("!! CreateKey to disable powershell failed\n")
 		}
 		defer keyDisallow.Close()
 
