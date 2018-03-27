@@ -183,21 +183,21 @@ var OfficeDDE = &MultiHardenInterfaces{
 //// HardenInterface methods
 
 // hardens OfficeRegistryRegExSingleDWORD registry values
-func (regValue OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
+func (officeRegEx OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 
-	for _, officeVersion := range regValue.OfficeVersions {
-		for _, officeApp := range regValue.OfficeApps {
-			path := fmt.Sprintf(regValue.PathRegEx, officeVersion, officeApp)
+	for _, officeVersion := range officeRegEx.OfficeVersions {
+		for _, officeApp := range officeRegEx.OfficeApps {
+			path := fmt.Sprintf(officeRegEx.PathRegEx, officeVersion, officeApp)
 
 			// build a RegistrySingleValueDWORD so we can reuse the Harden() method
 			var singleDWORD = &RegistrySingleValueDWORD{
-				RootKey:       regValue.RootKey,
+				RootKey:       officeRegEx.RootKey,
 				Path:          path,
-				ValueName:     regValue.ValueName,
-				HardenedValue: regValue.HardenedValue,
-				shortName:     regValue.shortName,
-				longName:      regValue.longName,
-				description:   regValue.description,
+				ValueName:     officeRegEx.ValueName,
+				HardenedValue: officeRegEx.HardenedValue,
+				shortName:     officeRegEx.shortName,
+				longName:      officeRegEx.longName,
+				description:   officeRegEx.description,
 			}
 
 			// call RegistrySingleValueDWORD Harden method to Harden or Restore.
