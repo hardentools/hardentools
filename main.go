@@ -39,6 +39,8 @@ const defaultLogLevel = "Info"
 // be considered
 // Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun, WindowsASR
 var allHardenSubjects = []HardenInterface{
+	//Experimental / read only
+	InstSoftware,
 	// WSH.
 	WSH,
 	// Office.
