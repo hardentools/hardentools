@@ -26,16 +26,23 @@ type InstalledSoftware struct {
 	shortName   string
 	longName    string
 	description string
-	rootKey     registry.Key
-	path        string
+}
+
+type registryKeys struct {
+	rootKey registry.Key
+	path    string
+}
+
+type installedSoftwareComponent struct {
+	displayName    string
+	displayVersion string
+	publisher      string
 }
 
 var InstSoftware = &InstalledSoftware{
 	shortName:   "ShowInstalledSoftware",
 	longName:    "Show Installed Software",
 	description: "Shows installed software",
-	rootKey:     registry.LOCAL_MACHINE,
-	path:        "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall",
 }
 
 func (software InstalledSoftware) Harden(harden bool) error {
@@ -60,69 +67,49 @@ func (software InstalledSoftware) IsHardened() bool {
 	}
 
 	// Software from Uninstall registry keys
-
-	/* TODO (from https://github.com/Jean13/CVE_Compare/tree/master/go):
-
-	if ($arch -eq "64-bit")
-
-	{
-
-	  # Get installed packages information (Windows 64-bit)
-
-	  $a = Get-ItemProperty HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*
-
-	  $b = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*
-
-	  $c = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*
-
-	  $registries = $a + $b + $c
-
+	regKeysUninstall := []registryKeys{
+		{registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"},
+		{registry.LOCAL_MACHINE, "SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall"},
+		{registry.CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"},
 	}
 
+	foundSoftware := make(map[string]installedSoftwareComponent)
 
-
-	# Else, try Windows 32-bit
-
-	else
-
-	{
-
-	  # Get installed packages information (Windows 32-bit)
-
-	  $a = Get-ItemProperty HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*
-
-	  $b = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*
-
-	  $registries = $a + $b
-
-	}*/
-
-	key, err := registry.OpenKey(software.rootKey, software.path, registry.READ)
-	if err != nil {
-		Info.Printf("Could not open registry key %s due to error %s", software.path, err.Error())
-		return false
-	}
-	defer key.Close()
-
-	keyInfo, _ := key.Stat()
-	subKeys, err := key.ReadSubKeyNames(int(keyInfo.SubKeyCount))
-	if err != nil {
-		Info.Printf("Could not read sub keys of registry key %s due to error %s", software.path, err.Error())
-		return false
-	}
-
-	for i := 1; i < len(subKeys); i++ {
-		//Info.Printf("Subkey: %s", subKeys[i])
-		subKey, err := registry.OpenKey(software.rootKey, software.path+"\\"+subKeys[i], registry.READ)
+	for i := 0; i < len(regKeysUninstall); i++ {
+		//Info.Printf("%d:%s", regKeysUninstall[i].rootKey, regKeysUninstall[i].path)
+		key, err := registry.OpenKey(regKeysUninstall[i].rootKey, regKeysUninstall[i].path, registry.READ)
 		if err != nil {
-			Info.Printf("Could not open registry key %s due to error %s", subKeys[i], err.Error())
+			Info.Printf("Could not open registry key %s due to error %s", regKeysUninstall[i].path, err.Error())
 			return false
 		}
-		defer subKey.Close()
-		displayName, _, _ := subKey.GetStringValue("DisplayName")
-		displayVersion, _, _ := subKey.GetStringValue("DisplayVersion")
-		publisher, _, _ := subKey.GetStringValue("Publisher")
-		Info.Printf("%s: %s %s (%s)", subKeys[i], displayName, displayVersion, publisher)
+		defer key.Close()
+
+		keyInfo, _ := key.Stat()
+		subKeys, err := key.ReadSubKeyNames(int(keyInfo.SubKeyCount))
+		if err != nil {
+			Info.Printf("Could not read sub keys of registry key %s due to error %s", regKeysUninstall[i].path, err.Error())
+			return false
+		}
+
+		for j := 0; j < len(subKeys); j++ {
+			subKey, err := registry.OpenKey(regKeysUninstall[i].rootKey, regKeysUninstall[i].path+"\\"+subKeys[j], registry.READ)
+			if err != nil {
+				Info.Printf("Could not open registry key %s due to error %s", subKeys[j], err.Error())
+				return false
+			}
+			defer subKey.Close()
+
+			displayName, _, _ := subKey.GetStringValue("DisplayName")
+			displayVersion, _, _ := subKey.GetStringValue("DisplayVersion")
+			publisher, _, _ := subKey.GetStringValue("Publisher")
+			//Info.Printf("%s: %s %s (%s)", subKeys[j], displayName, displayVersion, publisher)
+			newSoftwareFound := installedSoftwareComponent{displayName, displayVersion, publisher}
+			foundSoftware[subKeys[j]] = newSoftwareFound
+		}
+	}
+
+	for key, soft := range foundSoftware {
+		Info.Printf("%s: %s %s (%s)", key, soft.displayName, soft.displayVersion, soft.publisher)
 	}
 
 	// get patch level
