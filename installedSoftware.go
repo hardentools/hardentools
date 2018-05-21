@@ -172,6 +172,8 @@ func getWindowsVersion() (CurrentMajorVersionNumber, CurrentMinorVersionNumber u
 	}
 	defer k.Close()
 
+	// BUG: This does not work with Windows 8.1! There is only CurrentBuild and CurrentVersion (which include Major and Minor, e.g. "6.3")
+
 	maj, _, err := k.GetIntegerValue("CurrentMajorVersionNumber")
 	if err != nil {
 		return 0, 0, "", errors.New("Could not get version information from registry")
