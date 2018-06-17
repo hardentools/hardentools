@@ -18,11 +18,11 @@ build:
 	@echo "[builder] Building Windows executable"
 	@mkdir -p $(BUILD_FOLDER)/
 
-	$GOPATH/bin/rsrc -manifest harden.manifest -ico harden.ico -o rsrc.syso
+	$(GOPATH)/bin/rsrc -manifest harden.manifest -ico harden.ico -o rsrc.syso
 	$(FLAGS_WINDOWS) go build --ldflags '-s -w -extldflags "-static" -H windowsgui' -o ($BUILD_FOLDER)/hardentools.exe
 
 	@echo "[builder] Done!"
 
 clean:
 	rm -f rsrc.syso
-	rm -f $(BUILD_FOLDER)
+	rm -rf $(BUILD_FOLDER)
