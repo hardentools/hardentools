@@ -17,9 +17,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-
+	"errors"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -243,7 +242,7 @@ func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValu
 	rootKeyName, _ := getRootKeyName(rootKey)
 	key, _, err := registry.CreateKey(rootKey, path, registry.WRITE)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Couldn't create / open registry key for write access: %s\\%s", rootKeyName, path))
+		return fmt.Errorf("Couldn't create / open registry key for write access: %s\\%s", rootKeyName, path)
 	}
 	defer key.Close()
 
@@ -255,7 +254,7 @@ func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValu
 	// Harden.
 	err = key.SetDWordValue(valueName, hardenedValue)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Couldn't set registry value: %s \\ %s \\ %s", rootKeyName, path, valueName))
+		return fmt.Errorf("Couldn't set registry value: %s \\ %s \\ %s", rootKeyName, path, valueName)
 	}
 
 	return nil

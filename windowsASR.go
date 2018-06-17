@@ -32,10 +32,9 @@ More details here:
 */
 
 import (
-	"errors"
 	"fmt"
+	"errors"
 	"strings"
-
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -134,68 +133,63 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			D4F940AB-401B-4EFC-AADC-AD5F3C50688A
 */
 func (asr WindowsASRStruct) IsHardened() bool {
-	var hardened = false
-
-	if checkWindowsVersion() {
-		psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
-		ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
-		if err != nil {
-			Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
-			Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleIDsOut)
-			return false // in case command does not work we assume we are not hardened
-		}
-
-		psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
-		ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
-		if err != nil {
-			Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
-			Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleActionsOut)
-			return false // in case command does not work we assume we are not hardened
-		}
-
-		//// verify if all relevant ruleIDs are there
-		// split / remove line feeds and carriage return
-		currentRuleIDs := strings.Split(ruleIDsOut, "\r\n")
-		currentRuleActions := strings.Split(ruleActionsOut, "\r\n")
-
-		// just some debug output
-		for i, ruleIDdebug := range currentRuleIDs {
-			if len(ruleIDdebug) > 0 {
-				Trace.Printf("ruleID %d = %s with action = %s\n", i, ruleIDdebug, currentRuleActions[i])
-			}
-		}
-
-		// compare to hardened state
-		for i, ruleIDHardened := range ruleIDArray {
-			// check if rule exists by iterating over all ruleIDs
-			var existsAndEqual = false
-
-			for j, currentRuleID := range currentRuleIDs {
-				if ruleIDHardened == currentRuleID {
-					// verify if setting is the same (TODO: currently works only with "Enabled")
-					if currentRuleActions[j] == "1" && actionsArray[i] == "Enabled" {
-						// everything is fine
-						existsAndEqual = true
-					} else {
-						// break here
-						return false
-					}
-				}
-			}
-
-			if existsAndEqual == false {
-				// break here
-				return false
-			}
-		}
-
-		return true // seems all relevant hardening is in place
-	} else {
-		// Windows ASR can not be hardened, since Windows it too old (need at least Windows 10 - 1709)
+	if !checkWindowsVersion() {
 		return false
 	}
 
-	return hardened
+	psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
+	ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+	if err != nil {
+		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
+		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleIDsOut)
+		return false // in case command does not work we assume we are not hardened
+	}
+
+	psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
+	ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+	if err != nil {
+		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
+		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleActionsOut)
+		return false // in case command does not work we assume we are not hardened
+	}
+
+	//// verify if all relevant ruleIDs are there
+	// split / remove line feeds and carriage return
+	currentRuleIDs := strings.Split(ruleIDsOut, "\r\n")
+	currentRuleActions := strings.Split(ruleActionsOut, "\r\n")
+
+	// just some debug output
+	for i, ruleIDdebug := range currentRuleIDs {
+		if len(ruleIDdebug) > 0 {
+			Trace.Printf("ruleID %d = %s with action = %s\n", i, ruleIDdebug, currentRuleActions[i])
+		}
+	}
+
+	// compare to hardened state
+	for i, ruleIDHardened := range ruleIDArray {
+		// check if rule exists by iterating over all ruleIDs
+		var existsAndEqual = false
+
+		for j, currentRuleID := range currentRuleIDs {
+			if ruleIDHardened == currentRuleID {
+				// verify if setting is the same (TODO: currently works only with "Enabled")
+				if currentRuleActions[j] == "1" && actionsArray[i] == "Enabled" {
+					// everything is fine
+					existsAndEqual = true
+				} else {
+					// break here
+					return false
+				}
+			}
+		}
+
+		if existsAndEqual == false {
+			// break here
+			return false
+		}
+	}
+
+	return true // seems all relevant hardening is in place
 }
 
 func (asr WindowsASRStruct) Name() string {
