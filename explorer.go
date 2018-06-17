@@ -18,7 +18,6 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -70,13 +69,13 @@ var FileAssociations = ExplorerAssociations{
 func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
-		var lastError error = nil
+		var lastError error
 
 		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
 			// TODO: only reassoc extensions that were also there before hardening
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
-			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+			_, err := executeCommand("cmd.exe", "/E:ON", "/C", assocString)
 			if err != nil {
 				Trace.Println("Error during reassociation of file extension " + extension.ext + ": " + err.Error())
 				lastError = err
@@ -92,7 +91,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	} else {
 		// Harden.
 		for _, extension := range explAssoc.extensions {
-			var openWithProgidsDoesNotExist bool = false
+			var openWithProgidsDoesNotExist = false
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
 			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
 			if err != nil {
@@ -106,7 +105,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 
 			// Step 1: Remove association (system wide default)
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
-			_, err2 := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+			_, err2 := executeCommand("cmd.exe", "/E:ON", "/C", assocString)
 			if err2 != nil {
 				Info.Println("Executing ", assocString, " failed")
 				return err2
@@ -131,14 +130,14 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 // this returns hardened, even if only one extension is hardened (to prevent
 // restore from not beeing executed), due to errors in hardening quite common
 func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
-	var hardened bool = false
+	var hardened = false
 
 	for _, extension := range explAssoc.extensions {
 		// Check only system wide association (system wide default), since
 		// user settings are restored automatically when user first opens such
 		// a file
 		assocString := fmt.Sprintf("assoc %s", extension.ext)
-		out, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		out, err := executeCommand("cmd.exe", "/E:ON", "/C", assocString)
 		if err != nil {
 			Trace.Printf("isHardened?: (ok) %s (output = %s)(error=%s)", assocString, string(out[:]), err.Error())
 			hardened = true

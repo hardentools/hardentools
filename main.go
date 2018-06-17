@@ -17,16 +17,23 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
-	//	"io/ioutil"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/lxn/walk"
-	. "github.com/lxn/walk/declarative"
+	"github.com/lxn/walk/declarative"
 	"golang.org/x/sys/windows/registry"
 )
+
+// global configuration constants
+const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
+const logpath = "hardentools.log"
+const defaultLogLevel = "Info"
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
@@ -59,13 +66,11 @@ var allHardenSubjects = []HardenInterface{
 }
 
 var expertConfig map[string]bool
-var expertCompWidgetArray []Widget
+var expertCompWidgetArray []declarative.Widget
 
 var window *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
-
-const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
 
 // Loggers for log output (we only need info and trace, errors have to be
 // displayed in the GUI)
@@ -74,8 +79,8 @@ var (
 	Info  *log.Logger
 )
 
-// inits logger
-func InitLogging(traceHandle io.Writer, infoHandle io.Writer) {
+// initLogging inits loggers
+func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 	Trace = log.New(traceHandle,
 		"TRACE: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
@@ -85,6 +90,8 @@ func InitLogging(traceHandle io.Writer, infoHandle io.Writer) {
 		log.Ldate|log.Ltime|log.Lshortfile)
 }
 
+// checks status of hardentools registry key
+// (that tells if user environment is hardened / not hardened)
 func checkStatus() bool {
 	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
 	if err != nil {
@@ -104,6 +111,8 @@ func checkStatus() bool {
 	return false
 }
 
+// sets hardentools status registry key
+// (that tells if user environment is hardened / not hardened)
 func markStatus(hardened bool) {
 
 	if hardened {
@@ -131,6 +140,7 @@ func markStatus(hardened bool) {
 	}
 }
 
+// starts harden procedure
 func hardenAll() {
 	triggerAll(true)
 	markStatus(true)
@@ -139,6 +149,7 @@ func hardenAll() {
 	os.Exit(0)
 }
 
+// starts restore procedure
 func restoreAll() {
 	triggerAll(false)
 	markStatus(false)
@@ -147,6 +158,9 @@ func restoreAll() {
 	os.Exit(0)
 }
 
+// triggerAll is used for harden and restore, depending on the harden parameter
+// harden == true => harden
+// harden == false => restore
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
@@ -179,6 +193,8 @@ func triggerAll(harden bool) {
 
 }
 
+// iterates all harden subjects and prints status of each (checks real status
+// on system)
 func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
@@ -193,24 +209,45 @@ func showStatus() {
 	}
 }
 
+// main method for hardentools
 func main() {
+	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
 	var buttonFunc func()
 	var status = checkStatus()
 
-	// Init logging
-	var logpath = "hardentools.log"
-	var logfile, err = os.Create(logpath)
-	if err != nil {
-		// do nothing for now
-		//panic(err)
-	}
-	InitLogging(logfile, logfile) // use this for developing/testing
-	//InitLogging(ioutil.Discard, logfile)  // use this for production use
+	// parse command line parameters/flags
+	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
+	flag.Parse()
+	flag.VisitAll(func(f *flag.Flag) {
+		//fmt.Printf("%s = \"%s\"\n", f.Name, f.Value.String())
+		// only supports log-level right now
+		if f.Name == "log-level" {
+			// Init logging
+			if strings.EqualFold(f.Value.String(), "Info") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(ioutil.Discard, logfile)
+			} else if strings.EqualFold(f.Value.String(), "Trace") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(logfile, logfile)
+			} else {
+				// Off
+				initLogging(ioutil.Discard, ioutil.Discard)
+			}
+		}
+	})
 
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
-	expertCompWidgetArray = make([]Widget, len(allHardenSubjects))
+	expertCompWidgetArray = make([]declarative.Widget, len(allHardenSubjects))
 	var checkBoxArray = make([]*walk.CheckBox, len(allHardenSubjects))
 
 	for i, hardenSubject := range allHardenSubjects {
@@ -235,7 +272,7 @@ func main() {
 			enableField = false
 		}
 
-		expertCompWidgetArray[i] = CheckBox{
+		expertCompWidgetArray[i] = declarative.CheckBox{
 			AssignTo:         &checkBoxArray[i],
 			Name:             hardenSubject.Name(),
 			Text:             hardenSubject.LongName(),
@@ -245,6 +282,7 @@ func main() {
 		}
 	}
 
+	// set labels / text fields (harden or restore)
 	if status == false {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
@@ -257,50 +295,53 @@ func main() {
 		expertSettingsText = "The following hardened features are going to be restored:"
 	}
 
-	MainWindow{
+	// build up main GUI window
+	declarative.MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  Size{500, 600},
-		Layout:   VBox{},
-		DataBinder: DataBinder{
+		MinSize:  declarative.Size{500, 600},
+		Layout:   declarative.VBox{},
+		DataBinder: declarative.DataBinder{
 			DataSource: expertConfig,
 			AutoSubmit: true,
 		},
-		Children: []Widget{
-			Label{Text: labelText},
-			PushButton{
+		Children: []declarative.Widget{
+			declarative.Label{Text: labelText},
+			declarative.PushButton{
 				Text:      buttonText,
 				OnClicked: buttonFunc,
 			},
-			ProgressBar{
+			declarative.ProgressBar{
 				AssignTo: &progress,
 			},
-			TextEdit{
+			declarative.TextEdit{
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
-				MinSize:  Size{500, 250},
+				MinSize:  declarative.Size{500, 250},
 			},
-			HSpacer{},
-			HSpacer{},
-			Label{Text: expertSettingsText},
-			Composite{
-				Layout:   Grid{Columns: 3},
+			declarative.HSpacer{},
+			declarative.HSpacer{},
+			declarative.Label{Text: expertSettingsText},
+			declarative.Composite{
+				Layout:   declarative.Grid{Columns: 3},
 				Border:   true,
 				Children: expertCompWidgetArray,
 			},
 		},
 	}.Create()
 
+	// start main GUI
 	window.Run()
 }
 
-// generates a function that is used as an walk.EventHandler for the expert CheckBoxes
+// this function generates a function that is used as an walk.EventHandler
+// for the expert CheckBoxes in main GUI
 func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 	var i = n
 	var hardenSubjectName = hardenSubjName
 	return func() {
-		x := *(expertCompWidgetArray[i]).(CheckBox).AssignTo
+		x := *(expertCompWidgetArray[i]).(declarative.CheckBox).AssignTo
 		isChecked := x.CheckState()
 		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
 	}
