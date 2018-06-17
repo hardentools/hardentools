@@ -17,9 +17,34 @@
 package main
 
 import (
-	"golang.org/x/sys/windows/registry"
+	"errors"
+	"fmt"
 	"strconv"
+
+	"golang.org/x/sys/windows/registry"
 )
+
+type PowerShellDisallowRunMembers struct {
+	shortName   string
+	longName    string
+	description string
+}
+
+var PowerShell = &MultiHardenInterfaces{
+	shortName:   "PowerShell",
+	longName:    "Powershell and cmd.exe",
+	description: "Disables Powershell, Powershell ISE and cmd.exe",
+	hardenInterfaces: []HardenInterface{
+		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers"},
+
+		&RegistrySingleValueDWORD{
+			RootKey:       registry.CURRENT_USER,
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
+			ValueName:     "DisallowRun",
+			HardenedValue: 0x1,
+			shortName:     "PowerShell_DisallowRun"},
+	},
+}
 
 // Disables Powershell and cmd.exe
 //  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
@@ -28,17 +53,9 @@ import (
 //  "1"="powershell_ise.exe"
 //  "2"="powershell.exe"
 //  "3"="cmd.exe"
-
-func triggerPowerShell(harden bool) {
-	keyExplorerName := "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
-	keyExplorer, _, _ := registry.CreateKey(registry.CURRENT_USER, keyExplorerName, registry.ALL_ACCESS)
-	hardentoolsKey, _, _ := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
-
+func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
-		events.AppendText("Restoring original settings by enabling Powershell and cmd\n")
-
-		// Set DisallowRun to old value / delete if no old value saved.
-		restoreKey(keyExplorer, keyExplorerName, "DisallowRun")
+		// Restore.
 
 		// delete values for disallowed executables (by iterating all existing values)
 		// TODO: This only works if the hardentools values are the last
@@ -50,35 +67,36 @@ func triggerPowerShell(harden bool) {
 		//       with the hardentools created ones (it has to be decided
 		//       if this is a bug or a feature
 
+		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			events.AppendText("!! OpenKey to enable Powershell and cmd failed.\n")
+			return errors.New("!! OpenKey to enable Powershell and cmd failed.\n")
 		}
+		defer keyDisallow.Close()
 
 		for i := 1; i < 100; i++ {
 			value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
 
 			switch value {
 			case "powershell_ise.exe", "powershell.exe", "cmd.exe":
-				keyDisallow.DeleteValue(strconv.Itoa(i))
+				err := keyDisallow.DeleteValue(strconv.Itoa(i))
+				if err != nil {
+					errorText := fmt.Sprintf("Could not restore %s by deleting corresponding registry value due to error: %s", value, err.Error())
+					return errors.New(errorText)
+				} else {
+					Trace.Printf("Restored %s by deleting corresponding registry value", value)
+				}
 			}
 		}
-
-		keyDisallow.Close()
 	} else {
-		events.AppendText("Hardening by disabling Powershell and cmd\n")
+		// Harden.
 
-		// Save original state of "DisallowRun" value to be able to restore it.
-		saveOriginalRegistryDWORD(keyExplorer, keyExplorerName, "DisallowRun")
-
-		// Create DisallowRun key.
+		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			events.AppendText("!! CreateKey to disable powershell failed.\n")
+			return errors.New("!! CreateKey to disable powershell failed.\n")
 		}
-
-		// Enable DisallowRun.
-		keyExplorer.SetDWordValue("DisallowRun", 0x1)
+		defer keyDisallow.Close()
 
 		// Find starting point (only relevant if there are existing entries)
 		startingPoint := 1
@@ -91,13 +109,65 @@ func triggerPowerShell(harden bool) {
 		}
 
 		// Set values.
-		keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
-		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
-		keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
+		if err != nil {
+			return errors.New("!! Could not disable PowerShell ISE due to error " + err.Error())
+		}
 
-		keyDisallow.Close()
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
+		if err != nil {
+			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+		}
+
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+2), "cmd.exe")
+		if err != nil {
+			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
+		}
 	}
 
-	keyExplorer.Close()
-	hardentoolsKey.Close()
+	return nil
+}
+
+func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
+	var (
+		powerShellIseFound, powerShellFound, cmdExeFound bool = false, false, false
+	)
+
+	keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.READ)
+	if err != nil {
+		Info.Printf("Could not open registry key Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun due to error %s", err.Error())
+		return false
+	}
+	defer keyDisallow.Close()
+
+	for i := 1; i < 100; i++ {
+		value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
+
+		switch value {
+		case "powershell_ise.exe":
+			powerShellIseFound = true
+		case "powershell.exe":
+			powerShellFound = true
+		case "cmd.exe":
+			cmdExeFound = true
+		}
+	}
+
+	if powerShellIseFound && powerShellFound && cmdExeFound {
+		return true
+	}
+
+	return false
+}
+
+func (pwShell PowerShellDisallowRunMembers) Name() string {
+	return pwShell.shortName
+}
+
+func (pwShell PowerShellDisallowRunMembers) LongName() string {
+	return pwShell.longName
+}
+
+func (pwShell PowerShellDisallowRunMembers) Description() string {
+	return pwShell.description
 }

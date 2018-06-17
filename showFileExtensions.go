@@ -20,34 +20,29 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// Autorun
-
-// - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoDriveTypeAutoRun
-// - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
-// - HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
-
-var Autorun = &RegistryMultiValue{
+//// Unhide Explorer File Extensions
+var ShowFileExt = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
 		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
-			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-			ValueName:     "NoDriveTypeAutoRun",
-			HardenedValue: 0xb5,
-			shortName:     "Autorun_NoDriveTypeAutoRun"},
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+			ValueName:     "HideFileExt",
+			HardenedValue: 0x00000000,
+			shortName:     "ShowFileExt_FileExt"},
 
 		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
-			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-			ValueName:     "NoAutorun",
-			HardenedValue: 1,
-			shortName:     "Autorun_NoAutorung"},
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+			ValueName:     "Hidden",
+			HardenedValue: 0x00000001,
+			shortName:     "ShowFileExt_Hidden"},
 
 		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
-			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers",
-			ValueName:     "DisableAutoplay",
-			HardenedValue: 1,
-			shortName:     "Autorun_Autplay"}},
-	shortName: "Autorun",
-	longName:  "AutoRun and AutoPlay",
+			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+			ValueName:     "ShowSuperHidden",
+			HardenedValue: 0x00000001,
+			shortName:     "ShowFileExt_SuperHidden"}},
+	shortName: "ShowFileExt",
+	longName:  "Show File Extensions",
 }

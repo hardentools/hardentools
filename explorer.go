@@ -18,8 +18,9 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows/registry"
 	"os/exec"
+
+	"golang.org/x/sys/windows/registry"
 )
 
 // What better not to disable:
@@ -37,14 +38,20 @@ import (
 // - .VBE Visual Basic Script Encoded, mainly malicious
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
 
-func triggerFileAssociation(harden bool) {
+type Extension struct {
+	ext   string
+	assoc string
+}
 
-	type Extension struct {
-		ext   string
-		assoc string
-	}
+type ExplorerAssociations struct {
+	extensions  []Extension
+	shortName   string
+	longName    string
+	description string
+}
 
-	var extensions = []Extension{
+var FileAssociations = ExplorerAssociations{
+	extensions: []Extension{
 		{".hta", "htafile"},
 		{".js", "JSFile"},
 		{".JSE", "JSEFile"},
@@ -54,43 +61,103 @@ func triggerFileAssociation(harden bool) {
 		{".scr", "scrfile"},
 		{".vbs", "VBSFile"},
 		{".VBE", "VBEFile"},
-		{".pif", "piffile"},
-	}
+		{".pif", "piffile"}},
+	shortName: "FileAssociations",
+	longName:  "File associations",
+}
 
+// Harden/Restore explorer associations
+func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	if harden == false {
-		events.AppendText("Restoring default settings by enabling potentially malicious file associations\n")
+		// Restore.
+		var lastError error = nil
 
-		for _, extension := range extensions {
+		for _, extension := range explAssoc.extensions {
 			// Step 1: Reassociate system wide default
+			// TODO: only reassoc extensions that were also there before hardening
 			assocString := fmt.Sprintf("assoc %s=%s", extension.ext, extension.assoc)
 			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
 			if err != nil {
-				events.AppendText("error occured")
-				events.AppendText(fmt.Sprintln("%s", err))
+				Trace.Println("Error during reassociation of file extension " + extension.ext + ": " + err.Error())
+				lastError = err
 			}
 
 			// Step 2 (Reassociate user defaults) is not necessary, since this is automatically done by Windows on first usage
 		}
-	} else {
-		events.AppendText("Hardening by disabling potentially malicious file associations\n")
 
-		for _, extension := range extensions {
+		if lastError != nil {
+			return nil // just return nil for now, since errors are quite normal
+			//return lastError
+		}
+	} else {
+		// Harden.
+		for _, extension := range explAssoc.extensions {
+			var openWithProgidsDoesNotExist bool = false
 			regKeyString := fmt.Sprintf("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithProgids", extension.ext)
-			regKey, _ := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
+			regKey, err := registry.OpenKey(registry.CURRENT_USER, regKeyString, registry.ALL_ACCESS)
+			if err != nil {
+				Trace.Println("Could not open: CURRENT_USER\\", regKeyString)
+
+				// do not return an error, because it seems to be quite common that this does not exist for different extensions;
+				// just remember this for later
+				openWithProgidsDoesNotExist = true
+			}
+			defer regKey.Close()
 
 			// Step 1: Remove association (system wide default)
 			assocString := fmt.Sprintf("assoc %s=", extension.ext)
-			_, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
-			if err != nil {
-				events.AppendText("error occured")
-				events.AppendText(fmt.Sprintln("%s", err))
+			_, err2 := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+			if err2 != nil {
+				Info.Println("Executing ", assocString, " failed")
+				return err2
 			}
+
 			// Step 2: Remove user association
-			valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
-			for _, valueName := range valueNames {
-				regKey.DeleteValue(valueName)
+			if !openWithProgidsDoesNotExist {
+				valueNames, _ := regKey.ReadValueNames(100) // just used "100" because there shouldn't be more entries (default is one entry)
+				for _, valueName := range valueNames {
+					err3 := regKey.DeleteValue(valueName)
+					if err3 != nil {
+						Info.Println("Removing user association ", valueName, " failed")
+						return err3
+					}
+				}
 			}
-			regKey.Close()
 		}
 	}
+	return nil
+}
+
+// this returns hardened, even if only one extension is hardened (to prevent
+// restore from not beeing executed), due to errors in hardening quite common
+func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
+	var hardened bool = false
+
+	for _, extension := range explAssoc.extensions {
+		// Check only system wide association (system wide default), since
+		// user settings are restored automatically when user first opens such
+		// a file
+		assocString := fmt.Sprintf("assoc %s", extension.ext)
+		out, err := exec.Command("cmd.exe", "/E:ON", "/C", assocString).Output()
+		if err != nil {
+			Trace.Printf("isHardened?: (ok) %s (output = %s)(error=%s)", assocString, string(out[:]), err.Error())
+			hardened = true
+		} else {
+			Trace.Printf("isHardened?: (not) %s (output = %s)", assocString, string(out[:]))
+		}
+	}
+
+	return hardened
+}
+
+func (explAssoc ExplorerAssociations) Name() string {
+	return explAssoc.shortName
+}
+
+func (explAssoc ExplorerAssociations) LongName() string {
+	return explAssoc.longName
+}
+
+func (explAssoc ExplorerAssociations) Description() string {
+	return explAssoc.description
 }

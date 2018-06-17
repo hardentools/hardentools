@@ -20,19 +20,11 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-func triggerWSH(harden bool) {
-	keyName := "SOFTWARE\\Microsoft\\Windows Script Host\\Settings"
-	key, _, _ := registry.CreateKey(registry.CURRENT_USER, keyName, registry.ALL_ACCESS)
-	valueName := "Enabled"
-
-	if harden == false {
-		events.AppendText("Restoring original settings for Windows Script Host\n")
-		restoreKey(key, keyName, valueName)
-	} else {
-		events.AppendText("Hardening by disabling Windows Script Host\n")
-		saveOriginalRegistryDWORD(key, keyName, valueName)
-		key.SetDWordValue(valueName, 0)
-	}
-
-	key.Close()
-}
+var WSH = &RegistrySingleValueDWORD{
+	RootKey:       registry.CURRENT_USER,
+	Path:          "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
+	ValueName:     "Enabled",
+	HardenedValue: 0,
+	shortName:     "WSH",
+	longName:      "Windows Script Host",
+	description:   "Windows Script Host"}
