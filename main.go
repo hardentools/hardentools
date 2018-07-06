@@ -24,6 +24,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	//"time"
 
 	"github.com/lxn/walk"
 	"github.com/lxn/walk/declarative"
@@ -71,6 +72,7 @@ var expertConfig map[string]bool
 var expertCompWidgetArray []declarative.Widget
 
 var window *walk.MainWindow
+var splashWindow *walk.MainWindow
 var events *walk.TextEdit
 var progress *walk.ProgressBar
 
@@ -147,7 +149,7 @@ func hardenAll() {
 	triggerAll(true)
 	markStatus(true)
 
-	walk.MsgBox(window, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
+	walk.MsgBox(splashWindow, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
 	os.Exit(0)
 }
 
@@ -213,9 +215,34 @@ func showStatus() {
 
 // main method for hardentools
 func main() {
+	go initMainWindow()
+
+	// build up main GUI window
+	splash := declarative.MainWindow{
+		AssignTo: &splashWindow,
+		Title:    "HardenTools - Security Without Borders",
+		MinSize:  declarative.Size{500, 100},
+		Layout:   declarative.VBox{},
+		DataBinder: declarative.DataBinder{
+			DataSource: expertConfig,
+			AutoSubmit: true,
+		},
+		Children: []declarative.Widget{
+			declarative.Label{Text: "Please wait - starting up..."},
+		},
+	}
+	splash.Create()
+
+	// start main GUI
+	splashWindow.Run()
+}
+
+func initMainWindow() {
 	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
 	var buttonFunc func()
+
+	// check hardening status
 	var status = checkStatus()
 
 	// parse command line parameters/flags
@@ -284,6 +311,8 @@ func main() {
 		}
 	}
 
+	splashWindow.Hide()
+
 	// set labels / text fields (harden or restore)
 	if status == false {
 		buttonText = "Harden!"
@@ -298,6 +327,7 @@ func main() {
 	}
 
 	// build up main GUI window
+	//	window
 	declarative.MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
@@ -334,7 +364,8 @@ func main() {
 	}.Create()
 
 	// start main GUI
-	window.Run()
+	window.Show()
+
 }
 
 // this function generates a function that is used as an walk.EventHandler
@@ -348,3 +379,28 @@ func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
 	}
 }
+
+//func showSplash() {
+
+// show splash screen / dialog
+/*	var splashScreen *walk.Dialog
+	declarative.Dialog{
+		AssignTo:  &splashScreen,
+		FixedSize: true,
+		Title:     "HardenTools - Starting Up",
+		MinSize:   declarative.Size{500, 100},
+		Layout:    declarative.VBox{},
+		Children: []declarative.Widget{
+			declarative.Label{Text: "Please wait..."},
+		},
+	}.Create(nil)
+
+	// start main GUI
+	splashScreen.Run()
+	//time.Sleep(4 * time.Second)
+	splashScreen.Close(1)*/
+//splashDialog, _ := walk.NewDialog(nil)
+//splashDialog.Show()
+//msgBox := walk.MsgBox(nil, "Please wait!", "Hardentools is starting up.", walk.MsgBoxIconInformation)
+//msgBox.Close()
+//}
