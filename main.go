@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http://wweventsDialog.gnu.org/licenses/>.
 
 package main
 
@@ -24,7 +24,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	//"time"
 
 	"github.com/lxn/walk"
 	"github.com/lxn/walk/declarative"
@@ -70,11 +69,8 @@ var allHardenSubjects = []HardenInterface{
 
 var expertConfig map[string]bool
 var expertCompWidgetArray []declarative.Widget
-
-var window *walk.MainWindow
-var splashWindow *walk.MainWindow
 var events *walk.TextEdit
-var progress *walk.ProgressBar
+var window *walk.MainWindow
 
 // Loggers for log output (we only need info and trace, errors have to be
 // displayed in the GUI)
@@ -131,7 +127,7 @@ func markStatus(hardened bool) {
 		err = key.SetDWordValue("Harden", 1)
 		if err != nil {
 			Info.Println(err.Error())
-			walk.MsgBox(window, "ERROR", "Could not set hardentools registry keys - restore will not work!", walk.MsgBoxIconExclamation)
+			walk.MsgBox(nil, "ERROR", "Could not set hardentools registry keys - restore will not work!", walk.MsgBoxIconExclamation)
 			panic(err)
 		}
 	} else {
@@ -146,20 +142,30 @@ func markStatus(hardened bool) {
 
 // starts harden procedure
 func hardenAll() {
-	triggerAll(true)
-	markStatus(true)
+	showEventsTextArea()
 
-	walk.MsgBox(splashWindow, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
-	os.Exit(0)
+	// use goroutine to allow lxn/walk to update window
+	go func() {
+		triggerAll(true)
+		markStatus(true)
+
+		walk.MsgBox(nil, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
+		os.Exit(0)
+	}()
 }
 
 // starts restore procedure
 func restoreAll() {
-	triggerAll(false)
-	markStatus(false)
+	showEventsTextArea()
 
-	walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
-	os.Exit(0)
+	// use goroutine to allow lxn/walk to update window
+	go func() {
+		triggerAll(false)
+		markStatus(false)
+
+		walk.MsgBox(nil, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
+		os.Exit(0)
+	}()
 }
 
 // triggerAll is used for harden and restore, depending on the harden parameter
@@ -191,7 +197,7 @@ func triggerAll(harden bool) {
 
 	events.AppendText("\n")
 
-	progress.SetValue(100)
+	//progress.SetValue(100)
 
 	showStatus()
 
@@ -215,31 +221,17 @@ func showStatus() {
 
 // main method for hardentools
 func main() {
-	go initMainWindow()
+	// show splash screen
+	splashChannel := make(chan bool, 1)
+	showSplash(splashChannel)
 
-	// build up main GUI window
-	splash := declarative.MainWindow{
-		AssignTo: &splashWindow,
-		Title:    "HardenTools - Security Without Borders",
-		MinSize:  declarative.Size{500, 100},
-		Layout:   declarative.VBox{},
-		DataBinder: declarative.DataBinder{
-			DataSource: expertConfig,
-			AutoSubmit: true,
-		},
-		Children: []declarative.Widget{
-			declarative.Label{Text: "Please wait - starting up..."},
-		},
-	}
-	splash.Create()
-
-	// start main GUI
-	splashWindow.Run()
+	openMainWindow(splashChannel)
 }
 
-func initMainWindow() {
+func openMainWindow(splashChannel chan bool) {
 	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
+	var enableHardenAdditionalButton bool
 	var buttonFunc func()
 
 	// check hardening status
@@ -311,19 +303,19 @@ func initMainWindow() {
 		}
 	}
 
-	splashWindow.Hide()
-
 	// set labels / text fields (harden or restore)
 	if status == false {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
 		expertSettingsText = "Expert Settings - change only if you now what you are doing! Disabled settings are already hardened."
+		enableHardenAdditionalButton = false
 	} else {
 		buttonText = "Restore..."
 		buttonFunc = restoreAll
 		labelText = "We have already hardened some risky features, do you want to restore them?"
 		expertSettingsText = "The following hardened features are going to be restored:"
+		enableHardenAdditionalButton = true
 	}
 
 	// build up main GUI window
@@ -331,8 +323,8 @@ func initMainWindow() {
 	declarative.MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  declarative.Size{500, 600},
-		Layout:   declarative.VBox{},
+		//MinSize:  declarative.Size{500, 600},
+		Layout: declarative.VBox{},
 		DataBinder: declarative.DataBinder{
 			DataSource: expertConfig,
 			AutoSubmit: true,
@@ -343,15 +335,6 @@ func initMainWindow() {
 				Text:      buttonText,
 				OnClicked: buttonFunc,
 			},
-			declarative.ProgressBar{
-				AssignTo: &progress,
-			},
-			declarative.TextEdit{
-				AssignTo: &events,
-				Text:     eventsText,
-				ReadOnly: true,
-				MinSize:  declarative.Size{500, 250},
-			},
 			declarative.HSpacer{},
 			declarative.HSpacer{},
 			declarative.Label{Text: expertSettingsText},
@@ -360,12 +343,26 @@ func initMainWindow() {
 				Border:   true,
 				Children: expertCompWidgetArray,
 			},
+			declarative.PushButton{
+				Text:      "Harden not yet hardened settings",
+				OnClicked: buttonFunc,
+				Visible:   enableHardenAdditionalButton,
+			},
+			declarative.TextEdit{
+				AssignTo: &events,
+				Text:     eventsText,
+				ReadOnly: true,
+				MinSize:  declarative.Size{500, 250},
+				Visible:  false,
+			},
 		},
 	}.Create()
 
-	// start main GUI
-	window.Show()
+	// hide splash screen
+	splashChannel <- true
 
+	// start main GUI
+	window.Run()
 }
 
 // this function generates a function that is used as an walk.EventHandler
@@ -380,27 +377,36 @@ func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 	}
 }
 
-//func showSplash() {
-
-// show splash screen / dialog
-/*	var splashScreen *walk.Dialog
-	declarative.Dialog{
-		AssignTo:  &splashScreen,
-		FixedSize: true,
-		Title:     "HardenTools - Starting Up",
-		MinSize:   declarative.Size{500, 100},
-		Layout:    declarative.VBox{},
+func showSplash(splashChannel chan bool) {
+	var splashWindow *walk.MainWindow
+	declarative.MainWindow{
+		AssignTo: &splashWindow,
+		Title:    "HardenTools - HardenTools - Starting Up. Please wait.",
+		MinSize:  declarative.Size{500, 100},
+		Layout:   declarative.VBox{},
 		Children: []declarative.Widget{
-			declarative.Label{Text: "Please wait..."},
+			declarative.Label{Text: "Please wait - starting up..."},
 		},
-	}.Create(nil)
+	}.Create()
 
 	// start main GUI
-	splashScreen.Run()
-	//time.Sleep(4 * time.Second)
-	splashScreen.Close(1)*/
-//splashDialog, _ := walk.NewDialog(nil)
-//splashDialog.Show()
-//msgBox := walk.MsgBox(nil, "Please wait!", "Hardentools is starting up.", walk.MsgBoxIconInformation)
-//msgBox.Close()
-//}
+	splashWindow.Show()
+
+	// wait for main gui, then hide splash
+	go func() {
+		<-splashChannel
+		splashWindow.Hide()
+	}()
+}
+
+func showEventsTextArea() {
+	// set the events text element to visible to display output
+	events.SetVisible(true)
+
+	// set all other items but the last (which is the events text element from
+	// above) to disabled so no further action is possible by the user
+	length := window.Children().Len()
+	for i := 0; i < length-1; i++ {
+		window.Children().At(i).SetEnabled(false)
+	}
+}
