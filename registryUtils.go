@@ -17,12 +17,13 @@
 package main
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
+
 	"golang.org/x/sys/windows/registry"
 )
 
-// data type for a single registry DWORD value that suffices for hardening
+// RegistrySingleValueDWORD is a data type for a single registry DWORD value that suffices for hardening
 // a distinct setting or as part of an RegistryMultiValue
 type RegistrySingleValueDWORD struct {
 	RootKey       registry.Key
@@ -34,7 +35,7 @@ type RegistrySingleValueDWORD struct {
 	description   string
 }
 
-// data type for multiple SingleValueDWORDs
+// RegistryMultiValue is a data type for multiple SingleValueDWORDs
 // use if a single hardening needs multiple RegistrySingleValueDWORD to be modified
 type RegistryMultiValue struct {
 	ArraySingleDWORD []*RegistrySingleValueDWORD
@@ -43,7 +44,7 @@ type RegistryMultiValue struct {
 	description      string
 }
 
-// harden function for RegistrySingleValueDWORD struct
+// Harden function for RegistrySingleValueDWORD struct
 func (regValue *RegistrySingleValueDWORD) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
@@ -54,7 +55,7 @@ func (regValue *RegistrySingleValueDWORD) Harden(harden bool) error {
 	return hardenKey(regValue.RootKey, regValue.Path, regValue.ValueName, regValue.HardenedValue)
 }
 
-// verify if harden object of type RegistrySingleValueDWORD is already hardened
+// IsHardened verifies if harden object of type RegistrySingleValueDWORD is already hardened
 func (regValue *RegistrySingleValueDWORD) IsHardened() bool {
 	key, err := registry.OpenKey(regValue.RootKey, regValue.Path, registry.READ)
 
@@ -72,19 +73,22 @@ func (regValue *RegistrySingleValueDWORD) IsHardened() bool {
 	return false
 }
 
+// Name returns the (short) name of the harden item
 func (regValue *RegistrySingleValueDWORD) Name() string {
 	return regValue.shortName
 }
 
+// LongName returns the long name of the harden item
 func (regValue *RegistrySingleValueDWORD) LongName() string {
 	return regValue.longName
 }
 
+// Description of the harden item
 func (regValue *RegistrySingleValueDWORD) Description() string {
 	return regValue.description
 }
 
-// harden function for RegistryMultiValue struct
+// Harden function for RegistryMultiValue struct
 func (regMultiValue RegistryMultiValue) Harden(harden bool) error {
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
 		err := singleDWORD.Harden(harden)
@@ -96,7 +100,7 @@ func (regMultiValue RegistryMultiValue) Harden(harden bool) error {
 	return nil
 }
 
-// verify if harden object of type RegistryMultiValue is already hardened
+// IsHardened verifies if harden object of type RegistryMultiValue is already hardened
 func (regMultiValue *RegistryMultiValue) IsHardened() (isHardened bool) {
 	var hardened = true
 
@@ -109,14 +113,17 @@ func (regMultiValue *RegistryMultiValue) IsHardened() (isHardened bool) {
 	return hardened
 }
 
+// Name returns the (short) name of the harden item
 func (regMultiValue *RegistryMultiValue) Name() string {
 	return regMultiValue.shortName
 }
 
+// LongName returns the long name of the harden item
 func (regMultiValue *RegistryMultiValue) LongName() string {
 	return regMultiValue.longName
 }
 
+// Description of the harden item
 func (regMultiValue *RegistryMultiValue) Description() string {
 	return regMultiValue.description
 }

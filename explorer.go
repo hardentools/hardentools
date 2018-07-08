@@ -37,11 +37,13 @@ import (
 // - .VBE Visual Basic Script Encoded, mainly malicious
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
 
+// Extension is a helper struct
 type Extension struct {
 	ext   string
 	assoc string
 }
 
+// ExplorerAssociations is the struct for HardenInterface implementation
 type ExplorerAssociations struct {
 	extensions  []Extension
 	shortName   string
@@ -49,6 +51,7 @@ type ExplorerAssociations struct {
 	description string
 }
 
+// FileAssociations contains all extensions to be removed
 var FileAssociations = ExplorerAssociations{
 	extensions: []Extension{
 		{".hta", "htafile"},
@@ -65,7 +68,7 @@ var FileAssociations = ExplorerAssociations{
 	longName:  "File associations",
 }
 
-// Harden/Restore explorer associations
+// Harden explorer associations
 func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
@@ -127,7 +130,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 	return nil
 }
 
-// this returns hardened, even if only one extension is hardened (to prevent
+// IsHardened returns true, even if only one extension is hardened (to prevent
 // restore from not beeing executed), due to errors in hardening quite common
 func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 	var hardened = false
@@ -149,14 +152,17 @@ func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 	return hardened
 }
 
+// Name returns the (short) name of the harden item
 func (explAssoc ExplorerAssociations) Name() string {
 	return explAssoc.shortName
 }
 
+// LongName returns the long name of the harden item
 func (explAssoc ExplorerAssociations) LongName() string {
 	return explAssoc.longName
 }
 
+// Description of the harden item
 func (explAssoc ExplorerAssociations) Description() string {
 	return explAssoc.description
 }

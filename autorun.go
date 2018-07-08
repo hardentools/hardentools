@@ -26,6 +26,7 @@ import (
 // - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
 // - HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
 
+// Autorun is a Multi Value Registry struct for autorun registry keys
 var Autorun = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
 		&RegistrySingleValueDWORD{

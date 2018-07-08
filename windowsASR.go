@@ -32,9 +32,10 @@ More details here:
 */
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"strings"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -50,21 +51,21 @@ var ruleIDEnumeration = strings.Join(ruleIDArray, ",")
 var actionsArray = []string{"Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled"}
 var actionsEnumeration = strings.Join(actionsArray, ",")
 
-// struct for HardenInterface implementation
+// WindowsASRStruct ist the struct for HardenInterface implementation
 type WindowsASRStruct struct {
 	shortName   string
 	longName    string
 	description string
 }
 
+// WindowsASR contains Names for Windows ASR implementation of hardenInterface
 var WindowsASR = &WindowsASRStruct{
 	shortName:   "WindowsASR",
 	longName:    "Windows ASR (needs Win 10/1709)",
 	description: "Windows Attack Surface Reduction (ASR) (needs Win 10/1709)",
 }
 
-//// HardenInterface methods
-
+// Harden method
 func (asr WindowsASRStruct) Harden(harden bool) error {
 	if harden {
 		// harden (but only if we have at least Windows 10 - 1709)
@@ -80,7 +81,7 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			if err != nil {
 				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
 				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
-				return errors.New("!! Executing powershell cmdlet Set-MpPreference failed.\n")
+				return errors.New("Executing powershell cmdlet Set-MpPreference failed")
 			}
 			Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 		} else {
@@ -97,7 +98,7 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			if err != nil {
 				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
 				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
-				return errors.New("!! Executing powershell cmdlet Remove-MpPreference failed.\n")
+				return errors.New("Executing powershell cmdlet Remove-MpPreference failed")
 			}
 			Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 		}
@@ -132,6 +133,8 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			D3E037E1-3EB8-44C8-A917-57927947596D
 			D4F940AB-401B-4EFC-AADC-AD5F3C50688A
 */
+
+// IsHardened checks if ASR is already hardened
 func (asr WindowsASRStruct) IsHardened() bool {
 	if !checkWindowsVersion() {
 		return false
@@ -192,19 +195,22 @@ func (asr WindowsASRStruct) IsHardened() bool {
 	return true // seems all relevant hardening is in place
 }
 
+// Name returns Name
 func (asr WindowsASRStruct) Name() string {
 	return asr.shortName
 }
 
+// LongName returns Long Name
 func (asr WindowsASRStruct) LongName() string {
 	return asr.longName
 }
 
+// Description returns description
 func (asr WindowsASRStruct) Description() string {
 	return asr.description
 }
 
-// checks if hardentools is running on Windows 10 with Patch Level >= 1709
+// checkWindowsVersion checks if hardentools is running on Windows 10 with Patch Level >= 1709
 func checkWindowsVersion() bool {
 	k, err := registry.OpenKey(registry.LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", registry.QUERY_VALUE)
 	if err != nil {

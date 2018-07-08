@@ -186,7 +186,7 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
 	return hardened
 }
 
-// Name returns name of hardening module
+// Name returns name of hardening modulels
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Name() string {
 	return adobeRegEx.shortName
 }

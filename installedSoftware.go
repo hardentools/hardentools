@@ -27,14 +27,14 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// struct for HardenInterface implementation
+// InstalledSoftware is the struct for HardenInterface implementation
 type InstalledSoftware struct {
 	shortName   string
 	longName    string
 	description string
 }
 
-// var for HardenInterface implementation used by main.go
+// InstSoftware is the var for HardenInterface implementation used by main.go
 var InstSoftware = &InstalledSoftware{
 	shortName:   "ShowInstalledSoftware",
 	longName:    "Show Installed Software",
@@ -70,6 +70,7 @@ type installedSoftwareComponent struct {
 	publisher      string
 }
 
+// Harden function for InstalledSoftware struct
 func (software InstalledSoftware) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
@@ -82,6 +83,7 @@ func (software InstalledSoftware) Harden(harden bool) error {
 	return nil
 }
 
+// IsHardened verifies if harden object of type RegistrySingleValueDWORD is already hardened
 func (software InstalledSoftware) IsHardened() bool {
 	// fetch Windows version
 	maj, min, cb, err := getWindowsVersion()
@@ -127,17 +129,17 @@ func (software InstalledSoftware) IsHardened() bool {
 	return false
 }
 
-// HardenInterface method
+// Name returns the (short) name of the harden item
 func (software InstalledSoftware) Name() string {
 	return software.shortName
 }
 
-// HardenInterface method
+// LongName returns the long name of the harden item
 func (software InstalledSoftware) LongName() string {
 	return software.longName
 }
 
-// HardenInterface method
+// Description of the harden item
 func (software InstalledSoftware) Description() string {
 	return software.description
 }
@@ -208,7 +210,7 @@ func getInstalledSoftware() (map[string]installedSoftwareComponent, error) {
 		key, err := registry.OpenKey(regKeysUninstall[i].rootKey, regKeysUninstall[i].path, registry.READ)
 		if err != nil {
 			Info.Printf("Could not open registry key %s due to error %s", regKeysUninstall[i].path, err.Error())
-			return nil, errors.New(fmt.Sprintf("Could not open registry key %s due to error %s", regKeysUninstall[i].path, err.Error()))
+			return nil, fmt.Errorf("Could not open registry key %s due to error %s", regKeysUninstall[i].path, err.Error())
 		}
 		defer key.Close()
 
@@ -216,14 +218,14 @@ func getInstalledSoftware() (map[string]installedSoftwareComponent, error) {
 		subKeys, err := key.ReadSubKeyNames(int(keyInfo.SubKeyCount))
 		if err != nil {
 			Info.Printf("Could not read sub keys of registry key %s due to error %s", regKeysUninstall[i].path, err.Error())
-			return nil, errors.New(fmt.Sprintf("Could not read sub keys of registry key %s due to error %s", regKeysUninstall[i].path, err.Error()))
+			return nil, fmt.Errorf("Could not read sub keys of registry key %s due to error %s", regKeysUninstall[i].path, err.Error())
 		}
 
 		for j := 0; j < len(subKeys); j++ {
 			subKey, err := registry.OpenKey(regKeysUninstall[i].rootKey, regKeysUninstall[i].path+"\\"+subKeys[j], registry.READ)
 			if err != nil {
 				Info.Printf("Could not open registry key %s due to error %s", subKeys[j], err.Error())
-				return nil, errors.New(fmt.Sprintf("Could not open registry key %s due to error %s", subKeys[j], err.Error()))
+				return nil, fmt.Errorf("Could not open registry key %s due to error %s", subKeys[j], err.Error())
 			}
 			defer subKey.Close()
 

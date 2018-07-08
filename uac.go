@@ -20,6 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// UAC contains the registry keys to be hardened
 var UAC = &RegistrySingleValueDWORD{
 	RootKey:       registry.LOCAL_MACHINE,
 	Path:          "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
