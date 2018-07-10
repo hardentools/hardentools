@@ -289,6 +289,7 @@ func openMainWindow(splashChannel chan bool) {
 	var labelText, buttonText, eventsText, expertSettingsText string
 	var enableHardenAdditionalButton, runningWithElevatedPrivileges bool
 	var buttonFunc func()
+	var notifyTextEdit *walk.TextEdit
 
 	// check if we are running with elevated rights
 
@@ -396,12 +397,20 @@ func openMainWindow(splashChannel chan bool) {
 			AutoSubmit: true,
 		},
 		Children: []declarative.Widget{
+			declarative.TextEdit{
+				AssignTo: &notifyTextEdit,
+				Text:     "You are currently running as normal user and won't be able to harden all available settings! If you have admin rights available, you can press the button below to restart with admin rights",
+				ReadOnly: true,
+				MinSize:  declarative.Size{500, 50},
+				Visible:  !runningWithElevatedPrivileges,
+			},
 			declarative.PushButton{
-				Text:      "You are currently running as normal user and\n won't be able to harden all available settings!\nIf you have admin rights available,\nyou can press this button to restart with admin rights",
+				Text:      "Restart with admin privileges",
 				OnClicked: restartWithElevatedPrivileges,
 				Visible:   !runningWithElevatedPrivileges,
 			},
-
+			declarative.HSpacer{},
+			declarative.HSpacer{},
 			declarative.Label{Text: labelText},
 			declarative.PushButton{
 				Text:      buttonText,
