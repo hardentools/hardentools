@@ -16,6 +16,55 @@
 
 package main
 
+/*
+#include <windows.h>
+#include <shellapi.h>
+
+// checks if we are running with elevated privileges (admin rights)
+int IsElevated( ) {
+    boolean fRet = FALSE;
+    HANDLE hToken = NULL;
+    if( OpenProcessToken( GetCurrentProcess( ),TOKEN_QUERY,&hToken ) ) {
+        TOKEN_ELEVATION Elevation;
+        DWORD cbSize = sizeof( TOKEN_ELEVATION );
+        if( GetTokenInformation( hToken, TokenElevation, &Elevation, sizeof( Elevation ), &cbSize ) ) {
+            fRet = Elevation.TokenIsElevated;
+        }
+    }
+    if( hToken ) {
+        CloseHandle( hToken );
+    }
+    if( fRet ){
+	 return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+// executes the executable in the current directory (or in path) with "runas"
+// to aquire admin privileges
+// TODO: needs some error checking
+void ExecuteWithRunas(char execName[]){
+	      SHELLEXECUTEINFO shExecInfo;
+
+	      shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+
+	      shExecInfo.fMask = 0;
+	      shExecInfo.hwnd = NULL;
+	      shExecInfo.lpVerb = "runas";
+	      shExecInfo.lpFile = execName;
+	      shExecInfo.lpParameters = NULL;
+	      shExecInfo.lpDirectory = NULL;
+	      shExecInfo.nShow = SW_MAXIMIZE;
+	      shExecInfo.hInstApp = NULL;
+
+	      ShellExecuteEx(&shExecInfo);
+	   return;
+}
+*/
+import "C"
+
 import (
 	"flag"
 	"fmt"
@@ -38,7 +87,8 @@ const defaultLogLevel = "Info"
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
 // Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun, WindowsASR
-var allHardenSubjects = []HardenInterface{
+var allHardenSubjects = []HardenInterface{}
+var allHardenSubjectsWithAndWithoutElevatedPrivileges = []HardenInterface{
 	//Experimental / read only
 	InstSoftware,
 	// WSH.
@@ -65,6 +115,21 @@ var allHardenSubjects = []HardenInterface{
 	ShowFileExt,
 	// Windows 10 / 1709 ASR
 	WindowsASR,
+}
+var allHardenSubjectsForUnprivilegedUsers = []HardenInterface{
+	// WSH.
+	WSH,
+	// Office.
+	OfficeOLE,
+	OfficeMacros,
+	OfficeActiveX,
+	OfficeDDE,
+	// PDF.
+	AdobePDFJS,
+	AdobePDFObjects,
+	AdobePDFProtectedMode,
+	AdobePDFProtectedView,
+	AdobePDFEnhancedSecurity,
 }
 
 var expertConfig map[string]bool
@@ -219,20 +284,21 @@ func showStatus() {
 	}
 }
 
-// main method for hardentools
-func main() {
-	// show splash screen
-	splashChannel := make(chan bool, 1)
-	showSplash(splashChannel)
-
-	openMainWindow(splashChannel)
-}
-
 func openMainWindow(splashChannel chan bool) {
 	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
-	var enableHardenAdditionalButton bool
+	var enableHardenAdditionalButton, runningWithElevatedPrivileges bool
 	var buttonFunc func()
+
+	// check if we are running with elevated rights
+
+	if C.IsElevated() == 0 {
+		runningWithElevatedPrivileges = false
+		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+	} else {
+		runningWithElevatedPrivileges = true
+		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+	}
 
 	// check hardening status
 	var status = checkStatus()
@@ -330,6 +396,12 @@ func openMainWindow(splashChannel chan bool) {
 			AutoSubmit: true,
 		},
 		Children: []declarative.Widget{
+			declarative.PushButton{
+				Text:      "You are currently running as normal user and\n won't be able to harden all available settings!\nIf you have admin rights available,\nyou can press this button to restart with admin rights",
+				OnClicked: restartWithElevatedPrivileges,
+				Visible:   !runningWithElevatedPrivileges,
+			},
+
 			declarative.Label{Text: labelText},
 			declarative.PushButton{
 				Text:      buttonText,
@@ -382,7 +454,7 @@ func showSplash(splashChannel chan bool) {
 	declarative.MainWindow{
 		AssignTo: &splashWindow,
 		Title:    "HardenTools - HardenTools - Starting Up. Please wait.",
-		MinSize:  declarative.Size{500, 100},
+		MinSize:  declarative.Size{600, 100},
 		Layout:   declarative.VBox{},
 		Children: []declarative.Widget{
 			declarative.Label{Text: "Please wait - starting up..."},
@@ -409,4 +481,23 @@ func showEventsTextArea() {
 	for i := 0; i < length-1; i++ {
 		window.Children().At(i).SetEnabled(false)
 	}
+}
+
+// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
+func restartWithElevatedPrivileges() {
+	// find out our program (exe) name
+	progName := os.Args[0]
+	// start us again, this time with elevated privileges
+	C.ExecuteWithRunas(C.CString(progName))
+	// exit this instance (the unprivileged one)
+	os.Exit(0)
+}
+
+// main method for hardentools
+func main() {
+	// show splash screen
+	splashChannel := make(chan bool, 1)
+	showSplash(splashChannel)
+
+	openMainWindow(splashChannel)
 }
