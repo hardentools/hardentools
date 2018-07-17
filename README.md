@@ -76,3 +76,7 @@ In case you wish to restore the original settings and revert the changes Hardent
 ## Authors
 
 This tools is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst.
+
+## Credits
+
+Hammer icon by Travis Avery from the Noun Project
