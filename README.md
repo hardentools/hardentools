@@ -1,4 +1,4 @@
-![Hardentools](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/icon%40128.png)
+![Hardentools](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/icon@128.png)
 
 # Hardentools
 
