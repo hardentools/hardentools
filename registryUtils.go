@@ -17,8 +17,8 @@
 package main
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"golang.org/x/sys/windows/registry"
 )
 
