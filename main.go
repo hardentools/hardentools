@@ -236,6 +236,8 @@ func restoreAll() {
 // triggerAll is used for harden and restore, depending on the harden parameter
 // harden == true => harden
 // harden == false => restore
+// triggerAll evaluates the expertConfig settings and hardens/restores only
+// the active items
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
@@ -261,11 +263,36 @@ func triggerAll(harden bool) {
 	}
 
 	events.AppendText("\n")
-
-	//progress.SetValue(100)
-
 	showStatus()
+}
 
+// hardenDefaultsAgain restores the original settings and
+// hardens using the default settings (no custom settings apply)
+func hardenDefaultsAgain() {
+	showEventsTextArea()
+
+	// use goroutine to allow lxn/walk to update window
+	go func() {
+		// restore hardened settings
+		triggerAll(false)
+		markStatus(false)
+
+		// reset expertConfig (is set to currently already hardened settings
+		// in case of restore
+		expertConfig = make(map[string]bool)
+		for _, hardenSubject := range allHardenSubjects {
+			// TODO: sets all harden subjects to active for now. Better: replace
+			// this with default settings (to be implemented)
+			expertConfig[hardenSubject.Name()] = true
+		}
+
+		// harden all settings
+		triggerAll(true)
+		markStatus(true)
+
+		walk.MsgBox(nil, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
+		os.Exit(0)
+	}()
 }
 
 // iterates all harden subjects and prints status of each (checks real status
@@ -287,17 +314,15 @@ func showStatus() {
 func openMainWindow(splashChannel chan bool) {
 	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
-	var enableHardenAdditionalButton, runningWithElevatedPrivileges bool
+	var enableHardenAdditionalButton bool
 	var buttonFunc func()
-	var notifyTextEdit *walk.TextEdit
 
 	// check if we are running with elevated rights
-
 	if C.IsElevated() == 0 {
-		runningWithElevatedPrivileges = false
+		//runningWithElevatedPrivileges = false
 		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
 	} else {
-		runningWithElevatedPrivileges = true
+		//runningWithElevatedPrivileges = true
 		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
 	}
 
@@ -397,19 +422,12 @@ func openMainWindow(splashChannel chan bool) {
 			AutoSubmit: true,
 		},
 		Children: []declarative.Widget{
-			declarative.TextEdit{
-				AssignTo: &notifyTextEdit,
-				Text:     "You are currently running as normal user and won't be able to harden all available settings! If you have admin rights available, you can press the button below to restart with admin rights",
-				ReadOnly: true,
-				MinSize:  declarative.Size{500, 50},
-				Visible:  !runningWithElevatedPrivileges,
-			},
-			declarative.PushButton{
-				Text:      "Restart with admin privileges",
-				OnClicked: restartWithElevatedPrivileges,
-				Visible:   !runningWithElevatedPrivileges,
-			},
 			declarative.HSpacer{},
+			declarative.PushButton{
+				Text:      "Harden again (all default settings)",
+				OnClicked: hardenDefaultsAgain,
+				Visible:   enableHardenAdditionalButton,
+			},
 			declarative.HSpacer{},
 			declarative.Label{Text: labelText},
 			declarative.PushButton{
@@ -417,23 +435,17 @@ func openMainWindow(splashChannel chan bool) {
 				OnClicked: buttonFunc,
 			},
 			declarative.HSpacer{},
-			declarative.HSpacer{},
 			declarative.Label{Text: expertSettingsText},
 			declarative.Composite{
 				Layout:   declarative.Grid{Columns: 3},
 				Border:   true,
 				Children: expertCompWidgetArray,
 			},
-			declarative.PushButton{
-				Text:      "Harden not yet hardened settings",
-				OnClicked: buttonFunc,
-				Visible:   enableHardenAdditionalButton,
-			},
 			declarative.TextEdit{
 				AssignTo: &events,
 				Text:     eventsText,
 				ReadOnly: true,
-				MinSize:  declarative.Size{500, 250},
+				MinSize:  declarative.Size{500, 450},
 				Visible:  false,
 			},
 		},
@@ -492,6 +504,61 @@ func showEventsTextArea() {
 	}
 }
 
+// askElevationDialog asks the user if he wants to elevates his rights
+func askElevationDialog() {
+	//var notifyTextEdit *walk.TextEdit
+	var dialog *walk.Dialog
+	var acceptPB, cancelPB *walk.PushButton
+	_, err := declarative.Dialog{
+		AssignTo:      &dialog,
+		Title:         "Do you want to use admin privileges?",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		MinSize:       declarative.Size{300, 100},
+		Layout:        declarative.VBox{},
+		Children: []declarative.Widget{
+
+			declarative.Label{
+				Text: "You are currently running hardentools as normal user.",
+				//TextColor: walk.RGB(255, 0, 0),
+				//MinSize: declarative.Size{500, 50},
+			},
+			declarative.Label{
+				Text:      "You won't be able to harden all available settings!",
+				TextColor: walk.RGB(255, 0, 0),
+				//MinSize:   declarative.Size{500, 50},
+			},
+			declarative.Label{
+				Text: "If you have admin rights available, please press \"Yes\", otherwise press \"No\".",
+				//TextColor: walk.RGB(255, 0, 0),
+				//MinSize: declarative.Size{500, 50},
+			},
+			declarative.Composite{
+				Layout: declarative.HBox{},
+				Children: []declarative.Widget{
+					declarative.PushButton{
+						AssignTo: &acceptPB,
+						Text:     "Yes",
+
+						OnClicked: func() {
+							dialog.Accept()
+							restartWithElevatedPrivileges()
+						},
+					},
+					declarative.PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "No",
+						OnClicked: func() { dialog.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run(nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 // restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
 func restartWithElevatedPrivileges() {
 	// find out our program (exe) name
@@ -504,6 +571,12 @@ func restartWithElevatedPrivileges() {
 
 // main method for hardentools
 func main() {
+	// check if hardentools has been started with elevated rights. If not
+	// ask user if he wants to elevate
+	if C.IsElevated() == 0 {
+		askElevationDialog()
+	}
+
 	// show splash screen
 	splashChannel := make(chan bool, 1)
 	showSplash(splashChannel)
