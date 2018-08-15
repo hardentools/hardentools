@@ -1,4 +1,4 @@
-![Hardentools](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/icon%40128.png)
+![Hardentools](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/icon@128.png)
 
 # Hardentools
 
@@ -76,3 +76,7 @@ In case you wish to restore the original settings and revert the changes Hardent
 ## Authors
 
 This tools is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst.
+
+## Credits
+
+Hammer icon by Travis Avery from the Noun Project
