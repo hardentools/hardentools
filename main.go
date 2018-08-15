@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017  Security Without Borders
+// Copyright (C) 2018  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package main
 
 /*
+// some C code for managing elevated privileges
 #include <windows.h>
 #include <shellapi.h>
 
@@ -89,8 +90,6 @@ const defaultLogLevel = "Info"
 // Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun, WindowsASR
 var allHardenSubjects = []HardenInterface{}
 var allHardenSubjectsWithAndWithoutElevatedPrivileges = []HardenInterface{
-	//Experimental / read only
-	InstSoftware,
 	// WSH.
 	WSH,
 	// Office.
