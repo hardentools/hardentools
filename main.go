@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017  Security Without Borders
+// Copyright (C) 2018  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,9 +12,59 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http://wweventsDialog.gnu.org/licenses/>.
 
 package main
+
+/*
+// some C code for managing elevated privileges
+#include <windows.h>
+#include <shellapi.h>
+
+// checks if we are running with elevated privileges (admin rights)
+int IsElevated( ) {
+    boolean fRet = FALSE;
+    HANDLE hToken = NULL;
+    if( OpenProcessToken( GetCurrentProcess( ),TOKEN_QUERY,&hToken ) ) {
+        TOKEN_ELEVATION Elevation;
+        DWORD cbSize = sizeof( TOKEN_ELEVATION );
+        if( GetTokenInformation( hToken, TokenElevation, &Elevation, sizeof( Elevation ), &cbSize ) ) {
+            fRet = Elevation.TokenIsElevated;
+        }
+    }
+    if( hToken ) {
+        CloseHandle( hToken );
+    }
+    if( fRet ){
+	 return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+// executes the executable in the current directory (or in path) with "runas"
+// to aquire admin privileges
+// TODO: needs some error checking
+void ExecuteWithRunas(char execName[]){
+	      SHELLEXECUTEINFO shExecInfo;
+
+	      shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+
+	      shExecInfo.fMask = 0x00008000;
+	      shExecInfo.hwnd = NULL;
+	      shExecInfo.lpVerb = "runas";
+	      shExecInfo.lpFile = execName;
+	      shExecInfo.lpParameters = NULL;
+	      shExecInfo.lpDirectory = NULL;
+	      shExecInfo.nShow = SW_SHOW;
+	      shExecInfo.hInstApp = NULL;
+
+	      ShellExecuteEx(&shExecInfo);
+	   return;
+}
+*/
+import "C"
 
 import (
 	"flag"
@@ -38,7 +88,8 @@ const defaultLogLevel = "Info"
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
 // Elevated rights are needed by: UAC, PowerShell, FileAssociations, Autorun, WindowsASR
-var allHardenSubjects = []HardenInterface{
+var allHardenSubjects = []HardenInterface{}
+var allHardenSubjectsWithAndWithoutElevatedPrivileges = []HardenInterface{
 	// WSH.
 	WSH,
 	// Office.
@@ -64,13 +115,26 @@ var allHardenSubjects = []HardenInterface{
 	// Windows 10 / 1709 ASR
 	WindowsASR,
 }
+var allHardenSubjectsForUnprivilegedUsers = []HardenInterface{
+	// WSH.
+	WSH,
+	// Office.
+	OfficeOLE,
+	OfficeMacros,
+	OfficeActiveX,
+	OfficeDDE,
+	// PDF.
+	AdobePDFJS,
+	AdobePDFObjects,
+	AdobePDFProtectedMode,
+	AdobePDFProtectedView,
+	AdobePDFEnhancedSecurity,
+}
 
 var expertConfig map[string]bool
 var expertCompWidgetArray []declarative.Widget
-
-var window *walk.MainWindow
 var events *walk.TextEdit
-var progress *walk.ProgressBar
+var window *walk.MainWindow
 
 // Loggers for log output (we only need info and trace, errors have to be
 // displayed in the GUI)
@@ -127,7 +191,7 @@ func markStatus(hardened bool) {
 		err = key.SetDWordValue("Harden", 1)
 		if err != nil {
 			Info.Println(err.Error())
-			walk.MsgBox(window, "ERROR", "Could not set hardentools registry keys - restore will not work!", walk.MsgBoxIconExclamation)
+			walk.MsgBox(nil, "ERROR", "Could not set hardentools registry keys - restore will not work!", walk.MsgBoxIconExclamation)
 			panic(err)
 		}
 	} else {
@@ -142,25 +206,37 @@ func markStatus(hardened bool) {
 
 // starts harden procedure
 func hardenAll() {
-	triggerAll(true)
-	markStatus(true)
+	showEventsTextArea()
 
-	walk.MsgBox(window, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
-	os.Exit(0)
+	// use goroutine to allow lxn/walk to update window
+	go func() {
+		triggerAll(true)
+		markStatus(true)
+
+		walk.MsgBox(nil, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
+		os.Exit(0)
+	}()
 }
 
 // starts restore procedure
 func restoreAll() {
-	triggerAll(false)
-	markStatus(false)
+	showEventsTextArea()
 
-	walk.MsgBox(window, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
-	os.Exit(0)
+	// use goroutine to allow lxn/walk to update window
+	go func() {
+		triggerAll(false)
+		markStatus(false)
+
+		walk.MsgBox(nil, "Done!", "I have restored all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconExclamation)
+		os.Exit(0)
+	}()
 }
 
 // triggerAll is used for harden and restore, depending on the harden parameter
 // harden == true => harden
 // harden == false => restore
+// triggerAll evaluates the expertConfig settings and hardens/restores only
+// the active items
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
@@ -186,11 +262,36 @@ func triggerAll(harden bool) {
 	}
 
 	events.AppendText("\n")
-
-	progress.SetValue(100)
-
 	showStatus()
+}
 
+// hardenDefaultsAgain restores the original settings and
+// hardens using the default settings (no custom settings apply)
+func hardenDefaultsAgain() {
+	showEventsTextArea()
+
+	// use goroutine to allow lxn/walk to update window
+	go func() {
+		// restore hardened settings
+		triggerAll(false)
+		markStatus(false)
+
+		// reset expertConfig (is set to currently already hardened settings
+		// in case of restore
+		expertConfig = make(map[string]bool)
+		for _, hardenSubject := range allHardenSubjects {
+			// TODO: sets all harden subjects to active for now. Better: replace
+			// this with default settings (to be implemented)
+			expertConfig[hardenSubject.Name()] = true
+		}
+
+		// harden all settings
+		triggerAll(true)
+		markStatus(true)
+
+		walk.MsgBox(nil, "Done!", "I have hardened all risky features!\nFor all changes to take effect please restart Windows.", walk.MsgBoxIconInformation)
+		os.Exit(0)
+	}()
 }
 
 // iterates all harden subjects and prints status of each (checks real status
@@ -209,11 +310,22 @@ func showStatus() {
 	}
 }
 
-// main method for hardentools
-func main() {
+func openMainWindow(splashChannel chan bool) {
 	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
+	var enableHardenAdditionalButton bool
 	var buttonFunc func()
+
+	// check if we are running with elevated rights
+	if C.IsElevated() == 0 {
+		//runningWithElevatedPrivileges = false
+		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+	} else {
+		//runningWithElevatedPrivileges = true
+		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+	}
+
+	// check hardening status
 	var status = checkStatus()
 
 	// parse command line parameters/flags
@@ -288,39 +400,39 @@ func main() {
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
 		expertSettingsText = "Expert Settings - change only if you now what you are doing! Disabled settings are already hardened."
+		enableHardenAdditionalButton = false
 	} else {
 		buttonText = "Restore..."
 		buttonFunc = restoreAll
 		labelText = "We have already hardened some risky features, do you want to restore them?"
 		expertSettingsText = "The following hardened features are going to be restored:"
+		enableHardenAdditionalButton = true
 	}
 
 	// build up main GUI window
+	//	window
 	declarative.MainWindow{
 		AssignTo: &window,
 		Title:    "HardenTools - Security Without Borders",
-		MinSize:  declarative.Size{500, 600},
-		Layout:   declarative.VBox{},
+		//MinSize:  declarative.Size{500, 600},
+		Layout: declarative.VBox{},
 		DataBinder: declarative.DataBinder{
 			DataSource: expertConfig,
 			AutoSubmit: true,
 		},
 		Children: []declarative.Widget{
+			declarative.HSpacer{},
+			declarative.PushButton{
+				Text:      "Harden again (all default settings)",
+				OnClicked: hardenDefaultsAgain,
+				Visible:   enableHardenAdditionalButton,
+			},
+			declarative.HSpacer{},
 			declarative.Label{Text: labelText},
 			declarative.PushButton{
 				Text:      buttonText,
 				OnClicked: buttonFunc,
 			},
-			declarative.ProgressBar{
-				AssignTo: &progress,
-			},
-			declarative.TextEdit{
-				AssignTo: &events,
-				Text:     eventsText,
-				ReadOnly: true,
-				MinSize:  declarative.Size{500, 250},
-			},
-			declarative.HSpacer{},
 			declarative.HSpacer{},
 			declarative.Label{Text: expertSettingsText},
 			declarative.Composite{
@@ -328,8 +440,18 @@ func main() {
 				Border:   true,
 				Children: expertCompWidgetArray,
 			},
+			declarative.TextEdit{
+				AssignTo: &events,
+				Text:     eventsText,
+				ReadOnly: true,
+				MinSize:  declarative.Size{500, 450},
+				Visible:  false,
+			},
 		},
 	}.Create()
+
+	// hide splash screen
+	splashChannel <- true
 
 	// start main GUI
 	window.Run()
@@ -345,4 +467,111 @@ func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 		isChecked := x.CheckState()
 		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
 	}
+}
+
+func showSplash(splashChannel chan bool) {
+	var splashWindow *walk.MainWindow
+	declarative.MainWindow{
+		AssignTo: &splashWindow,
+		Title:    "HardenTools - HardenTools - Starting Up. Please wait.",
+		MinSize:  declarative.Size{600, 100},
+	}.Create()
+
+	// wait for main gui, then hide splash
+	go func() {
+		<-splashChannel
+		splashWindow.Hide()
+	}()
+}
+
+func showEventsTextArea() {
+	// set the events text element to visible to display output
+	events.SetVisible(true)
+
+	// set all other items but the last (which is the events text element from
+	// above) to disabled so no further action is possible by the user
+	length := window.Children().Len()
+	for i := 0; i < length-1; i++ {
+		window.Children().At(i).SetEnabled(false)
+	}
+}
+
+// askElevationDialog asks the user if he wants to elevates his rights
+func askElevationDialog() {
+	//var notifyTextEdit *walk.TextEdit
+	var dialog *walk.Dialog
+	var acceptPB, cancelPB *walk.PushButton
+	_, err := declarative.Dialog{
+		AssignTo:      &dialog,
+		Title:         "Do you want to use admin privileges?",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		MinSize:       declarative.Size{300, 100},
+		Layout:        declarative.VBox{},
+		Children: []declarative.Widget{
+
+			declarative.Label{
+				Text: "You are currently running hardentools as normal user.",
+				//TextColor: walk.RGB(255, 0, 0),
+				//MinSize: declarative.Size{500, 50},
+			},
+			declarative.Label{
+				Text:      "You won't be able to harden all available settings!",
+				TextColor: walk.RGB(255, 0, 0),
+				//MinSize:   declarative.Size{500, 50},
+			},
+			declarative.Label{
+				Text: "If you have admin rights available, please press \"Yes\", otherwise press \"No\".",
+				//TextColor: walk.RGB(255, 0, 0),
+				//MinSize: declarative.Size{500, 50},
+			},
+			declarative.Composite{
+				Layout: declarative.HBox{},
+				Children: []declarative.Widget{
+					declarative.PushButton{
+						AssignTo: &acceptPB,
+						Text:     "Yes",
+
+						OnClicked: func() {
+							dialog.Accept()
+							restartWithElevatedPrivileges()
+						},
+					},
+					declarative.PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "No",
+						OnClicked: func() { dialog.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run(nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
+func restartWithElevatedPrivileges() {
+	// find out our program (exe) name
+	progName := os.Args[0]
+	// start us again, this time with elevated privileges
+	C.ExecuteWithRunas(C.CString(progName))
+	// exit this instance (the unprivileged one)
+	os.Exit(0)
+}
+
+// main method for hardentools
+func main() {
+	// check if hardentools has been started with elevated rights. If not
+	// ask user if he wants to elevate
+	if C.IsElevated() == 0 {
+		askElevationDialog()
+	}
+
+	// show splash screen
+	splashChannel := make(chan bool, 1)
+	showSplash(splashChannel)
+
+	openMainWindow(splashChannel)
 }

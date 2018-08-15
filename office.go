@@ -22,6 +22,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// available office versions
 var standardOfficeVersions = []string{
 	"12.0", // Office 2007
 	"14.0", // Office 2010
@@ -29,9 +30,10 @@ var standardOfficeVersions = []string{
 	"16.0", // Office 2016
 }
 
+// standard office apps that are hardened
 var standardOfficeApps = []string{"Excel", "PowerPoint", "Word"}
 
-// data type for a RegEx Path / Single Value DWORD combination
+// OfficeRegistryRegExSingleDWORD is the data type for a RegEx Path / Single Value DWORD combination
 type OfficeRegistryRegExSingleDWORD struct {
 	RootKey        registry.Key
 	PathRegEx      string
@@ -44,7 +46,7 @@ type OfficeRegistryRegExSingleDWORD struct {
 	description    string
 }
 
-//// Office Packager Objects
+// OfficeOLE hardens Office Packager Objects
 // 0 - No prompt from Office when user clicks, object executes
 // 1 - Prompt from Office when user clicks, object executes
 // 2 - No prompt, Object does not execute
@@ -58,7 +60,7 @@ var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
 	shortName:      "OfficeOLE",
 	longName:       "Office Packager Objects (OLE)"}
 
-//// Office Macros
+// OfficeMacros contains Macro registry keys
 // 1 - Enable all
 // 2 - Disable with notification
 // 3 - Digitally signed only
@@ -73,7 +75,7 @@ var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
 	shortName:      "OfficeMacros",
 	longName:       "Office Macros"}
 
-// Office ActiveX
+// OfficeActiveX contains ActiveX registry keys
 var OfficeActiveX = &RegistrySingleValueDWORD{
 	RootKey:       registry.CURRENT_USER,
 	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
@@ -105,6 +107,7 @@ var pathRegExWordMail = "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options\\WordMail"
 var pathRegExSecurity = "Software\\Microsoft\\Office\\%s\\%s\\Security"
 var pathWord2007 = "Software\\Microsoft\\Office\\12.0\\Word\\Options\\vpref"
 
+// OfficeDDE contains the registry keys for DDE hardening
 var OfficeDDE = &MultiHardenInterfaces{
 	hardenInterfaces: []HardenInterface{
 		&OfficeRegistryRegExSingleDWORD{
@@ -182,7 +185,7 @@ var OfficeDDE = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
-// hardens OfficeRegistryRegExSingleDWORD registry values
+// Harden hardens OfficeRegistryRegExSingleDWORD registry values
 func (officeRegEx OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 
 	for _, officeVersion := range officeRegEx.OfficeVersions {
@@ -211,6 +214,7 @@ func (officeRegEx OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	return nil
 }
 
+// IsHardened verifies if OfficeRegistryRegExSingleDWORD is already hardenend
 func (officeRegEx OfficeRegistryRegExSingleDWORD) IsHardened() bool {
 	var hardened = true
 
@@ -234,14 +238,17 @@ func (officeRegEx OfficeRegistryRegExSingleDWORD) IsHardened() bool {
 	return hardened
 }
 
+// Name returns the (short) name of the harden item
 func (officeRegEx OfficeRegistryRegExSingleDWORD) Name() string {
 	return officeRegEx.shortName
 }
 
+// LongName returns the long name of the harden item
 func (officeRegEx OfficeRegistryRegExSingleDWORD) LongName() string {
 	return officeRegEx.longName
 }
 
+// Description of the harden item
 func (officeRegEx OfficeRegistryRegExSingleDWORD) Description() string {
 	return officeRegEx.description
 }

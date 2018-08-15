@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-//// Unhide Explorer File Extensions
+// ShowFileExt contains the Unhide Explorer File Extensions registry keys
 var ShowFileExt = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
 		&RegistrySingleValueDWORD{

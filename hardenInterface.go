@@ -16,7 +16,7 @@
 
 package main
 
-// Generale interface which should be used for every harden subject
+// HardenInterface is the general interface which should be used for every harden subject
 type HardenInterface interface {
 	IsHardened() bool    // returns true if harden subject is already completely hardened
 	Harden(bool) error   // hardens the harden subject if parameter is true, restores it if parameter is false
@@ -25,7 +25,7 @@ type HardenInterface interface {
 	Description() string // returns description
 }
 
-// type for array of HardenInterfaces
+// MultiHardenInterfaces is a type for an array of HardenInterfaces
 type MultiHardenInterfaces struct {
 	hardenInterfaces []HardenInterface
 	shortName        string
@@ -33,7 +33,7 @@ type MultiHardenInterfaces struct {
 	description      string
 }
 
-// the Harden() method hardens (if harden == true) or restores (if harden == false) MultiHardenInterfaces
+// Harden hardens (if harden == true) or restores (if harden == false) MultiHardenInterfaces
 func (mhInterfaces *MultiHardenInterfaces) Harden(harden bool) error {
 	for _, mhInterface := range mhInterfaces.hardenInterfaces {
 		err := mhInterface.Harden(harden)
@@ -44,7 +44,7 @@ func (mhInterfaces *MultiHardenInterfaces) Harden(harden bool) error {
 	return nil
 }
 
-// the IsHardened() method verifies if all MultiHardenInterfaces members are hardenend
+// IsHardened verifies if all MultiHardenInterfaces members are hardenend
 func (mhInterfaces *MultiHardenInterfaces) IsHardened() bool {
 	var hardened = true
 
@@ -57,14 +57,17 @@ func (mhInterfaces *MultiHardenInterfaces) IsHardened() bool {
 	return hardened
 }
 
+// Name returns the (short) name of the harden item
 func (mhInterfaces *MultiHardenInterfaces) Name() string {
 	return mhInterfaces.shortName
 }
 
+// LongName returns the long name of the harden item
 func (mhInterfaces *MultiHardenInterfaces) LongName() string {
 	return mhInterfaces.longName
 }
 
+// Description of the harden item
 func (mhInterfaces *MultiHardenInterfaces) Description() string {
 	return mhInterfaces.description
 }

@@ -24,12 +24,14 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// PowerShellDisallowRunMembers is the struct for the HardenInterface implementation
 type PowerShellDisallowRunMembers struct {
 	shortName   string
 	longName    string
 	description string
 }
 
+// PowerShell is the struct for hardentools interface that combines registry keys and PowerShellDisallowRunMembers
 var PowerShell = &MultiHardenInterfaces{
 	shortName:   "PowerShell",
 	longName:    "Powershell and cmd.exe",
@@ -46,7 +48,7 @@ var PowerShell = &MultiHardenInterfaces{
 	},
 }
 
-// Disables Powershell and cmd.exe
+// Harden disables Powershell and cmd.exe
 //  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
 //  "DisallowRun"=dword:00000001
 //  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
@@ -70,7 +72,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("!! OpenKey to enable Powershell and cmd failed\n")
+			return errors.New("\n!! OpenKey to enable Powershell and cmd failed")
 		}
 		defer keyDisallow.Close()
 
@@ -93,7 +95,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("!! CreateKey to disable powershell failed\n")
+			return errors.New("\n!! CreateKey to disable powershell failed")
 		}
 		defer keyDisallow.Close()
 
@@ -127,6 +129,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 	return nil
 }
 
+// IsHardened verifies if harden object of type PowerShellDisallowRunMembers is already hardened
 func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 	var (
 		powerShellIseFound, powerShellFound, cmdExeFound bool = false, false, false
@@ -159,14 +162,17 @@ func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 	return false
 }
 
+// Name returns the (short) name of the harden item
 func (pwShell PowerShellDisallowRunMembers) Name() string {
 	return pwShell.shortName
 }
 
+// LongName returns the long name of the harden item
 func (pwShell PowerShellDisallowRunMembers) LongName() string {
 	return pwShell.longName
 }
 
+// Description of the harden item
 func (pwShell PowerShellDisallowRunMembers) Description() string {
 	return pwShell.description
 }

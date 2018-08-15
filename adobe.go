@@ -27,7 +27,7 @@ var standardAdobeVersions = []string{
 	"XI", // Acrobat Reader XI
 }
 
-// data type for a RegEx Path / Single Value DWORD combination
+// AdobeRegistryRegExSingleDWORD is the data type for a RegEx Path / Single Value DWORD combination
 type AdobeRegistryRegExSingleDWORD struct {
 	RootKey       registry.Key
 	PathRegEx     string
@@ -39,6 +39,7 @@ type AdobeRegistryRegExSingleDWORD struct {
 	description   string
 }
 
+// AdobePDFJS hardens Acrobat JavaScript
 // bEnableJS possible values:
 // 0 - Disable AcroJS
 // 1 - Enable AcroJS
@@ -52,6 +53,7 @@ var AdobePDFJS = &AdobeRegistryRegExSingleDWORD{
 	longName:      "Acrobat Reader JavaScript",
 	description:   "Disables Acrobat Reader JavaScript"}
 
+// AdobePDFObjects hardens Adobe Reader Embedded Objects
 // bAllowOpenFile set to 0 and
 // bSecureOpenFile set to 1 to disable
 // the opening of non-PDF documents
@@ -77,7 +79,7 @@ var AdobePDFObjects = &MultiHardenInterfaces{
 	description: "Disables Acrobat Reader embedded objects",
 }
 
-// Switch on the Protected Mode setting under "Security (Enhanced)" (enabled by default in current versions)
+// AdobePDFProtectedMode switches on the Protected Mode setting under "Security (Enhanced)" (enabled by default in current versions)
 // (HKEY_LOCAL_USER\Software\Adobe\Acrobat Reader<version>\Privileged -> DWORD „bProtectedMode“)
 // 0 - Disable Protected Mode
 // 1 - Enable Protected Mode
@@ -91,7 +93,7 @@ var AdobePDFProtectedMode = &AdobeRegistryRegExSingleDWORD{
 	longName:      "Acrobat Reader Protected Mode",
 	description:   "Enables Acrobat Reader Protected Mode"}
 
-// Switch on Protected View for all files from untrusted sources
+// AdobePDFProtectedView switches on Protected View for all files from untrusted sources
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\<version>\TrustManager -> iProtectedView)
 // 0 - Disable Protected View
 // 1 - Enable Protected View
@@ -105,7 +107,7 @@ var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
 	longName:      "Acrobat Reader Protected View",
 	description:   "Enables Acrobat Reader Protected View"}
 
-// Switch on Enhanced Security setting under "Security (Enhanced)"
+// AdobePDFEnhancedSecurity switches on Enhanced Security setting under "Security (Enhanced)"
 // (enabled by default in current versions)
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\DC\TrustManager -> bEnhancedSecurityInBrowser = 1 & bEnhancedSecurityStandalone = 1)
 var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
@@ -132,7 +134,7 @@ var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 
 //// HardenInterface methods
 
-// Hardens / Restores AdobeRegistryRegExSingleDWORD registry keys
+// Harden hardens / restores AdobeRegistryRegExSingleDWORD registry keys
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	// Harden.
 	for _, adobeVersion := range adobeRegEx.AdobeVersions {
@@ -159,7 +161,7 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	return nil
 }
 
-// checks if AdobeRegistryRegExSingleDWORD is hardened
+// IsHardened checks if AdobeRegistryRegExSingleDWORD is hardened
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
 	var hardened = true
 
@@ -184,14 +186,17 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
 	return hardened
 }
 
+// Name returns name of hardening modulels
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Name() string {
 	return adobeRegEx.shortName
 }
 
+// LongName returns LongName of hardening module
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) LongName() string {
 	return adobeRegEx.longName
 }
 
+// Description return description of hardening module
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Description() string {
 	return adobeRegEx.description
 }
