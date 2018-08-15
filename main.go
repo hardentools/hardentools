@@ -51,13 +51,13 @@ void ExecuteWithRunas(char execName[]){
 
 	      shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 
-	      shExecInfo.fMask = 0;
+	      shExecInfo.fMask = 0x00008000;
 	      shExecInfo.hwnd = NULL;
 	      shExecInfo.lpVerb = "runas";
 	      shExecInfo.lpFile = execName;
 	      shExecInfo.lpParameters = NULL;
 	      shExecInfo.lpDirectory = NULL;
-	      shExecInfo.nShow = SW_MAXIMIZE;
+	      shExecInfo.nShow = SW_SHOW;
 	      shExecInfo.hInstApp = NULL;
 
 	      ShellExecuteEx(&shExecInfo);
@@ -475,14 +475,7 @@ func showSplash(splashChannel chan bool) {
 		AssignTo: &splashWindow,
 		Title:    "HardenTools - HardenTools - Starting Up. Please wait.",
 		MinSize:  declarative.Size{600, 100},
-		Layout:   declarative.VBox{},
-		Children: []declarative.Widget{
-			declarative.Label{Text: "Please wait - starting up..."},
-		},
 	}.Create()
-
-	// start main GUI
-	splashWindow.Show()
 
 	// wait for main gui, then hide splash
 	go func() {
