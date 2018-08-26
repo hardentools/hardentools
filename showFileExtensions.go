@@ -23,21 +23,21 @@ import (
 // ShowFileExt contains the Unhide Explorer File Extensions registry keys
 var ShowFileExt = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
-		&RegistrySingleValueDWORD{
+		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 			ValueName:     "HideFileExt",
 			HardenedValue: 0x00000000,
 			shortName:     "ShowFileExt_FileExt"},
 
-		&RegistrySingleValueDWORD{
+		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 			ValueName:     "Hidden",
 			HardenedValue: 0x00000001,
 			shortName:     "ShowFileExt_Hidden"},
 
-		&RegistrySingleValueDWORD{
+		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 			ValueName:     "ShowSuperHidden",

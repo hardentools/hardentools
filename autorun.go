@@ -29,21 +29,21 @@ import (
 // Autorun is a Multi Value Registry struct for autorun registry keys
 var Autorun = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
-		&RegistrySingleValueDWORD{
+		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "NoDriveTypeAutoRun",
 			HardenedValue: 0xb5,
 			shortName:     "Autorun_NoDriveTypeAutoRun"},
 
-		&RegistrySingleValueDWORD{
+		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
 			ValueName:     "NoAutorun",
 			HardenedValue: 1,
 			shortName:     "Autorun_NoAutorung"},
 
-		&RegistrySingleValueDWORD{
+		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers",
 			ValueName:     "DisableAutoplay",
