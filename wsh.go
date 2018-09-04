@@ -28,4 +28,5 @@ var WSH = &RegistrySingleValueDWORD{
 	HardenedValue: 0,
 	shortName:     "WSH",
 	longName:      "Windows Script Host",
-	description:   "Windows Script Host"}
+	description:   "Windows Script Host",
+}

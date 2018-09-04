@@ -28,21 +28,23 @@ var ShowFileExt = &RegistryMultiValue{
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 			ValueName:     "HideFileExt",
 			HardenedValue: 0x00000000,
-			shortName:     "ShowFileExt_FileExt"},
-
+			shortName:     "ShowFileExt_FileExt",
+		},
 		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 			ValueName:     "Hidden",
 			HardenedValue: 0x00000001,
-			shortName:     "ShowFileExt_Hidden"},
-
+			shortName:     "ShowFileExt_Hidden",
+		},
 		{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
 			ValueName:     "ShowSuperHidden",
 			HardenedValue: 0x00000001,
-			shortName:     "ShowFileExt_SuperHidden"}},
+			shortName:     "ShowFileExt_SuperHidden",
+		},
+	},
 	shortName: "ShowFileExt",
 	longName:  "Show File Extensions",
 }

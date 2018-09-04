@@ -27,4 +27,5 @@ var UAC = &RegistrySingleValueDWORD{
 	ValueName:     "ConsentPromptBehaviorAdmin",
 	HardenedValue: 2,
 	shortName:     "UAC",
-	longName:      "UAC Prompt"}
+	longName:      "UAC Prompt",
+}

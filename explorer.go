@@ -63,7 +63,8 @@ var FileAssociations = ExplorerAssociations{
 		{".scr", "scrfile"},
 		{".vbs", "VBSFile"},
 		{".VBE", "VBEFile"},
-		{".pif", "piffile"}},
+		{".pif", "piffile"},
+	},
 	shortName: "FileAssociations",
 	longName:  "File associations",
 }

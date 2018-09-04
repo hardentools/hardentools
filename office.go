@@ -58,7 +58,8 @@ var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
 	OfficeApps:     standardOfficeApps,
 	OfficeVersions: standardOfficeVersions,
 	shortName:      "OfficeOLE",
-	longName:       "Office Packager Objects (OLE)"}
+	longName:       "Office Packager Objects (OLE)",
+}
 
 // OfficeMacros contains Macro registry keys
 // 1 - Enable all
@@ -73,7 +74,8 @@ var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
 	OfficeApps:     standardOfficeApps,
 	OfficeVersions: standardOfficeVersions,
 	shortName:      "OfficeMacros",
-	longName:       "Office Macros"}
+	longName:       "Office Macros",
+}
 
 // OfficeActiveX contains ActiveX registry keys
 var OfficeActiveX = &RegistrySingleValueDWORD{
@@ -82,7 +84,8 @@ var OfficeActiveX = &RegistrySingleValueDWORD{
 	ValueName:     "DisableAllActiveX",
 	HardenedValue: 1,
 	shortName:     "OfficeActiveX",
-	longName:      "Office ActiveX"}
+	longName:      "Office ActiveX",
+}
 
 //// DDE Mitigations for Word, Outlook and Excel
 // Doesn't harden OneNote for now (due to high impact).
@@ -121,8 +124,8 @@ var OfficeDDE = &MultiHardenInterfaces{
 				"15.0", // Office 2013
 				"16.0", // Office 2016
 			},
-			shortName: "OfficeDDE_DontUpdateLinksWordExcel"},
-
+			shortName: "OfficeDDE_DontUpdateLinksWordExcel",
+		},
 		&OfficeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     pathRegExWordMail,
@@ -134,8 +137,8 @@ var OfficeDDE = &MultiHardenInterfaces{
 				"15.0", // Office 2013
 				"16.0", // Office 2016
 			},
-			shortName: "OfficeDDE_DontUpdateLinksWordMail"},
-
+			shortName: "OfficeDDE_DontUpdateLinksWordMail",
+		},
 		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExOptions,
@@ -143,8 +146,8 @@ var OfficeDDE = &MultiHardenInterfaces{
 			HardenedValue:  0,
 			OfficeApps:     []string{"Excel"},
 			OfficeVersions: standardOfficeVersions,
-			shortName:      "OfficeDDE_DDEAllowedExcel"},
-
+			shortName:      "OfficeDDE_DDEAllowedExcel",
+		},
 		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExOptions,
@@ -152,8 +155,8 @@ var OfficeDDE = &MultiHardenInterfaces{
 			HardenedValue:  1,
 			OfficeApps:     []string{"Excel"},
 			OfficeVersions: standardOfficeVersions,
-			shortName:      "OfficeDDE_DDECleanedExcel"},
-
+			shortName:      "OfficeDDE_DDECleanedExcel",
+		},
 		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExOptions,
@@ -161,8 +164,8 @@ var OfficeDDE = &MultiHardenInterfaces{
 			HardenedValue:  0x117,
 			OfficeApps:     []string{"Excel"},
 			OfficeVersions: standardOfficeVersions,
-			shortName:      "OfficeDDE_OptionsExcel"},
-
+			shortName:      "OfficeDDE_OptionsExcel",
+		},
 		&OfficeRegistryRegExSingleDWORD{
 			RootKey:        registry.CURRENT_USER,
 			PathRegEx:      pathRegExSecurity,
@@ -170,14 +173,15 @@ var OfficeDDE = &MultiHardenInterfaces{
 			HardenedValue:  2,
 			OfficeApps:     []string{"Excel"},
 			OfficeVersions: standardOfficeVersions,
-			shortName:      "OfficeDDE_WorkbookLinksExcel"},
-
+			shortName:      "OfficeDDE_WorkbookLinksExcel",
+		},
 		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          pathWord2007,
 			ValueName:     "fNoCalclinksOnopen_90_1",
 			HardenedValue: 1,
-			shortName:     "OfficeDDE_Word2007"},
+			shortName:     "OfficeDDE_Word2007",
+		},
 	},
 	shortName: "OfficeDDE",
 	longName:  "Office DDE  Links",
