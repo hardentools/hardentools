@@ -36,7 +36,7 @@ int IsElevated( ) {
         CloseHandle( hToken );
     }
     if( fRet ){
-	 return 1;
+		return 1;
 	}
 	else {
 		return 0;
@@ -45,23 +45,25 @@ int IsElevated( ) {
 
 // executes the executable in the current directory (or in path) with "runas"
 // to aquire admin privileges
-// TODO: needs some error checking
-void ExecuteWithRunas(char execName[]){
-	      SHELLEXECUTEINFO shExecInfo;
+int ExecuteWithRunas(char execName[]){
+	SHELLEXECUTEINFO shExecInfo;
 
-	      shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 
-	      shExecInfo.fMask = 0x00008000;
-	      shExecInfo.hwnd = NULL;
-	      shExecInfo.lpVerb = "runas";
-	      shExecInfo.lpFile = execName;
-	      shExecInfo.lpParameters = NULL;
-	      shExecInfo.lpDirectory = NULL;
-	      shExecInfo.nShow = SW_SHOW;
-	      shExecInfo.hInstApp = NULL;
+	shExecInfo.fMask = 0;
+	shExecInfo.hwnd = NULL;
+	shExecInfo.lpVerb = "runas";
+	shExecInfo.lpFile = execName;
+	shExecInfo.lpParameters = NULL;
+	shExecInfo.lpDirectory = NULL;
+	shExecInfo.nShow = SW_MAXIMIZE;
+	shExecInfo.hInstApp = NULL;
 
-	      ShellExecuteEx(&shExecInfo);
-	   return;
+	boolean success = ShellExecuteEx(&shExecInfo);
+	if (success)
+		return 1;
+	else
+		return 0;
 }
 */
 import "C"
@@ -154,7 +156,7 @@ func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 		log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-// checks status of hardentools registry key
+// checkStatus checks status of hardentools registry key
 // (that tells if user environment is hardened / not hardened)
 func checkStatus() bool {
 	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
@@ -175,7 +177,7 @@ func checkStatus() bool {
 	return false
 }
 
-// sets hardentools status registry key
+// markStatus sets hardentools status registry key
 // (that tells if user environment is hardened / not hardened)
 func markStatus(hardened bool) {
 
@@ -204,7 +206,7 @@ func markStatus(hardened bool) {
 	}
 }
 
-// starts harden procedure
+// hardenAll starts harden procedure
 func hardenAll() {
 	showEventsTextArea()
 
@@ -218,7 +220,7 @@ func hardenAll() {
 	}()
 }
 
-// starts restore procedure
+// restoreAll starts restore procedure
 func restoreAll() {
 	showEventsTextArea()
 
@@ -294,8 +296,8 @@ func hardenDefaultsAgain() {
 	}()
 }
 
-// iterates all harden subjects and prints status of each (checks real status
-// on system)
+// showStatus iterates all harden subjects and prints status of each
+// (checks real status on system)
 func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
@@ -310,6 +312,7 @@ func showStatus() {
 	}
 }
 
+// openMainWindows opens the main window
 func openMainWindow(splashChannel chan bool) {
 	// init variables
 	var labelText, buttonText, eventsText, expertSettingsText string
@@ -457,7 +460,7 @@ func openMainWindow(splashChannel chan bool) {
 	window.Run()
 }
 
-// this function generates a function that is used as an walk.EventHandler
+// checkBoxEventGenerator generates a function that is used as an walk.EventHandler
 // for the expert CheckBoxes in main GUI
 func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 	var i = n
@@ -469,6 +472,7 @@ func checkBoxEventGenerator(n int, hardenSubjName string) func() {
 	}
 }
 
+// showSplash shows an splash screen during initialization
 func showSplash(splashChannel chan bool) {
 	var splashWindow *walk.MainWindow
 	declarative.MainWindow{
@@ -484,6 +488,7 @@ func showSplash(splashChannel chan bool) {
 	}()
 }
 
+// showEventsTextArea sets the events area to visible and disables action buttons
 func showEventsTextArea() {
 	// set the events text element to visible to display output
 	events.SetVisible(true)
@@ -555,8 +560,17 @@ func askElevationDialog() {
 func restartWithElevatedPrivileges() {
 	// find out our program (exe) name
 	progName := os.Args[0]
+
 	// start us again, this time with elevated privileges
-	C.ExecuteWithRunas(C.CString(progName))
+	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
+		// exit this instance (the unprivileged one)
+		os.Exit(0)
+	} else {
+		// TODO: something went wrong, we should show an error dialog here
+		// instead of showing the elevation dialog again
+		askElevationDialog()
+	}
+
 	// exit this instance (the unprivileged one)
 	os.Exit(0)
 }
