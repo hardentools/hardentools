@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017  Security Without Borders
+// Copyright (C) 2017-2018  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ package main
 
 // HardenInterface is the general interface which should be used for every harden subject
 type HardenInterface interface {
-	IsHardened() bool    // returns true if harden subject is already completely hardened
-	Harden(bool) error   // hardens the harden subject if parameter is true, restores it if parameter is false
-	Name() string        // returns short name
-	LongName() string    // returns long name
+	IsHardened()  bool   // returns true if harden subject is already completely hardened
+	Harden(bool)  error  // hardens the harden subject if parameter is true, restores it if parameter is false
+	Name()        string // returns short name
+	LongName()    string // returns long name
 	Description() string // returns description
 }
 

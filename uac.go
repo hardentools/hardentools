@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017  Security Without Borders
+// Copyright (C) 2017-2018  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,4 +27,5 @@ var UAC = &RegistrySingleValueDWORD{
 	ValueName:     "ConsentPromptBehaviorAdmin",
 	HardenedValue: 2,
 	shortName:     "UAC",
-	longName:      "UAC Prompt"}
+	longName:      "UAC Prompt",
+}

@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017  Security Without Borders
+// Copyright (C) 2017-2018  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,4 +28,5 @@ var WSH = &RegistrySingleValueDWORD{
 	HardenedValue: 0,
 	shortName:     "WSH",
 	longName:      "Windows Script Host",
-	description:   "Windows Script Host"}
+	description:   "Windows Script Host",
+}

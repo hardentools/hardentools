@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017  Security Without Borders
+// Copyright (C) 2017-2018  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,8 @@ var AdobePDFJS = &AdobeRegistryRegExSingleDWORD{
 	AdobeVersions: standardAdobeVersions,
 	shortName:     "AdobePDFJS",
 	longName:      "Acrobat Reader JavaScript",
-	description:   "Disables Acrobat Reader JavaScript"}
+	description:   "Disables Acrobat Reader JavaScript",
+}
 
 // AdobePDFObjects hardens Adobe Reader Embedded Objects
 // bAllowOpenFile set to 0 and
@@ -65,14 +66,16 @@ var AdobePDFObjects = &MultiHardenInterfaces{
 			ValueName:     "bAllowOpenFile",
 			HardenedValue: 0,
 			AdobeVersions: standardAdobeVersions,
-			shortName:     "AdobePDFObjects_bAllowOpenFile"},
+			shortName:     "AdobePDFObjects_bAllowOpenFile",
+		},
 		&AdobeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\Originals",
 			ValueName:     "bSecureOpenFile",
 			HardenedValue: 1,
 			AdobeVersions: standardAdobeVersions,
-			shortName:     "AdobePDFObjects_bSecureOpenFile"},
+			shortName:     "AdobePDFObjects_bSecureOpenFile",
+		},
 	},
 	shortName:   "AdobePDFObjects",
 	longName:    "Acrobat Reader Embedded Objects",
@@ -91,7 +94,8 @@ var AdobePDFProtectedMode = &AdobeRegistryRegExSingleDWORD{
 	AdobeVersions: standardAdobeVersions,
 	shortName:     "AdobePDFProtectedMode",
 	longName:      "Acrobat Reader Protected Mode",
-	description:   "Enables Acrobat Reader Protected Mode"}
+	description:   "Enables Acrobat Reader Protected Mode",
+}
 
 // AdobePDFProtectedView switches on Protected View for all files from untrusted sources
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\<version>\TrustManager -> iProtectedView)
@@ -105,7 +109,8 @@ var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
 	AdobeVersions: standardAdobeVersions,
 	shortName:     "AdobePDFProtectedView",
 	longName:      "Acrobat Reader Protected View",
-	description:   "Enables Acrobat Reader Protected View"}
+	description:   "Enables Acrobat Reader Protected View",
+}
 
 // AdobePDFEnhancedSecurity switches on Enhanced Security setting under "Security (Enhanced)"
 // (enabled by default in current versions)
@@ -121,14 +126,16 @@ var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 			ValueName:     "bEnhancedSecurityInBrowser",
 			HardenedValue: 1,
 			AdobeVersions: standardAdobeVersions,
-			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityInBrowser"},
+			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityInBrowser",
+		},
 		&AdobeRegistryRegExSingleDWORD{
 			RootKey:       registry.CURRENT_USER,
 			PathRegEx:     "SOFTWARE\\Adobe\\Acrobat Reader\\%s\\TrustManager",
 			ValueName:     "bEnhancedSecurityStandalone",
 			HardenedValue: 1,
 			AdobeVersions: standardAdobeVersions,
-			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityStandalone"},
+			shortName:     "AdobePDFEnhancedSecurity_bEnhancedSecurityStandalone",
+		},
 	},
 }
 
