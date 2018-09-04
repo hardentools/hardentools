@@ -8,11 +8,7 @@ lint:
 
 deps:
 	@echo "[deps] Installing dependencies..."
-	$(FLAGS_WINDOWS) go get -u --ldflags '-s -w -extldflags "-static" -H windowsgui' github.com/lxn/win
-	$(FLAGS_WINDOWS) go get -u --ldflags '-s -w -extldflags "-static" -H windowsgui' github.com/lxn/walk
-	go get github.com/akavel/rsrc
-	go get golang.org/x/sys/windows/registry
-	go get gopkg.in/Knetic/govaluate.v3
+	go mod download
 	@echo "[deps] Dependencies installed."
 
 build:
