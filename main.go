@@ -50,7 +50,7 @@ int ExecuteWithRunas(char execName[]){
 
 	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 
-	shExecInfo.fMask = 0;
+	shExecInfo.fMask = 0x00008000;
 	shExecInfo.hwnd = NULL;
 	shExecInfo.lpVerb = "runas";
 	shExecInfo.lpFile = execName;
