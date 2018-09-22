@@ -602,11 +602,8 @@ func restartWithElevatedPrivileges() {
 		os.Exit(0)
 	} else {
 		// something went wrong
-		showErrorDialog("Error while trying to gain elevated privileges. Exiting.")
+		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
 	}
-
-	// exit this instance (the unprivileged one)
-	os.Exit(0)
 }
 
 // main method for hardentools
