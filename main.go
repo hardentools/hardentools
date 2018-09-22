@@ -501,6 +501,41 @@ func showEventsTextArea() {
 	}
 }
 
+// showErrorDialog shows an error message
+func showErrorDialog(errorMessage string) {
+	var dialog *walk.Dialog
+	var okPB *walk.PushButton
+	_, err := declarative.Dialog{
+		AssignTo:      &dialog,
+		Title:         "Error!",
+		DefaultButton: &okPB,
+		MinSize:       declarative.Size{300, 100},
+		Layout:        declarative.VBox{},
+		Children: []declarative.Widget{
+
+			declarative.Label{
+				Text: errorMessage,
+			},
+			declarative.Composite{
+				Layout: declarative.HBox{},
+				Children: []declarative.Widget{
+					declarative.PushButton{
+						AssignTo: &okPB,
+						Text:     "OK",
+
+						OnClicked: func() {
+							dialog.Accept()
+						},
+					},
+				},
+			},
+		},
+	}.Run(nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 // askElevationDialog asks the user if he wants to elevates his rights
 func askElevationDialog() {
 	//var notifyTextEdit *walk.TextEdit
@@ -566,9 +601,8 @@ func restartWithElevatedPrivileges() {
 		// exit this instance (the unprivileged one)
 		os.Exit(0)
 	} else {
-		// TODO: something went wrong, we should show an error dialog here
-		// instead of showing the elevation dialog again
-		askElevationDialog()
+		// something went wrong
+		showErrorDialog("Error while trying to gain elevated privileges. Exiting.")
 	}
 
 	// exit this instance (the unprivileged one)
