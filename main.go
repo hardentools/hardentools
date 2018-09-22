@@ -56,7 +56,7 @@ int ExecuteWithRunas(char execName[]){
 	shExecInfo.lpFile = execName;
 	shExecInfo.lpParameters = NULL;
 	shExecInfo.lpDirectory = NULL;
-	shExecInfo.nShow = SW_MAXIMIZE;
+	shExecInfo.nShow = SW_NORMAL;
 	shExecInfo.hInstApp = NULL;
 
 	boolean success = ShellExecuteEx(&shExecInfo);
