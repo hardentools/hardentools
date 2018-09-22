@@ -14,15 +14,15 @@ When you're ready, you can find the latest download [here](https://github.com/se
 
 Once you double-click on the icon, depending on your Windows privileges, you are asked if you want to run hardentools with administrative privileges. If you select "No" only a subset of the harden features is available, but you can also use hardentools if you have only restricted privileges to harden your user account. If you select "Yes", depending on your Windows security settings, you should be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
 
-![AdminPrivilegesDialogScreenshot](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/AdminPrivDialog.jpg)
+![AdminPrivilegesDialogScreenshot](./graphics/AdminPrivDialog.jpg)
 
 Then, you will see the main Hardentools window. It's very simple, you just click on the "Harden" button, and the tool will make the changes to your Windows configuration to disable a set of features that are risky. Once completed, you will be asked to restart your computer for all the changes to have full effect.
 
-![MainWindowScreenshot](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/MainWindow.jpg)
+![MainWindowScreenshot](./graphics/MainWindow.jpg)
 
 In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have startet a newer version of hardentools and you want to make sure the most current features are applied to your user.
 
-![MainWindowsHardenedScreenshot](https://github.com/securitywithoutborders/hardentools/raw/master/graphics/AlreadyHardened.jpg)
+![MainWindowsHardenedScreenshot](./graphics/AlreadyHardened.jpg)
 
 **Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
