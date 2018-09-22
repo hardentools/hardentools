@@ -20,7 +20,9 @@ Then, you will see the main Hardentools window. It's very simple, you just click
 
 ![MainWindowScreenshot](./graphics/MainWindow.jpg)
 
-In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have startet a newer version of hardentools and you want to make sure the most current features are applied to your user.
+Note: The selections in the expert settings part of the window allow you to select or deselect harden measures. Please only use these if you know what you are doing.
+
+In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again (all default settings)" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have startet a newer version of hardentools and you want to make sure the most current features are applied to your user.
 
 ![MainWindowsHardenedScreenshot](./graphics/AlreadyHardened.jpg)
 
