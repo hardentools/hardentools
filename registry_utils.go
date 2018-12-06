@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -197,7 +198,7 @@ func retrieveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueNa
 
 // Helper method for restoring original state of a DWORD registry key.
 func restoreKey(rootKey registry.Key, keyName string, valueName string) (err error) {
-	// open key to be restored
+	/*// open key to be restored
 	key, err := registry.OpenKey(rootKey, keyName, registry.ALL_ACCESS)
 	if err != nil {
 		Info.Println("Could not open registry key " + keyName + " due to error: " + err.Error())
@@ -214,7 +215,8 @@ func restoreKey(rootKey registry.Key, keyName string, valueName string) (err err
 		Info.Println("Restore: Could not get saved reg. value, deleting " + keyName + "\\" + valueName)
 		err = key.DeleteValue(valueName)
 	}
-	return err
+	return err*/
+	return nil
 }
 
 // get root key name (LOCAL_MACHINE vs. LOCAL_USER)
@@ -267,32 +269,54 @@ func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValu
 	return nil
 }
 
-/*
 func restoreSavedRegistryKeys() error {
 	// open hardentools root key
-	hardentoolsKey, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+	hardentoolsKey, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.QUERY_VALUE)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer hardentoolsKey.Close()
 
-	registry.
-		hardentoolsKey
-
-	// get rootKeyName
-	rootKeyName, err := getRootKeyName(rootKey)
+	params, err := hardentoolsKey.ReadValueNames(0)
 	if err != nil {
-		Info.Println("Could not get rootKeyName")
-		return 0, err
+		Info.Printf("Can't ReadSubKeyNames %s %#v", hardentoolsKeyPath, err)
+		return err
 	}
 
-	// get saved state
-	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + rootKeyName + "\\" + keyName + "_" + valueName)
-	if err != nil {
-		return 0, err
+	settings := make(map[string]uint64)
+	for _, param := range params {
+		val, _, err := hardentoolsKey.GetIntegerValue(param)
+		if err != nil {
+			Info.Println(err)
+			return err
+		}
+		settings[param] = val
 	}
+	Trace.Printf("%#v\n", settings)
 
-	return uint32(value64), nil
+	for regKey, regValue := range settings {
+		if strings.HasPrefix(regKey, "SavedState_") {
+			// trim SavedState_ string
+			regKey = strings.TrimPrefix(regKey, "SavedState_")
+			rootKeyName := strings.Split(regKey, "\\")[0]
+			regKey = strings.TrimPrefix(regKey, rootKeyName)
+			regKey = strings.TrimPrefix(regKey, "\\")
+			valueName := regKey[strings.LastIndex(regKey, "_")+1:]
+			regKey = strings.TrimSuffix(regKey, "_"+valueName)
+			Trace.Printf("rootKey = %s; regKey = %s; valueName = %s; regValue = %d\n", rootKeyName, regKey, valueName, regValue)
+
+			/*key, err := registry.OpenKey(rootKeyName, regKey, registry.ALL_ACCESS)
+			if err != nil {
+				Info.Println("Could not open registry key " + keyName + " due to error: " + err.Error())
+				return err
+			}
+			defer key.Close()
+
+			Info.Printf("Restore: Restoring registry value %s\\%s = %d", regKey, valueName, value)
+			err = key.SetDWordValue(valueName, value)
+			return err*/
+		}
+	}
+	return nil
 
 }
-*/

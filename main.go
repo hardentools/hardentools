@@ -269,6 +269,7 @@ func hardenDefaultsAgain() {
 	go func() {
 		// restore hardened settings
 		triggerAll(false)
+		restoreSavedRegistryKeys()
 		markStatus(false)
 
 		// reset expertConfig (is set to currently already hardened settings
