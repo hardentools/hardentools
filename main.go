@@ -219,6 +219,7 @@ func restoreAll() {
 	// use goroutine to allow lxn/walk to update window
 	go func() {
 		triggerAll(false)
+		restoreSavedRegistryKeys()
 		markStatus(false)
 
 		showInfoDialog("Done!\nI have restored all risky features!\nFor all changes to take effect please restart Windows.")

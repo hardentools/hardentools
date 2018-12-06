@@ -19,6 +19,7 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -265,3 +266,33 @@ func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValu
 
 	return nil
 }
+
+/*
+func restoreSavedRegistryKeys() error {
+	// open hardentools root key
+	hardentoolsKey, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+	if err != nil {
+		return 0, err
+	}
+	defer hardentoolsKey.Close()
+
+	registry.
+		hardentoolsKey
+
+	// get rootKeyName
+	rootKeyName, err := getRootKeyName(rootKey)
+	if err != nil {
+		Info.Println("Could not get rootKeyName")
+		return 0, err
+	}
+
+	// get saved state
+	value64, _, err := hardentoolsKey.GetIntegerValue("SavedState_" + rootKeyName + "\\" + keyName + "_" + valueName)
+	if err != nil {
+		return 0, err
+	}
+
+	return uint32(value64), nil
+
+}
+*/
