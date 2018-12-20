@@ -18,10 +18,10 @@ package main
 
 // HardenInterface is the general interface which should be used for every harden subject
 type HardenInterface interface {
-	IsHardened()  bool   // returns true if harden subject is already completely hardened
-	Harden(bool)  error  // hardens the harden subject if parameter is true, restores it if parameter is false
-	Name()        string // returns short name
-	LongName()    string // returns long name
+	IsHardened() bool    // returns true if harden subject is already completely hardened
+	Harden(bool) error   // hardens the harden subject if parameter is true, restores it if parameter is false
+	Name() string        // returns short name
+	LongName() string    // returns long name
 	Description() string // returns description
 }
 
