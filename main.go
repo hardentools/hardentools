@@ -206,6 +206,7 @@ func hardenAll() {
 	go func() {
 		triggerAll(true)
 		markStatus(true)
+		showStatus()
 
 		showInfoDialog("Done!\nI have hardened all risky features!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
@@ -221,6 +222,7 @@ func restoreAll() {
 		triggerAll(false)
 		restoreSavedRegistryKeys()
 		markStatus(false)
+		showStatus()
 
 		showInfoDialog("Done!\nI have restored all risky features!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
@@ -251,13 +253,12 @@ func triggerAll(harden bool) {
 				events.AppendText(fmt.Sprintf("\n!! %s %s FAILED !!\n", outputString, hardenSubject.Name()))
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
-				Info.Printf("%s %s has been successful", outputString, hardenSubject.Name())
+				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
 			}
 		}
 	}
 
 	events.AppendText("\n")
-	showStatus()
 }
 
 // hardenDefaultsAgain restores the original settings and
