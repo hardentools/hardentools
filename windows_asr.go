@@ -34,8 +34,9 @@ More details here:
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/sys/windows/registry"
 	"strings"
+
+	"golang.org/x/sys/windows/registry"
 )
 
 var ruleIDArray = []string{"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550", //Block executable content from email client and webmail
@@ -52,16 +53,18 @@ var actionsEnumeration = strings.Join(actionsArray, ",")
 
 // WindowsASRStruct ist the struct for HardenInterface implementation
 type WindowsASRStruct struct {
-	shortName   string
-	longName    string
-	description string
+	shortName       string
+	longName        string
+	description     string
+	hardenByDefault bool
 }
 
 // WindowsASR contains Names for Windows ASR implementation of hardenInterface
 var WindowsASR = &WindowsASRStruct{
-	shortName:   "WindowsASR",
-	longName:    "Windows ASR (needs Win 10/1709)",
-	description: "Windows Attack Surface Reduction (ASR) (needs Win 10/1709)",
+	shortName:       "WindowsASR",
+	longName:        "Windows ASR (needs Win 10/1709)",
+	description:     "Windows Attack Surface Reduction (ASR) (needs Win 10/1709)",
+	hardenByDefault: true,
 }
 
 // Harden method
@@ -207,6 +210,11 @@ func (asr WindowsASRStruct) LongName() string {
 // Description returns description
 func (asr WindowsASRStruct) Description() string {
 	return asr.description
+}
+
+// HardenByDefault returns if subject should be hardened by default
+func (asr WindowsASRStruct) HardenByDefault() bool {
+	return asr.hardenByDefault
 }
 
 // checkWindowsVersion checks if hardentools is running on Windows 10 with Patch Level >= 1709

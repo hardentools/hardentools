@@ -22,11 +22,12 @@ import (
 
 // WSH contains registry keys for Windows Script Host Settings
 var WSH = &RegistrySingleValueDWORD{
-	RootKey:       registry.CURRENT_USER,
-	Path:          "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
-	ValueName:     "Enabled",
-	HardenedValue: 0,
-	shortName:     "WSH",
-	longName:      "Windows Script Host",
-	description:   "Windows Script Host",
+	RootKey:         registry.CURRENT_USER,
+	Path:            "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",
+	ValueName:       "Enabled",
+	HardenedValue:   0,
+	shortName:       "WSH",
+	longName:        "Windows Script Host",
+	description:     "Windows Script Host",
+	hardenByDefault: true,
 }

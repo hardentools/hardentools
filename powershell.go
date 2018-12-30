@@ -26,19 +26,20 @@ import (
 
 // PowerShellDisallowRunMembers is the struct for the HardenInterface implementation
 type PowerShellDisallowRunMembers struct {
-	shortName   string
-	longName    string
-	description string
+	shortName       string
+	longName        string
+	description     string
+	hardenByDefault bool
 }
 
 // PowerShell is the struct for hardentools interface that combines registry keys and PowerShellDisallowRunMembers
 var PowerShell = &MultiHardenInterfaces{
-	shortName:   "PowerShell",
-	longName:    "Powershell and cmd.exe",
-	description: "Disables Powershell, Powershell ISE and cmd.exe",
+	shortName:       "PowerShell",
+	longName:        "Powershell and cmd.exe",
+	description:     "Disables Powershell, Powershell ISE and cmd.exe",
+	hardenByDefault: false,
 	hardenInterfaces: []HardenInterface{
-		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers"},
-
+		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", true},
 		&RegistrySingleValueDWORD{
 			RootKey:       registry.CURRENT_USER,
 			Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
@@ -175,4 +176,9 @@ func (pwShell PowerShellDisallowRunMembers) LongName() string {
 // Description of the harden item
 func (pwShell PowerShellDisallowRunMembers) Description() string {
 	return pwShell.description
+}
+
+// HardenByDefault returns if subject should be hardened by default
+func (pwShell PowerShellDisallowRunMembers) HardenByDefault() bool {
+	return pwShell.hardenByDefault
 }

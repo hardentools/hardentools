@@ -27,13 +27,14 @@ import (
 // RegistrySingleValueDWORD is a data type for a single registry DWORD value that suffices for hardening
 // a distinct setting or as part of an RegistryMultiValue
 type RegistrySingleValueDWORD struct {
-	RootKey       registry.Key
-	Path          string
-	ValueName     string
-	HardenedValue uint32
-	shortName     string
-	longName      string
-	description   string
+	RootKey         registry.Key
+	Path            string
+	ValueName       string
+	HardenedValue   uint32
+	shortName       string
+	longName        string
+	description     string
+	hardenByDefault bool
 }
 
 // RegistryMultiValue is a data type for multiple SingleValueDWORDs
@@ -43,6 +44,7 @@ type RegistryMultiValue struct {
 	shortName        string
 	longName         string
 	description      string
+	hardenByDefault  bool
 }
 
 // Harden function for RegistrySingleValueDWORD struct
@@ -89,6 +91,11 @@ func (regValue *RegistrySingleValueDWORD) Description() string {
 	return regValue.description
 }
 
+// HardenByDefault returns if subject should be hardened by default
+func (regValue *RegistrySingleValueDWORD) HardenByDefault() bool {
+	return regValue.hardenByDefault
+}
+
 // Harden function for RegistryMultiValue struct
 func (regMultiValue RegistryMultiValue) Harden(harden bool) error {
 	for _, singleDWORD := range regMultiValue.ArraySingleDWORD {
@@ -127,6 +134,11 @@ func (regMultiValue *RegistryMultiValue) LongName() string {
 // Description of the harden item
 func (regMultiValue *RegistryMultiValue) Description() string {
 	return regMultiValue.description
+}
+
+// HardenByDefault returns if subject should be hardened by default
+func (regMultiValue *RegistryMultiValue) HardenByDefault() bool {
+	return regMultiValue.hardenByDefault
 }
 
 ////

@@ -22,10 +22,11 @@ import (
 
 // UAC contains the registry keys to be hardened
 var UAC = &RegistrySingleValueDWORD{
-	RootKey:       registry.LOCAL_MACHINE,
-	Path:          "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-	ValueName:     "ConsentPromptBehaviorAdmin",
-	HardenedValue: 2,
-	shortName:     "UAC",
-	longName:      "UAC Prompt",
+	RootKey:         registry.LOCAL_MACHINE,
+	Path:            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+	ValueName:       "ConsentPromptBehaviorAdmin",
+	HardenedValue:   2,
+	shortName:       "UAC",
+	longName:        "UAC Prompt",
+	hardenByDefault: true,
 }

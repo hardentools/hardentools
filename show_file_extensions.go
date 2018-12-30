@@ -45,6 +45,7 @@ var ShowFileExt = &RegistryMultiValue{
 			shortName:     "ShowFileExt_SuperHidden",
 		},
 	},
-	shortName: "ShowFileExt",
-	longName:  "Show File Extensions",
+	shortName:       "ShowFileExt",
+	longName:        "Show File Extensions",
+	hardenByDefault: true,
 }

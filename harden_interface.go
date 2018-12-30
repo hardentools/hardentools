@@ -18,11 +18,12 @@ package main
 
 // HardenInterface is the general interface which should be used for every harden subject
 type HardenInterface interface {
-	IsHardened() bool    // returns true if harden subject is already completely hardened
-	Harden(bool) error   // hardens the harden subject if parameter is true, restores it if parameter is false
-	Name() string        // returns short name
-	LongName() string    // returns long name
-	Description() string // returns description
+	IsHardened() bool      // returns true if harden subject is already completely hardened
+	Harden(bool) error     // hardens the harden subject if parameter is true, restores it if parameter is false
+	Name() string          // returns short name
+	LongName() string      // returns long name
+	Description() string   // returns description
+	HardenByDefault() bool // returns if this harden subject should be hardened by default or only optional
 }
 
 // MultiHardenInterfaces is a type for an array of HardenInterfaces
@@ -31,6 +32,7 @@ type MultiHardenInterfaces struct {
 	shortName        string
 	longName         string
 	description      string
+	hardenByDefault  bool
 }
 
 // Harden hardens (if harden == true) or restores (if harden == false) MultiHardenInterfaces
@@ -70,4 +72,9 @@ func (mhInterfaces *MultiHardenInterfaces) LongName() string {
 // Description of the harden item
 func (mhInterfaces *MultiHardenInterfaces) Description() string {
 	return mhInterfaces.description
+}
+
+// HardenByDefault returns if subject should be hardened by default
+func (mhInterfaces *MultiHardenInterfaces) HardenByDefault() bool {
+	return mhInterfaces.hardenByDefault
 }

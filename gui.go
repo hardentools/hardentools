@@ -88,7 +88,7 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 
 		if status == false {
 			// all checkboxes checked by default, disabled only if subject is already hardened
-			expertConfig[hardenSubject.Name()] = !subjectIsHardened
+			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
 
 			// only enable, if not already hardenend
 			enableField = !subjectIsHardened
