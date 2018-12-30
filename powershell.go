@@ -37,7 +37,7 @@ var PowerShell = &MultiHardenInterfaces{
 	shortName:       "PowerShell",
 	longName:        "Powershell and cmd.exe",
 	description:     "Disables Powershell, Powershell ISE and cmd.exe",
-	hardenByDefault: false,
+	hardenByDefault: true,
 	hardenInterfaces: []HardenInterface{
 		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", true},
 		&RegistrySingleValueDWORD{
