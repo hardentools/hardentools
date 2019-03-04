@@ -277,9 +277,7 @@ func hardenDefaultsAgain() {
 		// in case of restore
 		expertConfig = make(map[string]bool)
 		for _, hardenSubject := range allHardenSubjects {
-			// TODO: sets all harden subjects to active for now. Better: replace
-			// this with default settings (to be implemented)
-			expertConfig[hardenSubject.Name()] = true
+			expertConfig[hardenSubject.Name()] = hardenSubject.HardenByDefault()
 		}
 
 		// harden all settings

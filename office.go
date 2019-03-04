@@ -35,15 +35,16 @@ var standardOfficeApps = []string{"Excel", "PowerPoint", "Word"}
 
 // OfficeRegistryRegExSingleDWORD is the data type for a RegEx Path / Single Value DWORD combination
 type OfficeRegistryRegExSingleDWORD struct {
-	RootKey        registry.Key
-	PathRegEx      string
-	ValueName      string
-	HardenedValue  uint32
-	OfficeApps     []string
-	OfficeVersions []string
-	shortName      string
-	longName       string
-	description    string
+	RootKey         registry.Key
+	PathRegEx       string
+	ValueName       string
+	HardenedValue   uint32
+	OfficeApps      []string
+	OfficeVersions  []string
+	shortName       string
+	longName        string
+	description     string
+	hardenByDefault bool
 }
 
 // OfficeOLE hardens Office Packager Objects
@@ -51,14 +52,15 @@ type OfficeRegistryRegExSingleDWORD struct {
 // 1 - Prompt from Office when user clicks, object executes
 // 2 - No prompt, Object does not execute
 var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
-	RootKey:        registry.CURRENT_USER,
-	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
-	ValueName:      "PackagerPrompt",
-	HardenedValue:  2,
-	OfficeApps:     standardOfficeApps,
-	OfficeVersions: standardOfficeVersions,
-	shortName:      "OfficeOLE",
-	longName:       "Office Packager Objects (OLE)",
+	RootKey:         registry.CURRENT_USER,
+	PathRegEx:       "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:       "PackagerPrompt",
+	HardenedValue:   2,
+	OfficeApps:      standardOfficeApps,
+	OfficeVersions:  standardOfficeVersions,
+	shortName:       "OfficeOLE",
+	longName:        "Office Packager Objects (OLE)",
+	hardenByDefault: true,
 }
 
 // OfficeMacros contains Macro registry keys
@@ -67,24 +69,26 @@ var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
 // 3 - Digitally signed only
 // 4 - Disable all
 var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
-	RootKey:        registry.CURRENT_USER,
-	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
-	ValueName:      "VBAWarnings",
-	HardenedValue:  4,
-	OfficeApps:     standardOfficeApps,
-	OfficeVersions: standardOfficeVersions,
-	shortName:      "OfficeMacros",
-	longName:       "Office Macros",
+	RootKey:         registry.CURRENT_USER,
+	PathRegEx:       "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:       "VBAWarnings",
+	HardenedValue:   4,
+	OfficeApps:      standardOfficeApps,
+	OfficeVersions:  standardOfficeVersions,
+	shortName:       "OfficeMacros",
+	longName:        "Office Macros",
+	hardenByDefault: true,
 }
 
 // OfficeActiveX contains ActiveX registry keys
 var OfficeActiveX = &RegistrySingleValueDWORD{
-	RootKey:       registry.CURRENT_USER,
-	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
-	ValueName:     "DisableAllActiveX",
-	HardenedValue: 1,
-	shortName:     "OfficeActiveX",
-	longName:      "Office ActiveX",
+	RootKey:         registry.CURRENT_USER,
+	Path:            "SOFTWARE\\Microsoft\\Office\\Common\\Security",
+	ValueName:       "DisableAllActiveX",
+	HardenedValue:   1,
+	shortName:       "OfficeActiveX",
+	longName:        "Office ActiveX",
+	hardenByDefault: true,
 }
 
 //// DDE Mitigations for Word, Outlook and Excel
@@ -278,8 +282,9 @@ var OfficeDDE = &MultiHardenInterfaces{
 			shortName:     "OfficeDDE_Word2007",
 		},
 	},
-	shortName: "OfficeDDE",
-	longName:  "Office DDE Mitigations",
+	shortName:       "OfficeDDE",
+	longName:        "Office DDE Mitigations",
+	hardenByDefault: true,
 }
 
 //// HardenInterface methods
@@ -350,4 +355,9 @@ func (officeRegEx OfficeRegistryRegExSingleDWORD) LongName() string {
 // Description of the harden item
 func (officeRegEx OfficeRegistryRegExSingleDWORD) Description() string {
 	return officeRegEx.description
+}
+
+// HardenByDefault returns if subject should be hardened by default
+func (officeRegEx OfficeRegistryRegExSingleDWORD) HardenByDefault() bool {
+	return officeRegEx.hardenByDefault
 }

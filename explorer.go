@@ -45,10 +45,11 @@ type Extension struct {
 
 // ExplorerAssociations is the struct for HardenInterface implementation
 type ExplorerAssociations struct {
-	extensions  []Extension
-	shortName   string
-	longName    string
-	description string
+	extensions      []Extension
+	shortName       string
+	longName        string
+	description     string
+	hardenByDefault bool
 }
 
 // FileAssociations contains all extensions to be removed
@@ -65,8 +66,9 @@ var FileAssociations = ExplorerAssociations{
 		{".VBE", "VBEFile"},
 		{".pif", "piffile"},
 	},
-	shortName: "FileAssociations",
-	longName:  "File associations",
+	shortName:       "FileAssociations",
+	longName:        "File associations",
+	hardenByDefault: true,
 }
 
 // Harden explorer associations
@@ -166,4 +168,9 @@ func (explAssoc ExplorerAssociations) LongName() string {
 // Description of the harden item
 func (explAssoc ExplorerAssociations) Description() string {
 	return explAssoc.description
+}
+
+// HardenByDefault returns if subject should be hardened by default
+func (explAssoc ExplorerAssociations) HardenByDefault() bool {
+	return explAssoc.hardenByDefault
 }
