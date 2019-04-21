@@ -1,5 +1,7 @@
 github.com/akavel/rsrc v0.0.0-20170831122431-f6a15ece2cfd h1:yumR8733CaQ3P76MFbIbBKdrJmy4EqnQ5DIhqq8gq2Q=
 github.com/akavel/rsrc v0.0.0-20170831122431-f6a15ece2cfd/go.mod h1:2+aQMrY0hBFBaIr2xxnZ/ctfwnYmMRMbTczYLAC34v4=
+github.com/akavel/rsrc v0.8.0 h1:zjWn7ukO9Kc5Q62DOJCcxGpXC18RawVtYAGdz2aLlfw=
+github.com/akavel/rsrc v0.8.0/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/lxn/walk v0.0.0-20180827160941-c4fcb8f984c9 h1:IW63IB4PLICart1GyBzeFbuBXnDiciqD3StdAlrTnTc=
 github.com/lxn/walk v0.0.0-20180827160941-c4fcb8f984c9/go.mod h1:E23UucZGqpuUANJooIbHWCufXvOcT6E7Stq81gU+CSQ=
 github.com/lxn/win v0.0.0-20180821075459-785c49560692 h1:NHaLxZM64QLmURkPKVz+LUFa1O15iiym8bsPwHXZ7Mg=
