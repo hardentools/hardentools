@@ -24,7 +24,7 @@ import (
 
 // What better not to disable:
 // - .bat/.cmd (most probably breaks many programs; but would also prevent arbitrary code (including cmd.exe and powershell.exe) to be executed, even if disabled using Explorer\DisallowRun)
-// -
+//
 // What to disable:
 // - .hta allows execution of JavaScript and other scripting languages; seldomly run by user directly)
 // - .js allows execution of JavaScript
@@ -36,6 +36,7 @@ import (
 // - .vbs Visual Basic Script, mainly malicious
 // - .VBE Visual Basic Script Encoded, mainly malicious
 // - .pif Normally, a PIF file contains information that defines how an MS-DOS-based program should run. Windows analyzes PIF files with the ShellExecute function and may run them as executable programs. Therefore, a PIF file can be used to transmit viruses or other harmful scripts.
+// - .mht Due to unpatched IE bug (https://www.zdnet.com/article/internet-explorer-zero-day-lets-hackers-steal-files-from-windows-pcs/)
 
 // Extension is a helper struct
 type Extension struct {
@@ -65,6 +66,7 @@ var FileAssociations = ExplorerAssociations{
 		{".vbs", "VBSFile"},
 		{".VBE", "VBEFile"},
 		{".pif", "piffile"},
+		{".mht", "mhtmlfile"},
 	},
 	shortName:       "FileAssociations",
 	longName:        "File associations",
