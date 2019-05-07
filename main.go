@@ -193,7 +193,7 @@ func markStatus(hardened bool) {
 		err := registry.DeleteKey(registry.CURRENT_USER, hardentoolsKeyPath)
 		if err != nil {
 			Info.Println(err.Error())
-			events.AppendText("Could not remove hardentools registry keys - nothing to worry about.")
+			events.AppendText("Could not remove hardentools registry keys - nothing to worry about.\r\n")
 		}
 	}
 }
@@ -250,7 +250,7 @@ func triggerAll(harden bool) {
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				events.AppendText(fmt.Sprintf("\n!! %s %s FAILED !!\n", outputString, hardenSubject.Name()))
+				events.AppendText(fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name()))
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
@@ -258,7 +258,7 @@ func triggerAll(harden bool) {
 		}
 	}
 
-	events.AppendText("\n")
+	events.AppendText("\r\n")
 }
 
 // hardenDefaultsAgain restores the original settings and
@@ -294,11 +294,11 @@ func hardenDefaultsAgain() {
 func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
-			eventText := fmt.Sprintf("%s is now hardened\n", hardenSubject.Name())
+			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
 			events.AppendText(eventText)
 			Info.Print(eventText)
 		} else {
-			eventText := fmt.Sprintf("%s is now NOT hardened\n", hardenSubject.Name())
+			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
 			events.AppendText(eventText)
 			Info.Print(eventText)
 		}
