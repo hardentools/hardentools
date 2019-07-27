@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2018  Security Without Borders
+// Copyright (C) 2019  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -274,7 +274,7 @@ func hardenDefaultsAgain() {
 		markStatus(false)
 
 		// reset expertConfig (is set to currently already hardened settings
-		// in case of restore
+		// in case of restore)
 		expertConfig = make(map[string]bool)
 		for _, hardenSubject := range allHardenSubjects {
 			expertConfig[hardenSubject.Name()] = hardenSubject.HardenByDefault()
