@@ -80,7 +80,7 @@ import (
 // global configuration constants
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
 const logpath = "hardentools.log"
-const defaultLogLevel = "Info"
+const defaultLogLevel = "Trace"
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
@@ -104,6 +104,8 @@ var allHardenSubjectsWithAndWithoutElevatedPrivileges = []HardenInterface{
 	Autorun,
 	// PowerShell.
 	PowerShell,
+	// cmd.exe.
+	Cmd,
 	// UAC.
 	UAC,
 	// Explorer.
