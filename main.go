@@ -80,7 +80,7 @@ import (
 // global configuration constants
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
 const logpath = "hardentools.log"
-const defaultLogLevel = "Trace"
+const defaultLogLevel = "Info"
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
