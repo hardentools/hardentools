@@ -24,39 +24,38 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// PowerShellDisallowRunMembers is the struct for the HardenInterface implementation
-type PowerShellDisallowRunMembers struct {
+// CmdDisallowRunMembers is the struct for the HardenInterface implementation
+type CmdDisallowRunMembers struct {
 	shortName       string
 	longName        string
 	description     string
 	hardenByDefault bool
 }
 
-// PowerShell is the struct for hardentools interface that combines registry keys and PowerShellDisallowRunMembers
-var PowerShell = &MultiHardenInterfaces{
-	shortName:       "PowerShell",
-	longName:        "Disable Powershell",
-	description:     "Disables Powershell and Powershell ISE",
-	hardenByDefault: true,
+// Cmd is the struct for hardentools interface that combines registry keys and CmdDisallowRunMembers
+var Cmd = &MultiHardenInterfaces{
+	shortName:       "cmd.exe",
+	longName:        "Disable cmd.exe",
+	description:     "Disables cmd.exe",
+	hardenByDefault: false,
 	hardenInterfaces: []HardenInterface{
-		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", true},
+		CmdDisallowRunMembers{"CmdDisallowRunMembers", "CmdDisallowRunMembers", "CmdDisallowRunMembers", false},
 	},
 }
 
-// Harden disables Powershell
+// Harden disables cmd.exe
 //  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
 //  "DisallowRun"=dword:00000001
 //  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
-//  "1"="powershell_ise.exe"
-//  "2"="powershell.exe"
-func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
+//  "3"="cmd.exe"
+func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
 
 		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("\n!! OpenKey to enable Powershell failed")
+			return errors.New("\n!! OpenKey to restore cmd failed")
 		}
 		defer keyDisallow.Close()
 
@@ -65,11 +64,15 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		//       were not created by hardentools if they are equivalent
 		//       with the hardentools created ones (it has to be decided
 		//       if this is a bug or a feature
-		for i := 1; i < 100; i++ {
-			value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
+		for i := 1; true; i++ {
+			value, _, err := keyDisallow.GetStringValue(strconv.Itoa(i))
+			if err != nil {
+				// stop for loop if end of list reached
+				break
+			}
 
 			switch value {
-			case "powershell_ise.exe", "powershell.exe":
+			case "cmd.exe":
 				err := keyDisallow.DeleteValue(strconv.Itoa(i))
 				if err != nil {
 					errorText := fmt.Sprintf("Could not restore %s by deleting corresponding registry value due to error: %s", value, err.Error())
@@ -105,7 +108,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 					return errors.New("\n!! Fully restoring DisableRun settings failed")
 				}
 			}
-			// create new according to index (i)
+			// create new values according to index (i)
 			for key, val := range newValues {
 				err := keyDisallow.SetStringValue(strconv.Itoa(key), val)
 				if err != nil {
@@ -117,7 +120,6 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 			// save number of values left over after cleanup
 			leftDisallowRunValues = len(newValues)
 		}
-
 		keyDisallow.Close()
 
 		if leftDisallowRunValues == 0 {
@@ -148,7 +150,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("\n!! CreateKey to disable powershell failed")
+			return errors.New("\n!! CreateKey to disable cmd.exe failed")
 		}
 		defer keyDisallow.Close()
 
@@ -163,14 +165,9 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		}
 
 		// Set values.
-		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
+		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "cmd.exe")
 		if err != nil {
-			return errors.New("!! Could not disable PowerShell ISE due to error " + err.Error())
-		}
-
-		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
-		if err != nil {
-			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
 		}
 
 		////
@@ -178,24 +175,24 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
 		if err != nil {
 			Info.Printf(err.Error())
-			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
 		}
 		defer keyExplorer.Close()
 
 		err = keyExplorer.SetDWordValue("DisallowRun", 0x01)
 		if err != nil {
 			Info.Printf(err.Error())
-			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
 		}
 	}
 
 	return nil
 }
 
-// IsHardened verifies if harden object of type PowerShellDisallowRunMembers is already hardened
-func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
+// IsHardened verifies if harden object of type CmdDisallowRunMembers is already hardened
+func (cmd CmdDisallowRunMembers) IsHardened() bool {
 	var (
-		powerShellIseFound, powerShellFound bool = false, false
+		cmdExeFound = false
 	)
 
 	keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.READ)
@@ -209,14 +206,12 @@ func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 		value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
 
 		switch value {
-		case "powershell_ise.exe":
-			powerShellIseFound = true
-		case "powershell.exe":
-			powerShellFound = true
+		case "cmd.exe":
+			cmdExeFound = true
 		}
 	}
 
-	if powerShellIseFound && powerShellFound {
+	if cmdExeFound {
 		return true
 	}
 
@@ -224,21 +219,21 @@ func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 }
 
 // Name returns the (short) name of the harden item
-func (pwShell PowerShellDisallowRunMembers) Name() string {
-	return pwShell.shortName
+func (cmd CmdDisallowRunMembers) Name() string {
+	return cmd.shortName
 }
 
 // LongName returns the long name of the harden item
-func (pwShell PowerShellDisallowRunMembers) LongName() string {
-	return pwShell.longName
+func (cmd CmdDisallowRunMembers) LongName() string {
+	return cmd.longName
 }
 
 // Description of the harden item
-func (pwShell PowerShellDisallowRunMembers) Description() string {
-	return pwShell.description
+func (cmd CmdDisallowRunMembers) Description() string {
+	return cmd.description
 }
 
 // HardenByDefault returns if subject should be hardened by default
-func (pwShell PowerShellDisallowRunMembers) HardenByDefault() bool {
-	return pwShell.hardenByDefault
+func (cmd CmdDisallowRunMembers) HardenByDefault() bool {
+	return cmd.hardenByDefault
 }
