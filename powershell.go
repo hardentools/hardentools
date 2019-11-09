@@ -40,12 +40,6 @@ var PowerShell = &MultiHardenInterfaces{
 	hardenByDefault: true,
 	hardenInterfaces: []HardenInterface{
 		PowerShellDisallowRunMembers{"PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", "PowerShell_DisallowRunMembers", true},
-		// &RegistrySingleValueDWORD{
-		// 	RootKey:       registry.CURRENT_USER,
-		// 	Path:          "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer",
-		// 	ValueName:     "DisallowRun",
-		// 	HardenedValue: 0x1,
-		// 	shortName:     "PowerShell_DisallowRun"},
 	},
 }
 
@@ -59,16 +53,6 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
 
-		// delete values for disallowed executables (by iterating all existing values)
-		// TODO: This only works if the hardentools values are the last
-		//       ones (if values are deleted and numbers are not in
-		//       consecutive order anymore, that might lead to Explorer
-		//       ignoring entries - to be tested
-		// TODO: This implementation currently also deletes values that
-		//       were not created by hardentools if they are equivalent
-		//       with the hardentools created ones (it has to be decided
-		//       if this is a bug or a feature
-
 		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
@@ -76,6 +60,11 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		}
 		defer keyDisallow.Close()
 
+		// delete values for disallowed executables (by iterating all existing values)
+		// Note: This implementation currently also deletes values that
+		//       were not created by hardentools if they are equivalent
+		//       with the hardentools created ones (it has to be decided
+		//       if this is a bug or a feature
 		for i := 1; i < 100; i++ {
 			value, _, _ := keyDisallow.GetStringValue(strconv.Itoa(i))
 
@@ -89,11 +78,73 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 				Trace.Printf("Restored %s by deleting corresponding registry value", value)
 			}
 		}
+
+		// repair order for value entries in DisallowRun key
+		leftDisallowRunValues := 0
+		values, err := keyDisallow.ReadValueNames(-1)
+		if err != nil {
+			Info.Printf(err.Error())
+		} else {
+			newValues := make(map[int]string)
+
+			for i, value := range values {
+				// get old value name and data content
+				content, _, err := keyDisallow.GetStringValue(value)
+				if err != nil {
+					break
+				}
+				Trace.Printf(value + "=" + content)
+
+				// saving data
+				newValues[i+1] = content
+
+				// delete old value
+				err = keyDisallow.DeleteValue(value)
+				if err != nil {
+					Info.Printf(err.Error())
+					return errors.New("\n!! Fully restoring DisableRun settings failed")
+				}
+			}
+			// create new according to index (i)
+			for key, val := range newValues {
+				err := keyDisallow.SetStringValue(strconv.Itoa(key), val)
+				if err != nil {
+					Info.Printf(err.Error())
+					return errors.New("\n!! Fully restoring DisableRun settings failed")
+				}
+			}
+
+			// save number of values left over after cleanup
+			leftDisallowRunValues = len(newValues)
+		}
+
 		keyDisallow.Close()
-		// TODO: remove DisallowRun Value if still exists
+
+		if leftDisallowRunValues == 0 {
+			// delete DisallowRun key if there are values left, otherwise keep it
+			err := registry.DeleteKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun")
+			if err != nil {
+				Info.Printf(err.Error())
+				return errors.New("\n!! Fully restoring DisableRun settings failed")
+			}
+
+			keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
+			if err != nil {
+				Info.Printf(err.Error())
+				return errors.New("\n!! Fully restoring DisableRun settings failed")
+			}
+			defer keyExplorer.Close()
+
+			err = keyExplorer.DeleteValue("DisallowRun")
+			if err != nil {
+				Info.Printf(err.Error())
+				return errors.New("\n!! Fully restoring DisableRun settings failed")
+			}
+		}
 	} else {
 		// Harden.
 
+		////
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
@@ -119,6 +170,21 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 
 		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
 		if err != nil {
+			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+		}
+
+		////
+		// Create or modify DisallowRun value
+		keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
+		if err != nil {
+			Info.Printf(err.Error())
+			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+		}
+		defer keyExplorer.Close()
+
+		err = keyExplorer.SetDWordValue("DisallowRun", 0x01)
+		if err != nil {
+			Info.Printf(err.Error())
 			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
 		}
 	}
