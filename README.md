@@ -42,17 +42,23 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 - **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
-- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices. For example, this should prevent applicatons from automatically executing when you plug a USB stick into your computer.
+- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices. This prevents applicatons from automatically executing when you plug a USB stick into your computer.
 
-- **Disables powershell.exe, powershell_ise.exe and cmd.exe execution via Windows Explorer**. You will not be able to use the terminal and it should prevent the use of PowerShell by malicious code trying to infect the system.
+- **Disables powershell.exe and powershell_ise.exe execution via Windows Explorer**. This prevents the use of PowerShell by malicious code trying to infect the system. You will not be able to open PowerShell directly anymore. 
+
+- **Disables cmd.exe execution via Windows Explorer (optional)**. You will not be able to use the cmd terminal and it should prevent malicious code trying to infect the system by using cmd.exe to e.g. start powershell.exe. This setting is optional because cmd.exe is used quite often by users and applications. This must therefore be enabled manually in the expert settings sections.
 
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
 - **Disable file extensions mainly used for malicious purposes**. Disables the ".hta", ".js", ".JSE", ".WSH", ".WSF", ".scf", ".scr", ".vbs", ".vbe" and ".pif" file extensions for the current user (and for system wide defaults, which is only relevant for newly created users).
 
-- **Shows file extensions and hidden files in explorer**.
+- **Shows file extensions and hidden files in explorer**. This is very useful to detect files pretending to be another file type (e.g. an exe file named like iAmSimulatingToBeAPdf.pdf.exe)
 
-- **Windows Defender Attack Surface Reduction (ASR)**. Enables various remediations using ASR starting with Windows 10 / 1709 (Block executable content from email client and webmail, Block Office applications from creating child processes, Block Office applications from creating executable content & from injecting code into other processes, Block JavaScript or VBScript from launching downloaded executable content, Block execution of potentially obfuscated scripts, Block Win32 API calls from Office macro). Needs the following prerequisites to work: (1) Windows 10 version >= 1709, (2) You are using Windows Defender Antivirus as the sole antivirus protection app. (3) Real-time protection is enabled in Windows Defender.
+- **Windows Defender Attack Surface Reduction (ASR)**. Enables various remediations using ASR starting with Windows 10 / 1709 (Block executable content from email client and webmail, Block Office applications from creating child processes, Block Office applications from creating executable content & from injecting code into other processes, Block JavaScript or VBScript from launching downloaded executable content, Block execution of potentially obfuscated scripts, Block Win32 API calls from Office macro). To be effective this needs the following prerequisites:
+
+  - Windows 10 version >= 1709,
+  - You are using Windows Defender Antivirus as the sole antivirus protection app,
+  - Real-time protection is enabled in Windows Defender.
 
 ### Microsoft Office
 
@@ -60,9 +66,13 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 - **Disable OLE object execution**. Microsoft Office applications are able to embed so called "OLE objects" and execute them, at times also automatically (for example through PowerPoint animations). Windows executables, such as spyware, can also be embedded and executed as an object. This is also a security disaster which we observed used time and time again, particularly in attacks against activists in repressed regions. Hardentools entirely disables this functionality.
 
-- **Disabling ActiveX**. Disables ActiveX Controls for all Office applications.
+- **Disabling ActiveX**. Disables ActiveX Controls for all Office applications. ActiveX controls can provide additional functionality in documents and are mostly used in enterprise environments. The impact of this setting is that ActiveX controls do not initialize and you are not notified that the ActiveX controls are disabled. Note: This doesn't disable ActiveX in Internet Explorer.
 
-- **Disable DDE**. Disables DDE for Word and Excel
+- **Disable DDE and Excel Links**. Disables DDE for Word, Excel and Outlook. The DDE protocol allows to send messages between applications to share data. This is an attack vector if the user opens a malicious document. Side effects are:
+
+  - If there are links to other office documents (to update data in a excel sheet for instance) this data is not updated automatically anymory. If you are using such kinds of documents you might have to disable this harden setting.
+
+  - Every Excel document is opened in a separate Excel instance if opened using Windows explorer. This might also have impact on sharing data between the documents and consume more memory.
 
 ### Acrobat Reader
 
@@ -70,11 +80,11 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 - **Disable execution of objects embedded in PDF documents**. Acrobat Reader also allows to execute embedded objects by opening them. This would normally raise a security alert, but given that legitimate uses of this are rare and limited, Hardentools disables this.
 
-- **Switch on the Protected Mode** (enabled by default in current versions)
+- **Switch on the Protected Mode**. When protected mode is enabled, Acrobat Reader assumes all PDFs are potentially malicious and confines any processing they invoke to a sandbox so that malicious PDF files can't infect the computer. (This setting is enabled by default in current Acrobat Reader versions.)
 
-- **Switch on Protected View** for all files from untrusted sources
+- **Switch on Protected View** for all files from untrusted sources. In the Protected View mode, most features are disabled to prevent malicious PDF files to do harm. You can view the PDF, but not do much else. A yellow bar displays on top of the Reader window. Click Enable All Features to exit the Protected View. but do that with caution and only for files you are really sure to originate from a trusted source.  
 
-- **Switch on Enhanced Security** (enabled by default in current versions)
+- **Switch on Enhanced Security**. This setting disallows PDF files to fetch data from untrusted locations. (This setting is enabled by default in current Acrobat Reader versions.)
 
 
 ## Authors
