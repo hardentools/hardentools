@@ -27,7 +27,7 @@ var standardOfficeVersions = []string{
 	"12.0", // Office 2007
 	"14.0", // Office 2010
 	"15.0", // Office 2013
-	"16.0", // Office 2016
+	"16.0", // Office 2016, 2019 and Office365 (local client)
 }
 
 // standard office apps that are hardened
