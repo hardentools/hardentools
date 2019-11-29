@@ -46,7 +46,7 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 - **Disables powershell.exe and powershell_ise.exe execution via Windows Explorer**. This prevents the use of PowerShell by malicious code trying to infect the system. You will not be able to open PowerShell directly anymore. 
 
-- **Disables cmd.exe execution via Windows Explorer (optional)**. You will not be able to use the cmd terminal and it should prevent malicious code trying to infect the system by using cmd.exe to e.g. start powershell.exe. This setting is optional because cmd.exe is used quite often by users and applications. This must therefore be enabled manually in the expert settings sections.
+- **Disables cmd.exe execution via Windows Explorer (optional)**. You will not be able to use the cmd terminal and it should prevent malicious code trying to infect the system by using cmd.exe to e.g. start powershell.exe. This setting is optional because cmd.exe is used quite often by users and applications. This must therefore be enabled manually in the expert settings section.
 
 - **Sets User Account Control (UAC) to always ask for permission** (even on configuration changes only) and to use "secure desktop".
 
