@@ -17,26 +17,32 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strings"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"github.com/lxn/walk"
 	"github.com/lxn/walk/declarative"
 )
 
-var expertCompWidgetArray []declarative.Widget
-var events *walk.TextEdit
-var window *walk.MainWindow
+var events widget.FormItem
+var eventsWindow fyne.Window
+var mainWindow fyne.Window
+var expertConfig map[string]bool
 
-// openMainWindows opens the main window
 func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 	// init variables
-	var labelText, buttonText, eventsText, expertSettingsText string
+	var labelText, buttonText, expertSettingsText string
 	var enableHardenAdditionalButton bool
 	var buttonFunc func()
+
+	appl := app.New()
+	appl.Settings().SetTheme(theme.LightTheme())
+	mainWindow = appl.NewWindow("Hardentools")
 
 	// check if we are running with elevated rights
 	if elevationStatus == false {
@@ -48,39 +54,9 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 	// check hardening status
 	var status = checkStatus()
 
-	// parse command line parameters/flags
-	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
-	flag.Parse()
-	flag.VisitAll(func(f *flag.Flag) {
-		//fmt.Printf("%s = \"%s\"\n", f.Name, f.Value.String())
-		// only supports log-level right now
-		if f.Name == "log-level" {
-			// Init logging
-			if strings.EqualFold(f.Value.String(), "Info") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(ioutil.Discard, logfile)
-			} else if strings.EqualFold(f.Value.String(), "Trace") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(logfile, logfile)
-			} else {
-				// Off
-				initLogging(ioutil.Discard, ioutil.Discard)
-			}
-		}
-	})
-
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
-	expertCompWidgetArray = make([]declarative.Widget, len(allHardenSubjects))
-	var checkBoxArray = make([]*walk.CheckBox, len(allHardenSubjects))
+	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
 
 	for i, hardenSubject := range allHardenSubjects {
 		var subjectIsHardened = hardenSubject.IsHardened()
@@ -104,13 +80,10 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 			enableField = false
 		}
 
-		expertCompWidgetArray[i] = declarative.CheckBox{
-			AssignTo:         &checkBoxArray[i],
-			Name:             hardenSubject.Name(),
-			Text:             hardenSubject.LongName(),
-			Checked:          expertConfig[hardenSubject.Name()],
-			OnCheckedChanged: walk.EventHandler(checkBoxEventGenerator(i, hardenSubject.Name())),
-			Enabled:          enableField,
+		expertCompWidgetArray[i] = widget.NewCheck(hardenSubject.LongName(), checkBoxEventGenerator(hardenSubject.Name()))
+		expertCompWidgetArray[i].SetChecked(expertConfig[hardenSubject.Name()])
+		if !enableField {
+			expertCompWidgetArray[i].Disable()
 		}
 	}
 
@@ -130,63 +103,47 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 	}
 
 	// build up main GUI window
+	// main tab
+	hardenAgainButton := widget.NewButton("Harden again (all default settings)",
+		hardenDefaultsAgain)
+	hardenAgainButton.Hidden = !enableHardenAdditionalButton
+
+	mainTabWidget := widget.NewVBox(
+		fyne.NewContainerWithLayout(layout.NewGridLayout(1),
+			widget.NewLabel(labelText),
+			widget.NewButton(buttonText, func() { buttonFunc() }),
+			hardenAgainButton,
+		),
+	)
+
+	// expert tab
+	expertTabWidget := widget.NewVBox(
+		widget.NewLabel(expertSettingsText),
+	)
+	for _, compWidget := range expertCompWidgetArray {
+		expertTabWidget.Append(compWidget)
+	}
+
+	// log tab widget
+	eventsWindow = appl.NewWindow("Hardentools Output")
+	events := widget.NewMultiLineEntry()
+	eventsWindow.SetContent(events)
+	eventsWindow.Resize(fyne.NewSize(500, 450))
+	eventsWindow.SetFixedSize(true)
+
 	//	window
-	declarative.MainWindow{
-		AssignTo: &window,
-		Title:    "HardenTools - Security Without Borders",
-		//MinSize:  declarative.Size{500, 600},
-		Layout: declarative.VBox{},
-		DataBinder: declarative.DataBinder{
-			DataSource: expertConfig,
-			AutoSubmit: true,
-		},
-		Children: []declarative.Widget{
-			declarative.HSpacer{},
-			declarative.PushButton{
-				Text:      "Harden again (all default settings)",
-				OnClicked: hardenDefaultsAgain,
-				Visible:   enableHardenAdditionalButton,
-			},
-			declarative.HSpacer{},
-			declarative.Label{Text: labelText},
-			declarative.PushButton{
-				Text:      buttonText,
-				OnClicked: buttonFunc,
-			},
-			declarative.HSpacer{},
-			declarative.Label{Text: expertSettingsText},
-			declarative.Composite{
-				Layout:   declarative.Grid{Columns: 3},
-				Border:   true,
-				Children: expertCompWidgetArray,
-			},
-			declarative.TextEdit{
-				AssignTo: &events,
-				Text:     eventsText,
-				ReadOnly: true,
-				MinSize:  declarative.Size{500, 450},
-				Visible:  false,
-			},
-		},
-	}.Create()
+	tabs := widget.NewTabContainer(
+		widget.NewTabItemWithIcon("Main", theme.HomeIcon(), mainTabWidget),
+		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), expertTabWidget))
+	tabs.SetTabLocation(widget.TabLocationLeading)
+	tabs.SelectTabIndex(appl.Preferences().Int("currentTab"))
+	mainWindow.SetContent(tabs)
 
 	// hide splash screen
 	splashChannel <- true
 
-	// start main GUI
-	window.Run()
-}
+	mainWindow.ShowAndRun()
 
-// checkBoxEventGenerator generates a function that is used as an walk.EventHandler
-// for the expert CheckBoxes in main GUI
-func checkBoxEventGenerator(n int, hardenSubjName string) func() {
-	var i = n
-	var hardenSubjectName = hardenSubjName
-	return func() {
-		x := *(expertCompWidgetArray[i]).(declarative.CheckBox).AssignTo
-		isChecked := x.CheckState()
-		expertConfig[hardenSubjectName] = (isChecked == walk.CheckChecked)
-	}
 }
 
 // showSplash shows an splash screen during initialization
@@ -208,14 +165,16 @@ func showSplash(splashChannel chan bool) {
 // showEventsTextArea sets the events area to visible and disables action buttons
 func showEventsTextArea() {
 	// set the events text element to visible to display output
-	events.SetVisible(true)
+	mainWindow.Close()
+	eventsWindow.Show()
+	/*events.SetVisible(true)
 
 	// set all other items but the last (which is the events text element from
 	// above) to disabled so no further action is possible by the user
 	length := window.Children().Len()
 	for i := 0; i < length-1; i++ {
 		window.Children().At(i).SetEnabled(false)
-	}
+	}*/
 }
 
 // showErrorDialog shows an error message
@@ -280,5 +239,19 @@ func askElevationDialog() {
 	}.Run(nil)
 	if err != nil {
 		fmt.Println(err)
+	}
+}
+
+func setExpertConfig(hardenSubjectName string, value bool) {
+	expertConfig[hardenSubjectName] = value
+}
+
+func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
+	var hardenSubjectName = hardenSubjName
+	return func(on bool) {
+		if expertConfig[hardenSubjectName] != on {
+			Trace.Printf("Expert Config setting %s to %t\n", hardenSubjectName, on)
+			setExpertConfig(hardenSubjectName, on)
+		}
 	}
 }

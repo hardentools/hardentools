@@ -69,10 +69,13 @@ int ExecuteWithRunas(char execName[]){
 import "C"
 
 import (
+	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -80,7 +83,7 @@ import (
 // global configuration constants
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
 const logpath = "hardentools.log"
-const defaultLogLevel = "Info"
+const defaultLogLevel = "Trace"
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
@@ -130,8 +133,6 @@ var allHardenSubjectsForUnprivilegedUsers = []HardenInterface{
 	AdobePDFProtectedView,
 	AdobePDFEnhancedSecurity,
 }
-
-var expertConfig map[string]bool
 
 // Loggers for log output (we only need info and trace, errors have to be
 // displayed in the GUI)
@@ -196,7 +197,7 @@ func markStatus(hardened bool) {
 		err := registry.DeleteKey(registry.CURRENT_USER, hardentoolsKeyPath)
 		if err != nil {
 			Info.Println(err.Error())
-			events.AppendText("Could not remove hardentools registry keys - nothing to worry about.\r\n")
+			events.Text += "Could not remove hardentools registry keys - nothing to worry about.\r\n"
 		}
 	}
 }
@@ -240,20 +241,22 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
-		events.AppendText("Now we are hardening ")
+		events.Text += "Now we are hardening "
 		outputString = "Hardening"
 	} else {
-		events.AppendText("Now we are restoring ")
+		events.Text += "Now we are restoring "
 		outputString = "Restoring"
 	}
 
+	Trace.Println(outputString)
+
 	for _, hardenSubject := range allHardenSubjects {
 		if expertConfig[hardenSubject.Name()] == true {
-			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.Name()))
+			events.Text += fmt.Sprintf("%s, ", hardenSubject.Name())
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				events.AppendText(fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name()))
+				events.Text += fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name())
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
@@ -261,7 +264,7 @@ func triggerAll(harden bool) {
 		}
 	}
 
-	events.AppendText("\r\n")
+	events.Text += "\r\n"
 }
 
 // hardenDefaultsAgain restores the original settings and
@@ -298,11 +301,11 @@ func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			events.AppendText(eventText)
+			events.Text += eventText
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			events.AppendText(eventText)
+			events.Text += eventText
 			Info.Print(eventText)
 		}
 	}
@@ -334,6 +337,34 @@ func main() {
 	if C.IsElevated() == 1 {
 		elevationStatus = true
 	}
+
+	// parse command line parameters/flags
+	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
+	flag.Parse()
+	flag.VisitAll(func(f *flag.Flag) {
+		// only supports log-level right now
+		if f.Name == "log-level" {
+			// Init logging
+			if strings.EqualFold(f.Value.String(), "Info") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(ioutil.Discard, logfile)
+			} else if strings.EqualFold(f.Value.String(), "Trace") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(logfile, logfile)
+			} else {
+				// Off
+				initLogging(ioutil.Discard, ioutil.Discard)
+			}
+		}
+	})
 
 	// show splash screen
 	splashChannel := make(chan bool, 1)
