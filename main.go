@@ -77,6 +77,10 @@ import (
 	"os"
 	"strings"
 
+	"fyne.io/fyne"
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/theme"
+
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -141,6 +145,9 @@ var (
 	Info  *log.Logger
 )
 
+var mainWindow fyne.Window
+var expertConfig map[string]bool
+
 // initLogging inits loggers
 func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 	Trace = log.New(traceHandle,
@@ -197,7 +204,7 @@ func markStatus(hardened bool) {
 		err := registry.DeleteKey(registry.CURRENT_USER, hardentoolsKeyPath)
 		if err != nil {
 			Info.Println(err.Error())
-			events.Text += "Could not remove hardentools registry keys - nothing to worry about.\r\n"
+			PrintEvent("Could not remove hardentools registry keys - nothing to worry about.\r\n")
 		}
 	}
 }
@@ -241,10 +248,10 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
-		events.Text += "Now we are hardening "
+		PrintEvent("Now we are hardening ")
 		outputString = "Hardening"
 	} else {
-		events.Text += "Now we are restoring "
+		PrintEvent("Now we are restoring ")
 		outputString = "Restoring"
 	}
 
@@ -252,11 +259,11 @@ func triggerAll(harden bool) {
 
 	for _, hardenSubject := range allHardenSubjects {
 		if expertConfig[hardenSubject.Name()] == true {
-			events.Text += fmt.Sprintf("%s, ", hardenSubject.Name())
+			PrintEvent(fmt.Sprintf("%s, ", hardenSubject.Name()))
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				events.Text += fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name())
+				PrintEvent(fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name()))
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
@@ -264,7 +271,7 @@ func triggerAll(harden bool) {
 		}
 	}
 
-	events.Text += "\r\n"
+	PrintEvent("\r\n")
 }
 
 // hardenDefaultsAgain restores the original settings and
@@ -301,11 +308,11 @@ func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			events.Text += eventText
+			PrintEvent(eventText)
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			events.Text += eventText
+			PrintEvent(eventText)
 			Info.Print(eventText)
 		}
 	}
@@ -328,6 +335,12 @@ func restartWithElevatedPrivileges() {
 
 // main method for hardentools
 func main() {
+	// init main window
+	appl := app.New()
+	appl.Settings().SetTheme(theme.LightTheme())
+	mainWindow = appl.NewWindow("Hardentools")
+	mainWindow.Show()
+
 	// check if hardentools has been started with elevated rights. If not
 	// ask user if he wants to elevate
 	if C.IsElevated() == 0 {
@@ -370,5 +383,5 @@ func main() {
 	splashChannel := make(chan bool, 1)
 	showSplash(splashChannel)
 
-	openMainWindow(splashChannel, elevationStatus)
+	openMainWindow(splashChannel, elevationStatus, appl)
 }

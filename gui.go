@@ -17,32 +17,23 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-
-	"github.com/lxn/walk"
-	"github.com/lxn/walk/declarative"
 )
 
-var events widget.FormItem
-var eventsWindow fyne.Window
-var mainWindow fyne.Window
-var expertConfig map[string]bool
+var events = widget.NewMultiLineEntry()
 
-func openMainWindow(splashChannel chan bool, elevationStatus bool) {
+func openMainWindow(splashChannel chan bool, elevationStatus bool, appl fyne.App) {
 	// init variables
 	var labelText, buttonText, expertSettingsText string
 	var enableHardenAdditionalButton bool
 	var buttonFunc func()
-
-	appl := app.New()
-	appl.Settings().SetTheme(theme.LightTheme())
-	mainWindow = appl.NewWindow("Hardentools")
 
 	// check if we are running with elevated rights
 	if elevationStatus == false {
@@ -124,13 +115,6 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 		expertTabWidget.Append(compWidget)
 	}
 
-	// log tab widget
-	eventsWindow = appl.NewWindow("Hardentools Output")
-	events := widget.NewMultiLineEntry()
-	eventsWindow.SetContent(events)
-	eventsWindow.Resize(fyne.NewSize(500, 450))
-	eventsWindow.SetFixedSize(true)
-
 	//	window
 	tabs := widget.NewTabContainer(
 		widget.NewTabItemWithIcon("Main", theme.HomeIcon(), mainTabWidget),
@@ -143,17 +127,16 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool) {
 	splashChannel <- true
 
 	mainWindow.ShowAndRun()
-
 }
 
 // showSplash shows an splash screen during initialization
 func showSplash(splashChannel chan bool) {
-	var splashWindow *walk.MainWindow
-	declarative.MainWindow{
-		AssignTo: &splashWindow,
-		Title:    "HardenTools - HardenTools - Starting Up. Please wait.",
-		MinSize:  declarative.Size{600, 100},
-	}.Create()
+	appl := app.New()
+	appl.Settings().SetTheme(theme.LightTheme())
+	splashWindow := appl.NewWindow("Hardentools is starting up")
+	splashWindow.Resize(fyne.NewSize(600, 300))
+	splashWindow.SetFixedSize(true)
+	splashWindow.Show()
 
 	// wait for main gui, then hide splash
 	go func() {
@@ -165,93 +148,51 @@ func showSplash(splashChannel chan bool) {
 // showEventsTextArea sets the events area to visible and disables action buttons
 func showEventsTextArea() {
 	// set the events text element to visible to display output
-	mainWindow.Close()
-	eventsWindow.Show()
-	/*events.SetVisible(true)
 
-	// set all other items but the last (which is the events text element from
-	// above) to disabled so no further action is possible by the user
-	length := window.Children().Len()
-	for i := 0; i < length-1; i++ {
-		window.Children().At(i).SetEnabled(false)
-	}*/
+	// log tab widget
+	events.SetReadOnly(true)
+	mainWindow.SetContent(events)
+	mainWindow.SetFixedSize(true)
+	mainWindow.Resize(fyne.NewSize(600, 800))
+	//mainWindow.Close()
+	//eventsWindow.Show()
 }
 
 // showErrorDialog shows an error message
 func showErrorDialog(errorMessage string) {
-	walk.MsgBox(nil, "ERROR", errorMessage, walk.MsgBoxIconExclamation)
+	err := errors.New(errorMessage)
+	dialog.ShowError(err, mainWindow)
 }
 
 // showInfoDialog shows an error message
 func showInfoDialog(infoMessage string) {
-	walk.MsgBox(nil, "Information", infoMessage, walk.MsgBoxIconInformation)
+	dialog.ShowInformation("Information", infoMessage, mainWindow)
+}
+
+func elevationDialogCallback(response bool) {
+	if response == true {
+		restartWithElevatedPrivileges()
+	}
 }
 
 // askElevationDialog asks the user if he wants to elevates his rights
 func askElevationDialog() {
-	//var notifyTextEdit *walk.TextEdit
-	var dialog *walk.Dialog
-	var acceptPB, cancelPB *walk.PushButton
-	_, err := declarative.Dialog{
-		AssignTo:      &dialog,
-		Title:         "Do you want to use admin privileges?",
-		DefaultButton: &acceptPB,
-		CancelButton:  &cancelPB,
-		MinSize:       declarative.Size{300, 100},
-		Layout:        declarative.VBox{},
-		Children: []declarative.Widget{
-
-			declarative.Label{
-				Text: "You are currently running hardentools as normal user.",
-				//TextColor: walk.RGB(255, 0, 0),
-				//MinSize: declarative.Size{500, 50},
-			},
-			declarative.Label{
-				Text:      "You won't be able to harden all available settings!",
-				TextColor: walk.RGB(255, 0, 0),
-				//MinSize:   declarative.Size{500, 50},
-			},
-			declarative.Label{
-				Text: "If you have admin rights available, please press \"Yes\", otherwise press \"No\".",
-				//TextColor: walk.RGB(255, 0, 0),
-				//MinSize: declarative.Size{500, 50},
-			},
-			declarative.Composite{
-				Layout: declarative.HBox{},
-				Children: []declarative.Widget{
-					declarative.PushButton{
-						AssignTo: &acceptPB,
-						Text:     "Yes",
-
-						OnClicked: func() {
-							dialog.Accept()
-							restartWithElevatedPrivileges()
-						},
-					},
-					declarative.PushButton{
-						AssignTo:  &cancelPB,
-						Text:      "No",
-						OnClicked: func() { dialog.Cancel() },
-					},
-				},
-			},
-		},
-	}.Run(nil)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func setExpertConfig(hardenSubjectName string, value bool) {
-	expertConfig[hardenSubjectName] = value
+	dialogText := "You are currently running hardentools as normal user.\n" +
+		"You won't be able to harden all available settings!\n" +
+		"If you have admin rights available, please press \"Yes\", otherwise press \"No\".\n"
+	cnf := dialog.NewConfirm("Do you want to use admin privileges?", dialogText, elevationDialogCallback, mainWindow)
+	cnf.SetDismissText("No")
+	cnf.SetConfirmText("Yes")
+	cnf.Show()
 }
 
 func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
 	var hardenSubjectName = hardenSubjName
 	return func(on bool) {
-		if expertConfig[hardenSubjectName] != on {
-			Trace.Printf("Expert Config setting %s to %t\n", hardenSubjectName, on)
-			setExpertConfig(hardenSubjectName, on)
-		}
+		expertConfig[hardenSubjectName] = on
 	}
+}
+
+func PrintEvent(text string) {
+	events.SetText(events.Text + text)
 }
