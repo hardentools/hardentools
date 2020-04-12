@@ -16,11 +16,66 @@
 
 package main
 
+/*
+// some C code for managing elevated privileges
+#include <windows.h>
+#include <shellapi.h>
+
+// checks if we are running with elevated privileges (admin rights)
+int IsElevated( ) {
+    boolean fRet = FALSE;
+    HANDLE hToken = NULL;
+    if( OpenProcessToken( GetCurrentProcess( ),TOKEN_QUERY,&hToken ) ) {
+        TOKEN_ELEVATION Elevation;
+        DWORD cbSize = sizeof( TOKEN_ELEVATION );
+        if( GetTokenInformation( hToken, TokenElevation, &Elevation, sizeof( Elevation ), &cbSize ) ) {
+            fRet = Elevation.TokenIsElevated;
+        }
+    }
+    if( hToken ) {
+        CloseHandle( hToken );
+    }
+    if( fRet ){
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+// executes the executable in the current directory (or in path) with "runas"
+// to aquire admin privileges
+int ExecuteWithRunas(char execName[]){
+	SHELLEXECUTEINFO shExecInfo;
+
+	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+
+	shExecInfo.fMask = 0x00008000;
+	shExecInfo.hwnd = NULL;
+	shExecInfo.lpVerb = "runas";
+	shExecInfo.lpFile = execName;
+	shExecInfo.lpParameters = NULL;
+	shExecInfo.lpDirectory = NULL;
+	shExecInfo.nShow = SW_NORMAL;
+	shExecInfo.hInstApp = NULL;
+
+	boolean success = ShellExecuteEx(&shExecInfo);
+	if (success)
+		return 1;
+	else
+		return 0;
+}
+*/
+import "C"
+
 import (
 	"errors"
+	"flag"
+	"io/ioutil"
+	"os"
+	"strings"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/app"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -29,7 +84,68 @@ import (
 
 var events = widget.NewMultiLineEntry()
 
-func openMainWindow(splashChannel chan bool, elevationStatus bool, appl fyne.App) {
+func main2() {
+
+	// check if hardentools has been started with elevated rights. If not
+	// ask user if he wants to elevate
+	if C.IsElevated() == 0 {
+		// main window must already be open for this dialog to work
+		askElevationDialog()
+	}
+	elevationStatus := false
+	if C.IsElevated() == 1 {
+		elevationStatus = true
+	}
+
+	showSplash()
+
+	// parse command line parameters/flags
+	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
+	flag.Parse()
+	flag.VisitAll(func(f *flag.Flag) {
+		// only supports log-level right now
+		if f.Name == "log-level" {
+			// Init logging
+			if strings.EqualFold(f.Value.String(), "Info") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(ioutil.Discard, logfile)
+			} else if strings.EqualFold(f.Value.String(), "Trace") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(logfile, logfile)
+			} else {
+				// Off
+				initLogging(ioutil.Discard, ioutil.Discard)
+			}
+		}
+	})
+
+	createMainGUIContent(elevationStatus)
+}
+
+// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
+func restartWithElevatedPrivileges() {
+	// find out our program (exe) name
+	progName := os.Args[0]
+
+	// start us again, this time with elevated privileges
+	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
+		// exit this instance (the unprivileged one)
+		os.Exit(0)
+	} else {
+		// something went wrong
+		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
+	}
+}
+
+func createMainGUIContent(elevationStatus bool) {
 	// init variables
 	var labelText, buttonText, expertSettingsText string
 	var enableHardenAdditionalButton bool
@@ -120,70 +236,69 @@ func openMainWindow(splashChannel chan bool, elevationStatus bool, appl fyne.App
 		widget.NewTabItemWithIcon("Main", theme.HomeIcon(), mainTabWidget),
 		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), expertTabWidget))
 	tabs.SetTabLocation(widget.TabLocationLeading)
-	tabs.SelectTabIndex(appl.Preferences().Int("currentTab"))
+	//tabs.SelectTabIndex(appl.Preferences().Int("currentTab"))
 	mainWindow.SetContent(tabs)
-
-	// hide splash screen
-	splashChannel <- true
-
-	mainWindow.ShowAndRun()
 }
 
-// showSplash shows an splash screen during initialization
-func showSplash(splashChannel chan bool) {
-	appl := app.New()
-	appl.Settings().SetTheme(theme.LightTheme())
-	splashWindow := appl.NewWindow("Hardentools is starting up")
-	splashWindow.Resize(fyne.NewSize(600, 300))
-	splashWindow.SetFixedSize(true)
-	splashWindow.Show()
+// showSplash shows an splash content during initialization
+func showSplash() {
+	splashContent := widget.NewVBox(
+		widget.NewLabel("Hardentools is starting up. Please wait..."),
+		widget.NewProgressBarInfinite())
 
-	// wait for main gui, then hide splash
-	go func() {
-		<-splashChannel
-		splashWindow.Hide()
-	}()
+	mainWindow.SetContent(splashContent)
 }
 
-// showEventsTextArea sets the events area to visible and disables action buttons
+// showEventsTextArea
 func showEventsTextArea() {
-	// set the events text element to visible to display output
-
 	// log tab widget
 	events.SetReadOnly(true)
 	mainWindow.SetContent(events)
 	mainWindow.SetFixedSize(true)
 	mainWindow.Resize(fyne.NewSize(600, 800))
-	//mainWindow.Close()
-	//eventsWindow.Show()
 }
 
 // showErrorDialog shows an error message
 func showErrorDialog(errorMessage string) {
+	ch := make(chan int)
+
 	err := errors.New(errorMessage)
-	dialog.ShowError(err, mainWindow)
+	dialog.ShowErrorWithCallback(err, func(conf bool) {
+		ch <- 42
+	}, mainWindow)
+
+	<-ch
 }
 
 // showInfoDialog shows an error message
 func showInfoDialog(infoMessage string) {
-	dialog.ShowInformation("Information", infoMessage, mainWindow)
-}
+	ch := make(chan int)
 
-func elevationDialogCallback(response bool) {
-	if response == true {
-		restartWithElevatedPrivileges()
-	}
+	dialog.ShowInformationWithCallback("Information", infoMessage,
+		func(conf bool) {
+			ch <- 42
+		}, mainWindow)
+
+	<-ch
 }
 
 // askElevationDialog asks the user if he wants to elevates his rights
 func askElevationDialog() {
+	ch := make(chan int)
 	dialogText := "You are currently running hardentools as normal user.\n" +
 		"You won't be able to harden all available settings!\n" +
 		"If you have admin rights available, please press \"Yes\", otherwise press \"No\".\n"
-	cnf := dialog.NewConfirm("Do you want to use admin privileges?", dialogText, elevationDialogCallback, mainWindow)
+	cnf := dialog.NewConfirm("Do you want to use admin privileges?", dialogText, func(response bool) {
+		if response == true {
+			restartWithElevatedPrivileges()
+		}
+		ch <- 42
+	}, mainWindow)
 	cnf.SetDismissText("No")
 	cnf.SetConfirmText("Yes")
 	cnf.Show()
+
+	<-ch
 }
 
 func checkBoxEventGenerator(hardenSubjName string) func(on bool) {

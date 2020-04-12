@@ -16,66 +16,11 @@
 
 package main
 
-/*
-// some C code for managing elevated privileges
-#include <windows.h>
-#include <shellapi.h>
-
-// checks if we are running with elevated privileges (admin rights)
-int IsElevated( ) {
-    boolean fRet = FALSE;
-    HANDLE hToken = NULL;
-    if( OpenProcessToken( GetCurrentProcess( ),TOKEN_QUERY,&hToken ) ) {
-        TOKEN_ELEVATION Elevation;
-        DWORD cbSize = sizeof( TOKEN_ELEVATION );
-        if( GetTokenInformation( hToken, TokenElevation, &Elevation, sizeof( Elevation ), &cbSize ) ) {
-            fRet = Elevation.TokenIsElevated;
-        }
-    }
-    if( hToken ) {
-        CloseHandle( hToken );
-    }
-    if( fRet ){
-		return 1;
-	}
-	else {
-		return 0;
-	}
-}
-
-// executes the executable in the current directory (or in path) with "runas"
-// to aquire admin privileges
-int ExecuteWithRunas(char execName[]){
-	SHELLEXECUTEINFO shExecInfo;
-
-	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-
-	shExecInfo.fMask = 0x00008000;
-	shExecInfo.hwnd = NULL;
-	shExecInfo.lpVerb = "runas";
-	shExecInfo.lpFile = execName;
-	shExecInfo.lpParameters = NULL;
-	shExecInfo.lpDirectory = NULL;
-	shExecInfo.nShow = SW_NORMAL;
-	shExecInfo.hInstApp = NULL;
-
-	boolean success = ShellExecuteEx(&shExecInfo);
-	if (success)
-		return 1;
-	else
-		return 0;
-}
-*/
-import "C"
-
 import (
-	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -219,7 +164,8 @@ func hardenAll() {
 		markStatus(true)
 		showStatus()
 
-		showInfoDialog("Done!\nI have hardened all risky features!\nFor all changes to take effect please restart Windows.")
+		showInfoDialog("Done!\nAll risky features have been hardened!\n" +
+			"For all changes to take effect, please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -318,70 +264,15 @@ func showStatus() {
 	}
 }
 
-// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
-func restartWithElevatedPrivileges() {
-	// find out our program (exe) name
-	progName := os.Args[0]
-
-	// start us again, this time with elevated privileges
-	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
-		// exit this instance (the unprivileged one)
-		os.Exit(0)
-	} else {
-		// something went wrong
-		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
-	}
-}
-
 // main method for hardentools
 func main() {
 	// init main window
 	appl := app.New()
 	appl.Settings().SetTheme(theme.LightTheme())
 	mainWindow = appl.NewWindow("Hardentools")
-	mainWindow.Show()
+	mainWindow.Resize(fyne.NewSize(700, 400))
+	mainWindow.SetFixedSize(true)
 
-	// check if hardentools has been started with elevated rights. If not
-	// ask user if he wants to elevate
-	if C.IsElevated() == 0 {
-		askElevationDialog()
-	}
-	elevationStatus := false
-	if C.IsElevated() == 1 {
-		elevationStatus = true
-	}
-
-	// parse command line parameters/flags
-	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
-	flag.Parse()
-	flag.VisitAll(func(f *flag.Flag) {
-		// only supports log-level right now
-		if f.Name == "log-level" {
-			// Init logging
-			if strings.EqualFold(f.Value.String(), "Info") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(ioutil.Discard, logfile)
-			} else if strings.EqualFold(f.Value.String(), "Trace") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(logfile, logfile)
-			} else {
-				// Off
-				initLogging(ioutil.Discard, ioutil.Discard)
-			}
-		}
-	})
-
-	// show splash screen
-	splashChannel := make(chan bool, 1)
-	showSplash(splashChannel)
-
-	openMainWindow(splashChannel, elevationStatus, appl)
+	go main2()
+	mainWindow.ShowAndRun()
 }
