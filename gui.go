@@ -263,7 +263,7 @@ func showErrorDialog(errorMessage string) {
 	ch := make(chan int)
 
 	err := errors.New(errorMessage)
-	dialog.ShowErrorWithCallback(err, func(conf bool) {
+	dialog.ShowErrorWithCallback(err, func() {
 		ch <- 42
 	}, mainWindow)
 
@@ -275,7 +275,7 @@ func showInfoDialog(infoMessage string) {
 	ch := make(chan int)
 
 	dialog.ShowInformationWithCallback("Information", infoMessage,
-		func(conf bool) {
+		func() {
 			ch <- 42
 		}, mainWindow)
 
