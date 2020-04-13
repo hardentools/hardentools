@@ -149,7 +149,7 @@ func markStatus(hardened bool) {
 		err := registry.DeleteKey(registry.CURRENT_USER, hardentoolsKeyPath)
 		if err != nil {
 			Info.Println(err.Error())
-			PrintEvent("Could not remove hardentools registry keys - nothing to worry about.\r\n")
+			ShowFailure("Remove hardentools registry keys", "Could not remove")
 		}
 	}
 }
@@ -194,10 +194,10 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
-		PrintEvent("Now we are hardening ")
+		//PrintEvent("Now we are hardening ")
 		outputString = "Hardening"
 	} else {
-		PrintEvent("Now we are restoring ")
+		//PrintEvent("Now we are restoring ")
 		outputString = "Restoring"
 	}
 
@@ -205,19 +205,17 @@ func triggerAll(harden bool) {
 
 	for _, hardenSubject := range allHardenSubjects {
 		if expertConfig[hardenSubject.Name()] == true {
-			PrintEvent(fmt.Sprintf("%s, ", hardenSubject.Name()))
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				PrintEvent(fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name()))
+				ShowFailure(hardenSubject.Name(), err.Error())
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
+				ShowSuccess(hardenSubject.Name())
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
 			}
 		}
 	}
-
-	PrintEvent("\r\n")
 }
 
 // hardenDefaultsAgain restores the original settings and
@@ -254,11 +252,11 @@ func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			PrintEvent(eventText)
+			ShowSuccess(hardenSubject.Name())
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			PrintEvent(eventText)
+			ShowSuccess(hardenSubject.Name())
 			Info.Print(eventText)
 		}
 	}
@@ -270,8 +268,8 @@ func main() {
 	appl := app.New()
 	appl.Settings().SetTheme(theme.LightTheme())
 	mainWindow = appl.NewWindow("Hardentools")
-	mainWindow.Resize(fyne.NewSize(700, 400))
-	mainWindow.SetFixedSize(true)
+	mainWindow.Resize(fyne.NewSize(700, 300))
+	//mainWindow.SetFixedSize(true)
 
 	go main2()
 	mainWindow.ShowAndRun()

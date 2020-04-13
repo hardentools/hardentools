@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -77,15 +77,14 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/dialog"
-	"fyne.io/fyne/layout"
+
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 )
 
-var events = widget.NewMultiLineEntry()
+var resultBox *widget.Box
 
 func main2() {
-
 	// check if hardentools has been started with elevated rights. If not
 	// ask user if he wants to elevate
 	if C.IsElevated() == 0 {
@@ -130,26 +129,12 @@ func main2() {
 	createMainGUIContent(elevationStatus)
 }
 
-// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
-func restartWithElevatedPrivileges() {
-	// find out our program (exe) name
-	progName := os.Args[0]
-
-	// start us again, this time with elevated privileges
-	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
-		// exit this instance (the unprivileged one)
-		os.Exit(0)
-	} else {
-		// something went wrong
-		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
-	}
-}
-
 func createMainGUIContent(elevationStatus bool) {
 	// init variables
 	var labelText, buttonText, expertSettingsText string
 	var enableHardenAdditionalButton bool
 	var buttonFunc func()
+	var expertSettingsCheckBox *widget.Check
 
 	// check if we are running with elevated rights
 	if elevationStatus == false {
@@ -199,15 +184,32 @@ func createMainGUIContent(elevationStatus bool) {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
-		expertSettingsText = "Expert Settings - change only if you now what you are doing! Disabled settings are already hardened."
+		expertSettingsText = "Change only if you now what you are doing!\nDisabled settings are already hardened."
 		enableHardenAdditionalButton = false
 	} else {
 		buttonText = "Restore..."
 		buttonFunc = restoreAll
-		labelText = "We have already hardened some risky features, do you want to restore them?"
+		labelText = "We have already hardened some risky features.\nDo you want to restore them?"
 		expertSettingsText = "The following hardened features are going to be restored:"
 		enableHardenAdditionalButton = true
 	}
+
+	// expert tab
+	countExpertSettings := len(expertCompWidgetArray)
+	expertTab1 := widget.NewVBox()
+	expertTab2 := widget.NewVBox()
+	for i, compWidget := range expertCompWidgetArray {
+		if i < countExpertSettings/2 {
+			expertTab1.Append(compWidget)
+		} else {
+			expertTab2.Append(compWidget)
+		}
+	}
+	expertSettingsHBox := widget.NewHBox(expertTab1, expertTab2)
+	expertTabWidget := widget.NewGroup("Expert Settings",
+		widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{Italic: true}),
+		expertSettingsHBox,
+	)
 
 	// build up main GUI window
 	// main tab
@@ -215,29 +217,36 @@ func createMainGUIContent(elevationStatus bool) {
 		hardenDefaultsAgain)
 	hardenAgainButton.Hidden = !enableHardenAdditionalButton
 
-	mainTabWidget := widget.NewVBox(
-		fyne.NewContainerWithLayout(layout.NewGridLayout(1),
-			widget.NewLabel(labelText),
-			widget.NewButton(buttonText, func() { buttonFunc() }),
-			hardenAgainButton,
-		),
-	)
+	hardenButton := widget.NewButton(buttonText, func() { buttonFunc() })
+	hardenButton.SetIcon(theme.ConfirmIcon())
 
-	// expert tab
-	expertTabWidget := widget.NewVBox(
-		widget.NewLabel(expertSettingsText),
-	)
-	for _, compWidget := range expertCompWidgetArray {
-		expertTabWidget.Append(compWidget)
-	}
+	introText := widget.NewLabelWithStyle("Hardentools is designed to disable a number of \"features\" exposed by Microsoft\n"+
+		"Windows and is primary a consumer application. These features, commonly thought\n"+
+		"for enterprise customers, are generally useless to regular users and rather\n"+
+		"pose as dangers as they are very commonly abused by attackers to execute\n"+
+		"malicious code on a victim's computer. The intent of this tool is to simply\n"+
+		"reduce the attack surface by disabling the low-hanging fruit. Hardentools is\n"+
+		"intended for individuals at risk, who might want an extra level of security\n"+
+		"at the price of some usability. It is not intended for corporate environments.\n",
+		fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 
-	//	window
-	tabs := widget.NewTabContainer(
-		widget.NewTabItemWithIcon("Main", theme.HomeIcon(), mainTabWidget),
-		widget.NewTabItemWithIcon("Advanced", theme.SettingsIcon(), expertTabWidget))
-	tabs.SetTabLocation(widget.TabLocationLeading)
-	//tabs.SelectTabIndex(appl.Preferences().Int("currentTab"))
-	mainWindow.SetContent(tabs)
+	mainTabContent := widget.NewVBox(
+		widget.NewLabelWithStyle(labelText, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		hardenButton,
+		hardenAgainButton,
+	)
+	mainTabWidget := widget.NewGroup("Harden", mainTabContent)
+
+	expertSettingsCheckBox = widget.NewCheck("Show Expert Settings", func(on bool) {
+		if on {
+			mainWindow.SetContent(widget.NewVBox(expertTabWidget, mainTabWidget))
+		} else {
+			mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
+		}
+	})
+	mainTabContent.Append(expertSettingsCheckBox)
+
+	mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
 }
 
 // showSplash shows an splash content during initialization
@@ -249,36 +258,26 @@ func showSplash() {
 	mainWindow.SetContent(splashContent)
 }
 
-// showEventsTextArea
-func showEventsTextArea() {
-	// log tab widget
-	events.SetReadOnly(true)
-	mainWindow.SetContent(events)
-	mainWindow.SetFixedSize(true)
-	mainWindow.Resize(fyne.NewSize(600, 800))
-}
-
 // showErrorDialog shows an error message
 func showErrorDialog(errorMessage string) {
-	ch := make(chan int)
-
+	ch := make(chan bool)
 	err := errors.New(errorMessage)
-	dialog.ShowErrorWithCallback(err, func() {
-		ch <- 42
-	}, mainWindow)
-
+	errorDialog := dialog.NewError(err, mainWindow)
+	errorDialog.SetOnClosed(func() {
+		ch <- true
+	})
+	errorDialog.Show()
 	<-ch
 }
 
 // showInfoDialog shows an error message
 func showInfoDialog(infoMessage string) {
-	ch := make(chan int)
-
-	dialog.ShowInformationWithCallback("Information", infoMessage,
-		func() {
-			ch <- 42
-		}, mainWindow)
-
+	ch := make(chan bool)
+	infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
+	infoDialog.SetOnClosed(func() {
+		ch <- true
+	})
+	infoDialog.Show()
 	<-ch
 }
 
@@ -308,6 +307,32 @@ func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
 	}
 }
 
-func PrintEvent(text string) {
-	events.SetText(events.Text + text)
+// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
+func restartWithElevatedPrivileges() {
+	// find out our program (exe) name
+	progName := os.Args[0]
+
+	// start us again, this time with elevated privileges
+	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
+		// exit this instance (the unprivileged one)
+		os.Exit(0)
+	} else {
+		// something went wrong
+		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
+	}
+}
+
+// showEventsTextArea
+func showEventsTextArea() {
+	resultBox = widget.NewVBox()
+	mainWindow.SetContent(widget.NewGroup("Results", resultBox))
+}
+
+func ShowSuccess(text string) {
+	resultBox.Append(widget.NewLabel(text))
+}
+
+func ShowFailure(text, failureText string) {
+	//	resultBox.Append(widget.NewButtonWithIcon(text, theme.WarningIcon(), nil))
+	resultBox.Append(widget.NewLabelWithStyle(text+" failed with error: "+failureText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 }
