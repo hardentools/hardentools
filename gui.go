@@ -329,10 +329,7 @@ func showEventsTextArea() {
 }
 
 func ShowSuccess(text string) {
-	ic := widget.NewIcon(theme.ConfirmIcon())
-
 	resultBox.Append(widget.NewHBox(widget.NewLabel(text), widget.NewIcon(theme.ConfirmIcon())))
-
 }
 
 func ShowFailure(text, failureText string) {
