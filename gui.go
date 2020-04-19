@@ -329,10 +329,14 @@ func showEventsTextArea() {
 }
 
 func ShowSuccess(text string) {
-	resultBox.Append(widget.NewLabel(text))
+	ic := widget.NewIcon(theme.ConfirmIcon())
+
+	resultBox.Append(widget.NewHBox(widget.NewLabel(text), widget.NewIcon(theme.ConfirmIcon())))
+
 }
 
 func ShowFailure(text, failureText string) {
 	//	resultBox.Append(widget.NewButtonWithIcon(text, theme.WarningIcon(), nil))
 	resultBox.Append(widget.NewLabelWithStyle(text+" failed with error: "+failureText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	resultBox.Append(widget.NewIcon(theme.CancelIcon()))
 }
