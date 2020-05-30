@@ -50,13 +50,14 @@ var PowerShell = &MultiHardenInterfaces{
 //  "1"="powershell_ise.exe"
 //  "2"="powershell.exe"
 func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
+
 	if harden == false {
 		// Restore.
 
 		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("\n!! OpenKey to enable Powershell failed")
+			return errors.New("OpenKey to enable Powershell failed")
 		}
 		defer keyDisallow.Close()
 
@@ -102,7 +103,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 				err = keyDisallow.DeleteValue(value)
 				if err != nil {
 					Info.Printf(err.Error())
-					return errors.New("\n!! Fully restoring DisableRun settings failed")
+					return errors.New("Fully restoring DisableRun settings failed")
 				}
 			}
 			// create new according to index (i)
@@ -110,7 +111,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 				err := keyDisallow.SetStringValue(strconv.Itoa(key), val)
 				if err != nil {
 					Info.Printf(err.Error())
-					return errors.New("\n!! Fully restoring DisableRun settings failed")
+					return errors.New("Fully restoring DisableRun settings failed")
 				}
 			}
 
@@ -125,20 +126,20 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 			err := registry.DeleteKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun")
 			if err != nil {
 				Info.Printf(err.Error())
-				return errors.New("\n!! Fully restoring DisableRun settings failed")
+				return errors.New("Fully restoring DisableRun settings failed")
 			}
 
 			keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
 			if err != nil {
 				Info.Printf(err.Error())
-				return errors.New("\n!! Fully restoring DisableRun settings failed")
+				return errors.New("Fully restoring DisableRun settings failed")
 			}
 			defer keyExplorer.Close()
 
 			err = keyExplorer.DeleteValue("DisallowRun")
 			if err != nil {
 				Info.Printf(err.Error())
-				return errors.New("\n!! Fully restoring DisableRun settings failed")
+				return errors.New("Fully restoring DisableRun settings failed")
 			}
 		}
 	} else {
@@ -148,7 +149,7 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("\n!! CreateKey to disable powershell failed")
+			return errors.New("CreateKey to disable powershell failed")
 		}
 		defer keyDisallow.Close()
 
@@ -165,12 +166,12 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Set values.
 		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "powershell_ise.exe")
 		if err != nil {
-			return errors.New("!! Could not disable PowerShell ISE due to error " + err.Error())
+			return errors.New("Could not disable PowerShell ISE due to error " + err.Error())
 		}
 
 		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint+1), "powershell.exe")
 		if err != nil {
-			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+			return errors.New("Could not disable PowerShell due to error " + err.Error())
 		}
 
 		////
@@ -178,14 +179,14 @@ func (pwShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
 		if err != nil {
 			Info.Printf(err.Error())
-			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+			return errors.New("Could not disable PowerShell due to error " + err.Error())
 		}
 		defer keyExplorer.Close()
 
 		err = keyExplorer.SetDWordValue("DisallowRun", 0x01)
 		if err != nil {
 			Info.Printf(err.Error())
-			return errors.New("!! Could not disable PowerShell due to error " + err.Error())
+			return errors.New("Could not disable PowerShell due to error " + err.Error())
 		}
 	}
 

@@ -164,8 +164,7 @@ func hardenAll() {
 		markStatus(true)
 		showStatus()
 
-		showInfoDialog("Done!\nAll risky features have been hardened!\n" +
-			"For all changes to take effect, please restart Windows.")
+		showEndDialog("Done!\nAll selected risky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -181,7 +180,7 @@ func restoreAll() {
 		markStatus(false)
 		showStatus()
 
-		showInfoDialog("Done!\nI have restored all risky features!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nI have restored all settings to their original state.\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -208,10 +207,10 @@ func triggerAll(harden bool) {
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				ShowFailure(hardenSubject.Name(), err.Error())
+				ShowFailure(hardenSubject.LongName(), err.Error())
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
-				ShowSuccess(hardenSubject.Name())
+				ShowSuccess(hardenSubject.LongName())
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
 			}
 		}
@@ -240,8 +239,9 @@ func hardenDefaultsAgain() {
 		// harden all settings
 		triggerAll(true)
 		markStatus(true)
+		showStatus()
 
-		showInfoDialog("Done!\nI have hardened all risky features!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nAll selected risky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -252,11 +252,11 @@ func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			ShowSuccess(hardenSubject.Name())
+			ShowIsHardened(hardenSubject.LongName())
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			ShowSuccess(hardenSubject.Name())
+			ShowNotHardened(hardenSubject.LongName())
 			Info.Print(eventText)
 		}
 	}

@@ -82,7 +82,8 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-var resultBox *widget.Box
+var resultBox, leftBox, rightBox, messageBox *widget.Box
+var eventsTextAreaProgressBar *widget.ProgressBarInfinite
 
 func main2() {
 	// check if hardentools has been started with elevated rights. If not
@@ -247,12 +248,13 @@ func createMainGUIContent(elevationStatus bool) {
 	mainTabContent.Append(expertSettingsCheckBox)
 
 	mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
+	mainWindow.Resize(fyne.NewSize(710, 310))
 }
 
 // showSplash shows an splash content during initialization
 func showSplash() {
 	splashContent := widget.NewVBox(
-		widget.NewLabel("Hardentools is starting up. Please wait..."),
+		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
 		widget.NewProgressBarInfinite())
 
 	mainWindow.SetContent(splashContent)
@@ -270,7 +272,7 @@ func showErrorDialog(errorMessage string) {
 	<-ch
 }
 
-// showInfoDialog shows an error message
+// showInfoDialog shows an info message
 func showInfoDialog(infoMessage string) {
 	ch := make(chan bool)
 	infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
@@ -278,6 +280,22 @@ func showInfoDialog(infoMessage string) {
 		ch <- true
 	})
 	infoDialog.Show()
+	<-ch
+
+}
+
+// showEndDialog shows the end dialog message after hardening/restoring
+func showEndDialog(infoMessage string) {
+	ch := make(chan bool)
+
+	eventsTextAreaProgressBar.Hide()
+
+	message := widget.NewLabelWithStyle(infoMessage, fyne.TextAlignCenter, fyne.TextStyle{Monospace: true})
+	messageBox.Append(widget.NewVBox(message,
+		widget.NewButton("Close", func() {
+			ch <- true
+		})))
+
 	<-ch
 }
 
@@ -324,16 +342,35 @@ func restartWithElevatedPrivileges() {
 
 // showEventsTextArea
 func showEventsTextArea() {
-	resultBox = widget.NewVBox()
-	mainWindow.SetContent(widget.NewGroup("Results", resultBox))
+	leftBox = widget.NewVBox()
+	rightBox = widget.NewVBox()
+	messageBox = widget.NewVBox()
+	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
+	messageBox.Append(eventsTextAreaProgressBar)
+	resultBox = widget.NewVBox(messageBox, widget.NewHBox(widget.NewGroup("Harden/Restore Progress", leftBox),
+		widget.NewGroup("Harden Status Verification", rightBox)))
+	scrollContainer := widget.NewScrollContainer(resultBox)
+	scrollContainer.SetMinSize(fyne.NewSize(600, 800))
+	mainWindow.SetContent(scrollContainer)
+	mainWindow.Resize(fyne.NewSize(610, 810))
 }
 
-func ShowSuccess(text string) {
-	resultBox.Append(widget.NewHBox(widget.NewLabel(text), widget.NewIcon(theme.ConfirmIcon())))
+func ShowSuccess(name string) {
+	leftBox.Append(widget.NewHBox(widget.NewIcon(theme.ConfirmIcon()), widget.NewLabel(name)))
 }
 
-func ShowFailure(text, failureText string) {
-	//	resultBox.Append(widget.NewButtonWithIcon(text, theme.WarningIcon(), nil))
-	resultBox.Append(widget.NewLabelWithStyle(text+" failed with error: "+failureText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	resultBox.Append(widget.NewIcon(theme.CancelIcon()))
+func ShowFailure(name, failureText string) {
+	leftBox.Append(widget.NewHBox(widget.NewIcon(theme.CancelIcon()),
+		widget.NewLabelWithStyle(name+": Error: "+failureText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
+
+	//additionally show error dialog
+	showErrorDialog(name + " failed with error: " + failureText)
+}
+
+func ShowIsHardened(text string) {
+	rightBox.Append(widget.NewHBox(widget.NewIcon(theme.CheckButtonCheckedIcon()), widget.NewLabel(text)))
+}
+
+func ShowNotHardened(text string) {
+	rightBox.Append(widget.NewHBox(widget.NewIcon(theme.CheckButtonIcon()), widget.NewLabel(text)))
 }
