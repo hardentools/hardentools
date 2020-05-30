@@ -185,7 +185,7 @@ func createMainGUIContent(elevationStatus bool) {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
 		labelText = "Ready to harden some features of your system?"
-		expertSettingsText = "Change only if you now what you are doing!\nDisabled settings are already hardened."
+		expertSettingsText = "Change only if you know what you are doing!\nDisabled settings are already hardened."
 		enableHardenAdditionalButton = false
 	} else {
 		buttonText = "Restore..."
@@ -248,7 +248,7 @@ func createMainGUIContent(elevationStatus bool) {
 	mainTabContent.Append(expertSettingsCheckBox)
 
 	mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
-	mainWindow.Resize(fyne.NewSize(710, 310))
+	mainWindow.Resize(fyne.NewSize(710, 390))
 }
 
 // showSplash shows an splash content during initialization
