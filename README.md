@@ -22,7 +22,7 @@ Then, you will see the main Hardentools window. It's very simple, you just click
 
 Note: The selections in the expert settings part of the window allow you to select or deselect harden measures. Please only use these if you know what you are doing.
 
-In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again (all default settings)" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have startet a newer version of hardentools and you want to make sure the most current features are applied to your user.
+In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again (all default settings)" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have started a newer version of hardentools and you want to make sure the most current features are applied to your user.
 
 ![MainWindowsHardenedScreenshot](./graphics/AlreadyHardened.jpg)
 
@@ -40,9 +40,9 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 ### Generic Windows Features
 
-- **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and Javascript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
+- **Disable Windows Script Host**. Windows Script Host allows the execution of VBScript and JavaScript files on Windows operating systems. This is very commonly used by regular malware (such as ransomware) as well as targeted malware.
 
-- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices. This prevents applicatons from automatically executing when you plug a USB stick into your computer.
+- **Disabling AutoRun and AutoPlay**. Disables AutoRun / AutoPlay for all devices. This prevents applications from automatically executing when you plug a USB stick into your computer.
 
 - **Disables powershell.exe and powershell_ise.exe execution via Windows Explorer**. This prevents the use of PowerShell by malicious code trying to infect the system. You will not be able to open PowerShell directly anymore. 
 
@@ -72,7 +72,7 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 - **Disable DDE and Excel Links**. Disables DDE for Word, Excel and Outlook. The DDE protocol allows to send messages between applications to share data. This is an attack vector if the user opens a malicious document. Side effects are:
 
-  - If there are links to other office documents (to update data in a excel sheet for instance) this data is not updated automatically anymory. If you are using such kinds of documents you might have to disable this harden setting.
+  - If there are links to other office documents (to update data in a excel sheet for instance) this data is not updated automatically anymore. If you are using such kinds of documents you might have to disable this harden setting.
 
   - Every Excel document is opened in a separate Excel instance if opened using Windows explorer. This might also have impact on sharing data between the documents and consume more memory.
 
