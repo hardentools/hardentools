@@ -25,6 +25,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -268,8 +269,13 @@ func main() {
 	appl := app.New()
 	appl.Settings().SetTheme(theme.LightTheme())
 	mainWindow = appl.NewWindow("Hardentools")
-	mainWindow.Resize(fyne.NewSize(700, 300))
-	//mainWindow.SetFixedSize(true)
+	// emptyContainer needed to get minimum window size to be able to show
+	// (elevation) dialog
+	emptyContainer := widget.NewScrollContainer(widget.NewVBox())
+	emptyContainer.SetMinSize(fyne.NewSize(700, 300))
+	mainWindow.SetContent(emptyContainer)
+	// TODO
+	// mainWindow.SetIcon()
 
 	go main2()
 	mainWindow.ShowAndRun()
