@@ -33,7 +33,7 @@ import (
 // global configuration constants
 const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
 const logpath = "hardentools.log"
-const defaultLogLevel = "Trace"
+const defaultLogLevel = "Info"
 
 // allHardenSubjects contains all top level harden subjects that should
 // be considered
@@ -165,7 +165,7 @@ func hardenAll() {
 		markStatus(true)
 		showStatus()
 
-		showEndDialog("Done!\nAll selected risky features have been hardened!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -181,7 +181,7 @@ func restoreAll() {
 		markStatus(false)
 		showStatus()
 
-		showEndDialog("Done!\nI have restored all settings to their original state.\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -208,10 +208,10 @@ func triggerAll(harden bool) {
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				ShowFailure(hardenSubject.LongName(), err.Error())
+				ShowFailure(hardenSubject.Name(), err.Error())
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
-				ShowSuccess(hardenSubject.LongName())
+				ShowSuccess(hardenSubject.Name())
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
 			}
 		}
@@ -242,7 +242,7 @@ func hardenDefaultsAgain() {
 		markStatus(true)
 		showStatus()
 
-		showEndDialog("Done!\nAll selected risky features have been hardened!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -253,11 +253,11 @@ func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			ShowIsHardened(hardenSubject.LongName())
+			ShowIsHardened(hardenSubject.Name())
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			ShowNotHardened(hardenSubject.LongName())
+			ShowNotHardened(hardenSubject.Name())
 			Info.Print(eventText)
 		}
 	}

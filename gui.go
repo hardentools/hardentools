@@ -83,7 +83,7 @@ import (
 
 var messageBox, firstColumn, secondColumn, thirdColumn *widget.Box
 var eventsTextAreaProgressBar *widget.ProgressBarInfinite
-var stateIcons map[string]*widget.Icon
+var stateLabels map[string]*widget.Label
 
 func main2() {
 	// check if hardentools has been started with elevated rights. If not
@@ -97,6 +97,8 @@ func main2() {
 		elevationStatus = true
 	}
 
+	// show splash screen since loading takes some time (at least with admin
+	// privileges) due to sequential reading of all the settings
 	showSplash()
 
 	// parse command line parameters/flags
@@ -127,9 +129,21 @@ func main2() {
 		}
 	})
 
+	// show main screen
 	createMainGUIContent(elevationStatus)
 }
 
+// showSplash shows an splash content during initialization
+func showSplash() {
+	splashContent := widget.NewVBox(
+		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
+		widget.NewProgressBarInfinite())
+
+	mainWindow.SetContent(splashContent)
+}
+
+// createMainGUIContent shows the main GUI screen that allows to harden or
+// restore the settings
 func createMainGUIContent(elevationStatus bool) {
 	// init variables
 	var labelText, buttonText, expertSettingsText string
@@ -248,16 +262,7 @@ func createMainGUIContent(elevationStatus bool) {
 	mainTabContent.Append(expertSettingsCheckBox)
 
 	mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
-	//mainWindow.Resize(fyne.NewSize(710, 390))
-}
-
-// showSplash shows an splash content during initialization
-func showSplash() {
-	splashContent := widget.NewVBox(
-		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
-		widget.NewProgressBarInfinite())
-
-	mainWindow.SetContent(splashContent)
+	mainWindow.CenterOnScreen()
 }
 
 // showErrorDialog shows an error message
@@ -318,6 +323,9 @@ func askElevationDialog() {
 	<-ch
 }
 
+// checkBoxEventGenerator is a helper function that allows GUI checkbox elements
+// to call this function as a callback method. checkBoxEventGenerator then saves
+// the requested expert config setting for the checkbox in the corresponding map
 func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
 	var hardenSubjectName = hardenSubjName
 	return func(on bool) {
@@ -325,7 +333,8 @@ func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
 	}
 }
 
-// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
+// restartWithElevatedPrivileges tries to restart hardentools.exe with admin
+// privileges
 func restartWithElevatedPrivileges() {
 	// find out our program (exe) name
 	progName := os.Args[0]
@@ -340,79 +349,74 @@ func restartWithElevatedPrivileges() {
 	}
 }
 
-// showEventsTextArea
+// showEventsTextArea updates the UI to show the harden/restore progress and
+// the final status of the hardenend settings
 func showEventsTextArea() {
 	// init map that remembers stateIcons
-	stateIcons = make(map[string]*widget.Icon, len(allHardenSubjectsWithAndWithoutElevatedPrivileges))
+	stateLabels = make(map[string]*widget.Label, len(allHardenSubjectsWithAndWithoutElevatedPrivileges))
 
 	messageBox = widget.NewVBox()
 	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
 	messageBox.Append(eventsTextAreaProgressBar)
 
-	firstColumn = widget.NewVBox(widget.NewLabel("Action"))
-	secondColumn = widget.NewVBox(widget.NewLabel("Verification"))
-	thirdColumn = widget.NewVBox(widget.NewLabel("Harden Item Name"))
+	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 
 	resultBox := widget.NewHBox(
 		firstColumn,
 		secondColumn,
 		thirdColumn)
 
-	scrollContainer := widget.NewScrollContainer(resultBox)
-	scrollContainer.SetMinSize(fyne.NewSize(800, 500))
-	eventsArea := widget.NewVBox(messageBox, scrollContainer)
+	resultBoxScrollContainer := widget.NewScrollContainer(resultBox)
+	resultBoxScrollContainer.SetMinSize(fyne.NewSize(600, 400))
+	resultBoxGroup := widget.NewGroup("Result Details", resultBoxScrollContainer)
+
+	eventsArea := widget.NewVBox(messageBox, resultBoxGroup)
 	mainWindow.SetContent(eventsArea)
 }
 
 func ShowSuccess(name string) {
-	//	icon := widget.NewIcon(theme.ConfirmIcon())
+	stateLabels[name] = widget.NewLabel("...")
 
-	dummyIcon := widget.NewIcon(theme.QuestionIcon())
-	stateIcons[name] = dummyIcon
-
-	firstColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
-	secondColumn.Append(widget.NewHBox(widget.NewLabel(" "), dummyIcon))
-	thirdColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+	secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
+	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 }
 
 func ShowFailure(name, failureText string) {
-	//	icon := widget.NewIcon(theme.CancelIcon())
+	stateLabels[name] = widget.NewLabel("...")
 
-	dummyIcon := widget.NewIcon(theme.QuestionIcon())
-	stateIcons[name] = dummyIcon
-
-	firstColumn.Append(widget.NewHBox(widget.NewLabel("FAIL")))
-	secondColumn.Append(widget.NewHBox(widget.NewLabel(" "), dummyIcon))
-	thirdColumn.Append(widget.NewHBox(widget.NewLabelWithStyle(name+": Error: "+failureText, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
+	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+	secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
+	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 
 	//additionally show error dialog
-	showErrorDialog(name + " failed with error: " + failureText)
+	showErrorDialog(name + " failed with error:\n" + failureText)
 }
 
 func ShowIsHardened(name string) {
-	icon := stateIcons[name]
-	if icon != nil {
-		icon.SetResource(theme.CheckButtonCheckedIcon())
+	label := stateLabels[name]
+	if label != nil {
+		label.SetText("is hardened")
 	} else {
-		stateIcon := widget.NewIcon(theme.CheckButtonCheckedIcon())
+		stateLabels[name] = widget.NewLabel("is hardened")
 
-		firstColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
-		secondColumn.Append(widget.NewHBox(widget.NewLabel(" "), stateIcon))
-		thirdColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		secondColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
+		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 	}
-	//	rightBox.Append(widget.NewHBox(widget.NewIcon(theme.CheckButtonCheckedIcon()), widget.NewLabel(text)))
 }
 
 func ShowNotHardened(name string) {
-	icon := stateIcons[name]
-	if icon != nil {
-		icon.SetResource(theme.CheckButtonIcon())
+	label := stateLabels[name]
+	if label != nil {
+		label.SetText("not hardened")
 	} else {
-		stateIcon := widget.NewIcon(theme.CheckButtonIcon())
-		firstColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
-		secondColumn.Append(widget.NewHBox(widget.NewLabel(" "), stateIcon))
-		thirdColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-	}
+		stateLabels[name] = widget.NewLabel("not hardened")
 
-	//	rightBox.Append(widget.NewHBox(widget.NewIcon(theme.CheckButtonIcon()), widget.NewLabel(text)))
+		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		secondColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
+		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+	}
 }

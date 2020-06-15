@@ -34,7 +34,7 @@ type PowerShellDisallowRunMembers struct {
 
 // PowerShell is the struct for hardentools interface that combines registry keys and PowerShellDisallowRunMembers
 var PowerShell = &MultiHardenInterfaces{
-	shortName:       "PowerShell",
+	shortName:       "Powershell",
 	longName:        "Disable Powershell",
 	description:     "Disables Powershell and Powershell ISE",
 	hardenByDefault: true,

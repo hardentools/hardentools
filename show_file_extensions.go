@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2018  Security Without Borders
+// Copyright (C) 2020  Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ var ShowFileExt = &RegistryMultiValue{
 			shortName:     "ShowFileExt_SuperHidden",
 		},
 	},
-	shortName:       "ShowFileExt",
+	shortName:       "Show File Ext",
 	longName:        "Show File Extensions",
 	hardenByDefault: true,
 }

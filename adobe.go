@@ -50,7 +50,7 @@ var AdobePDFJS = &AdobeRegistryRegExSingleDWORD{
 	ValueName:       "bEnableJS",
 	HardenedValue:   0, // Disable AcroJS
 	AdobeVersions:   standardAdobeVersions,
-	shortName:       "AdobePDFJS",
+	shortName:       "Adobe JavaScript",
 	longName:        "Acrobat Reader JavaScript",
 	description:     "Disables Acrobat Reader JavaScript",
 	hardenByDefault: true,
@@ -79,7 +79,7 @@ var AdobePDFObjects = &MultiHardenInterfaces{
 			shortName:     "AdobePDFObjects_bSecureOpenFile",
 		},
 	},
-	shortName:       "AdobePDFObjects",
+	shortName:       "Adobe Objects",
 	longName:        "Acrobat Reader Embedded Objects",
 	description:     "Disables Acrobat Reader embedded objects",
 	hardenByDefault: true,
@@ -95,7 +95,7 @@ var AdobePDFProtectedMode = &AdobeRegistryRegExSingleDWORD{
 	ValueName:       "bProtectedMode",
 	HardenedValue:   1,
 	AdobeVersions:   standardAdobeVersions,
-	shortName:       "AdobePDFProtectedMode",
+	shortName:       "Adobe Protected Mode",
 	longName:        "Acrobat Reader Protected Mode",
 	description:     "Enables Acrobat Reader Protected Mode",
 	hardenByDefault: true,
@@ -111,7 +111,7 @@ var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
 	ValueName:       "iProtectedView",
 	HardenedValue:   1,
 	AdobeVersions:   standardAdobeVersions,
-	shortName:       "AdobePDFProtectedView",
+	shortName:       "Adobe Protected View",
 	longName:        "Acrobat Reader Protected View",
 	description:     "Enables Acrobat Reader Protected View",
 	hardenByDefault: true,
@@ -121,7 +121,7 @@ var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
 // (enabled by default in current versions)
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\DC\TrustManager -> bEnhancedSecurityInBrowser = 1 & bEnhancedSecurityStandalone = 1)
 var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
-	shortName:       "AdobePDFEnhancedSecurity",
+	shortName:       "Adobe Enhanced Security",
 	longName:        "Acrobat Reader Enhanced Security",
 	description:     "Enables Acrobat Reader Enhanced Security",
 	hardenByDefault: true,

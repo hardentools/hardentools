@@ -34,7 +34,7 @@ type CmdDisallowRunMembers struct {
 
 // Cmd is the struct for hardentools interface that combines registry keys and CmdDisallowRunMembers
 var Cmd = &MultiHardenInterfaces{
-	shortName:       "cmd.exe",
+	shortName:       "Disable cmd.exe",
 	longName:        "Disable cmd.exe",
 	description:     "Disables cmd.exe",
 	hardenByDefault: false,
