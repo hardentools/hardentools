@@ -84,6 +84,7 @@ import (
 var messageBox, firstColumn, secondColumn, thirdColumn *widget.Box
 var eventsTextAreaProgressBar *widget.ProgressBarInfinite
 var stateLabels map[string]*widget.Label
+var inProgressLabel *widget.Label
 
 func main2() {
 	// check if hardentools has been started with elevated rights. If not
@@ -289,14 +290,15 @@ func showInfoDialog(infoMessage string) {
 
 }
 
-// showEndDialog shows the end dialog message after hardening/restoring
+// showEndDialog shows the close button after hardening/restoring
 func showEndDialog(infoMessage string) {
 	ch := make(chan bool)
 
 	eventsTextAreaProgressBar.Hide()
+	inProgressLabel.Hide()
 
 	message := widget.NewLabelWithStyle(infoMessage, fyne.TextAlignCenter, fyne.TextStyle{Monospace: true})
-	messageBox.Append(widget.NewVBox(message,
+	messageBox.Prepend(widget.NewVBox(message,
 		widget.NewButton("Close", func() {
 			ch <- true
 		})))
@@ -355,10 +357,6 @@ func showEventsTextArea() {
 	// init map that remembers stateIcons
 	stateLabels = make(map[string]*widget.Label, len(allHardenSubjectsWithAndWithoutElevatedPrivileges))
 
-	messageBox = widget.NewVBox()
-	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
-	messageBox.Append(eventsTextAreaProgressBar)
-
 	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
@@ -369,8 +367,21 @@ func showEventsTextArea() {
 		thirdColumn)
 
 	resultBoxScrollContainer := widget.NewScrollContainer(resultBox)
-	resultBoxScrollContainer.SetMinSize(fyne.NewSize(600, 400))
+	resultBoxScrollContainer.SetMinSize(fyne.NewSize(500, 400))
 	resultBoxGroup := widget.NewGroup("Result Details", resultBoxScrollContainer)
+	resultBoxGroup.Hide()
+
+	messageBox = widget.NewVBox()
+	inProgressLabel = widget.NewLabelWithStyle("Hardening in progress...", fyne.TextAlignCenter, fyne.TextStyle{})
+	messageBox.Append(inProgressLabel)
+	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
+	messageBox.Append(eventsTextAreaProgressBar)
+	var resultDetailsButton *widget.Button
+	resultDetailsButton = widget.NewButton("Show Result Details", func() {
+		resultBoxGroup.Show()
+		resultDetailsButton.Hide()
+	})
+	messageBox.Append((resultDetailsButton))
 
 	eventsArea := widget.NewVBox(messageBox, resultBoxGroup)
 	mainWindow.SetContent(eventsArea)

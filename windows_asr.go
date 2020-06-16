@@ -69,9 +69,6 @@ var WindowsASR = &WindowsASRStruct{
 
 // Harden method
 func (asr WindowsASRStruct) Harden(harden bool) error {
-
-	return errors.New("Test error for powershell cmdlet Set-MpPreference failed")
-
 	if harden {
 		// harden (but only if we have at least Windows 10 - 1709)
 		if checkWindowsVersion() {
