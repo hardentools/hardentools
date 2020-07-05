@@ -70,10 +70,7 @@ import "C"
 
 import (
 	"errors"
-	"flag"
-	"io/ioutil"
 	"os"
-	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/dialog"
@@ -101,34 +98,6 @@ func main2() {
 	// show splash screen since loading takes some time (at least with admin
 	// privileges) due to sequential reading of all the settings
 	showSplash()
-
-	// parse command line parameters/flags
-	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
-	flag.Parse()
-	flag.VisitAll(func(f *flag.Flag) {
-		// only supports log-level right now
-		if f.Name == "log-level" {
-			// Init logging
-			if strings.EqualFold(f.Value.String(), "Info") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(ioutil.Discard, logfile)
-			} else if strings.EqualFold(f.Value.String(), "Trace") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(logfile, logfile)
-			} else {
-				// Off
-				initLogging(ioutil.Discard, ioutil.Discard)
-			}
-		}
-	})
 
 	// show main screen
 	createMainGUIContent(elevationStatus)
