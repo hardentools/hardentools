@@ -16,63 +16,16 @@
 
 package main
 
-/*
-// some C code for managing elevated privileges
-#include <windows.h>
-#include <shellapi.h>
-
-// checks if we are running with elevated privileges (admin rights)
-int IsElevated( ) {
-    boolean fRet = FALSE;
-    HANDLE hToken = NULL;
-    if( OpenProcessToken( GetCurrentProcess( ),TOKEN_QUERY,&hToken ) ) {
-        TOKEN_ELEVATION Elevation;
-        DWORD cbSize = sizeof( TOKEN_ELEVATION );
-        if( GetTokenInformation( hToken, TokenElevation, &Elevation, sizeof( Elevation ), &cbSize ) ) {
-            fRet = Elevation.TokenIsElevated;
-        }
-    }
-    if( hToken ) {
-        CloseHandle( hToken );
-    }
-    if( fRet ){
-		return 1;
-	}
-	else {
-		return 0;
-	}
-}
-
-// executes the executable in the current directory (or in path) with "runas"
-// to aquire admin privileges
-int ExecuteWithRunas(char execName[]){
-	SHELLEXECUTEINFO shExecInfo;
-
-	shExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-
-	shExecInfo.fMask = 0x00008000;
-	shExecInfo.hwnd = NULL;
-	shExecInfo.lpVerb = "runas";
-	shExecInfo.lpFile = execName;
-	shExecInfo.lpParameters = NULL;
-	shExecInfo.lpDirectory = NULL;
-	shExecInfo.nShow = SW_NORMAL;
-	shExecInfo.hInstApp = NULL;
-
-	boolean success = ShellExecuteEx(&shExecInfo);
-	if (success)
-		return 1;
-	else
-		return 0;
-}
-*/
-import "C"
-
 import (
 	"fmt"
 	"io"
 	"log"
 	"os"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/app"
+	"fyne.io/fyne/theme"
+	"fyne.io/fyne/widget"
 
 	"golang.org/x/sys/windows/registry"
 )
@@ -131,14 +84,15 @@ var allHardenSubjectsForUnprivilegedUsers = []HardenInterface{
 	AdobePDFEnhancedSecurity,
 }
 
-var expertConfig map[string]bool
-
 // Loggers for log output (we only need info and trace, errors have to be
 // displayed in the GUI)
 var (
 	Trace *log.Logger
 	Info  *log.Logger
 )
+
+var mainWindow fyne.Window
+var expertConfig map[string]bool
 
 // initLogging inits loggers
 func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
@@ -196,7 +150,7 @@ func markStatus(hardened bool) {
 		err := registry.DeleteKey(registry.CURRENT_USER, hardentoolsKeyPath)
 		if err != nil {
 			Info.Println(err.Error())
-			events.AppendText("Could not remove hardentools registry keys - nothing to worry about.\r\n")
+			ShowFailure("Remove hardentools registry keys", "Could not remove")
 		}
 	}
 }
@@ -211,7 +165,7 @@ func hardenAll() {
 		markStatus(true)
 		showStatus()
 
-		showInfoDialog("Done!\nI have hardened all risky features!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -227,7 +181,7 @@ func restoreAll() {
 		markStatus(false)
 		showStatus()
 
-		showInfoDialog("Done!\nI have restored all risky features!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -240,28 +194,28 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
-		events.AppendText("Now we are hardening ")
+		//PrintEvent("Now we are hardening ")
 		outputString = "Hardening"
 	} else {
-		events.AppendText("Now we are restoring ")
+		//PrintEvent("Now we are restoring ")
 		outputString = "Restoring"
 	}
 
+	Trace.Println(outputString)
+
 	for _, hardenSubject := range allHardenSubjects {
 		if expertConfig[hardenSubject.Name()] == true {
-			events.AppendText(fmt.Sprintf("%s, ", hardenSubject.Name()))
 
 			err := hardenSubject.Harden(harden)
 			if err != nil {
-				events.AppendText(fmt.Sprintf("\r\n!! %s %s FAILED !!\r\n", outputString, hardenSubject.Name()))
+				ShowFailure(hardenSubject.Name(), err.Error())
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
 			} else {
+				ShowSuccess(hardenSubject.Name())
 				Trace.Printf("%s %s has been successful", outputString, hardenSubject.Name())
 			}
 		}
 	}
-
-	events.AppendText("\r\n")
 }
 
 // hardenDefaultsAgain restores the original settings and
@@ -286,8 +240,9 @@ func hardenDefaultsAgain() {
 		// harden all settings
 		triggerAll(true)
 		markStatus(true)
+		showStatus()
 
-		showInfoDialog("Done!\nI have hardened all risky features!\nFor all changes to take effect please restart Windows.")
+		showEndDialog("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
 	}()
 }
@@ -298,46 +253,30 @@ func showStatus() {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			events.AppendText(eventText)
+			ShowIsHardened(hardenSubject.Name())
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			events.AppendText(eventText)
+			ShowNotHardened(hardenSubject.Name())
 			Info.Print(eventText)
 		}
 	}
 }
 
-// restartWithElevatedPrivileges tries to restart hardentools.exe with admin privileges
-func restartWithElevatedPrivileges() {
-	// find out our program (exe) name
-	progName := os.Args[0]
-
-	// start us again, this time with elevated privileges
-	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
-		// exit this instance (the unprivileged one)
-		os.Exit(0)
-	} else {
-		// something went wrong
-		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
-	}
-}
-
 // main method for hardentools
 func main() {
-	// check if hardentools has been started with elevated rights. If not
-	// ask user if he wants to elevate
-	if C.IsElevated() == 0 {
-		askElevationDialog()
-	}
-	elevationStatus := false
-	if C.IsElevated() == 1 {
-		elevationStatus = true
-	}
+	// init main window
+	appl := app.New()
+	appl.Settings().SetTheme(theme.LightTheme())
+	mainWindow = appl.NewWindow("Hardentools")
+	// emptyContainer needed to get minimum window size to be able to show
+	// (elevation) dialog
+	emptyContainer := widget.NewScrollContainer(widget.NewVBox())
+	emptyContainer.SetMinSize(fyne.NewSize(700, 300))
+	mainWindow.SetContent(emptyContainer)
+	// TODO
+	// mainWindow.SetIcon()
 
-	// show splash screen
-	splashChannel := make(chan bool, 1)
-	showSplash(splashChannel)
-
-	openMainWindow(splashChannel, elevationStatus)
+	go main2()
+	mainWindow.ShowAndRun()
 }

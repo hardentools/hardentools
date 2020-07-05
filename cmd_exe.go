@@ -34,7 +34,7 @@ type CmdDisallowRunMembers struct {
 
 // Cmd is the struct for hardentools interface that combines registry keys and CmdDisallowRunMembers
 var Cmd = &MultiHardenInterfaces{
-	shortName:       "cmd.exe",
+	shortName:       "Disable cmd.exe",
 	longName:        "Disable cmd.exe",
 	description:     "Disables cmd.exe",
 	hardenByDefault: false,
@@ -55,7 +55,7 @@ func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 		// Open DisallowRun key.
 		keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("\n!! OpenKey to restore cmd failed")
+			return errors.New("OpenKey to restore cmd failed")
 		}
 		defer keyDisallow.Close()
 
@@ -113,7 +113,7 @@ func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 				err := keyDisallow.SetStringValue(strconv.Itoa(key), val)
 				if err != nil {
 					Info.Printf(err.Error())
-					return errors.New("\n!! Fully restoring DisableRun settings failed")
+					return errors.New("Fully restoring DisableRun settings failed")
 				}
 			}
 
@@ -127,20 +127,20 @@ func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 			err := registry.DeleteKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun")
 			if err != nil {
 				Info.Printf(err.Error())
-				return errors.New("\n!! Fully restoring DisableRun settings failed")
+				return errors.New("Fully restoring DisableRun settings failed")
 			}
 
 			keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
 			if err != nil {
 				Info.Printf(err.Error())
-				return errors.New("\n!! Fully restoring DisableRun settings failed")
+				return errors.New("Fully restoring DisableRun settings failed")
 			}
 			defer keyExplorer.Close()
 
 			err = keyExplorer.DeleteValue("DisallowRun")
 			if err != nil {
 				Info.Printf(err.Error())
-				return errors.New("\n!! Fully restoring DisableRun settings failed")
+				return errors.New("Fully restoring DisableRun settings failed")
 			}
 		}
 	} else {
@@ -150,7 +150,7 @@ func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 		// Create or Open DisallowRun key.
 		keyDisallow, _, err := registry.CreateKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.ALL_ACCESS)
 		if err != nil {
-			return errors.New("\n!! CreateKey to disable cmd.exe failed")
+			return errors.New("CreateKey to disable cmd.exe failed")
 		}
 		defer keyDisallow.Close()
 
@@ -167,7 +167,7 @@ func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 		// Set values.
 		err = keyDisallow.SetStringValue(strconv.Itoa(startingPoint), "cmd.exe")
 		if err != nil {
-			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
+			return errors.New("Could not disable cmd.exe due to error " + err.Error())
 		}
 
 		////
@@ -175,14 +175,14 @@ func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 		keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", registry.ALL_ACCESS)
 		if err != nil {
 			Info.Printf(err.Error())
-			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
+			return errors.New("Could not disable cmd.exe due to error " + err.Error())
 		}
 		defer keyExplorer.Close()
 
 		err = keyExplorer.SetDWordValue("DisallowRun", 0x01)
 		if err != nil {
 			Info.Printf(err.Error())
-			return errors.New("!! Could not disable cmd.exe due to error " + err.Error())
+			return errors.New("Could not disable cmd.exe due to error " + err.Error())
 		}
 	}
 

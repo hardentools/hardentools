@@ -68,7 +68,7 @@ var FileAssociations = ExplorerAssociations{
 		{".pif", "piffile"},
 		{".mht", "mhtmlfile"},
 	},
-	shortName:       "FileAssociations",
+	shortName:       "File Associations",
 	longName:        "File associations",
 	hardenByDefault: true,
 }

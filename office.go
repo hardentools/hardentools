@@ -58,7 +58,7 @@ var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
 	HardenedValue:   2,
 	OfficeApps:      standardOfficeApps,
 	OfficeVersions:  standardOfficeVersions,
-	shortName:       "OfficeOLE",
+	shortName:       "Office OLE",
 	longName:        "Office Packager Objects (OLE)",
 	hardenByDefault: true,
 }
@@ -75,7 +75,7 @@ var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
 	HardenedValue:   4,
 	OfficeApps:      standardOfficeApps,
 	OfficeVersions:  standardOfficeVersions,
-	shortName:       "OfficeMacros",
+	shortName:       "Office Macros",
 	longName:        "Office Macros",
 	hardenByDefault: true,
 }
@@ -86,7 +86,7 @@ var OfficeActiveX = &RegistrySingleValueDWORD{
 	Path:            "SOFTWARE\\Microsoft\\Office\\Common\\Security",
 	ValueName:       "DisableAllActiveX",
 	HardenedValue:   1,
-	shortName:       "OfficeActiveX",
+	shortName:       "Office ActiveX",
 	longName:        "Office ActiveX",
 	hardenByDefault: true,
 }
@@ -282,7 +282,7 @@ var OfficeDDE = &MultiHardenInterfaces{
 			shortName:     "OfficeDDE_Word2007",
 		},
 	},
-	shortName:       "OfficeDDE",
+	shortName:       "Office DDE",
 	longName:        "Office DDE Mitigations",
 	hardenByDefault: true,
 }
