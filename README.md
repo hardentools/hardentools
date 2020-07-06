@@ -42,11 +42,8 @@ In case you wish to restore the original settings and revert the changes Hardent
 **Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
 
-## Authors
-
-This tool is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst.
-
-
 ## Credits
 
-Hammer icon by Travis Avery from the Noun Project
+This tool is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst. You can find [here](https://github.com/securitywithoutborders/hardentools/graphs/contributors) a full list of contributors.
+
+Hammer icon by Travis Avery from the Noun Project.
