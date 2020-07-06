@@ -13,7 +13,7 @@ matrix:
 
 before_install:
     - sudo apt-get update -qq
-    - sudo apt-get install gcc-mingw-w64-i686-win32
+    - sudo apt-get install mingw-w64
 
 install:
     - cd -
