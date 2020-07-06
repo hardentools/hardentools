@@ -17,10 +17,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
@@ -103,6 +106,8 @@ func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 	Info = log.New(infoHandle,
 		"INFO: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
+
+	log.SetOutput(infoHandle)
 }
 
 // checkStatus checks status of hardentools registry key
@@ -265,6 +270,34 @@ func showStatus() {
 
 // main method for hardentools
 func main() {
+	// parse command line parameters/flags
+	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
+	flag.Parse()
+	flag.VisitAll(func(f *flag.Flag) {
+		// only supports log-level right now
+		if f.Name == "log-level" {
+			// Init logging
+			if strings.EqualFold(f.Value.String(), "Info") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(ioutil.Discard, logfile)
+			} else if strings.EqualFold(f.Value.String(), "Trace") {
+				var logfile, err = os.Create(logpath)
+				if err != nil {
+					panic(err)
+				}
+
+				initLogging(logfile, logfile)
+			} else {
+				// Off
+				initLogging(ioutil.Discard, ioutil.Discard)
+			}
+		}
+	})
+
 	// init main window
 	appl := app.New()
 	appl.Settings().SetTheme(theme.LightTheme())
@@ -277,6 +310,9 @@ func main() {
 	// TODO
 	// mainWindow.SetIcon()
 
+	Trace.Println("Starting up hardentools")
+
 	go main2()
+
 	mainWindow.ShowAndRun()
 }
