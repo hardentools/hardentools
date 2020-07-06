@@ -1,0 +1,22 @@
+language: go
+sudo: required
+
+go:
+- "1.13"
+- "1.14"
+- master
+
+matrix:
+    allow_failures:
+        - go: master
+    fast_finish: true
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install mingw32-cross-gcc
+
+install:
+    - cd -
+
+script:
+    - env GO111MODULE=on make build
