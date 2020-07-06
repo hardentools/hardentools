@@ -25,15 +25,15 @@ When you're ready, you can find the latest download [here](https://github.com/se
 
 Once you double-click on the icon, depending on your Windows privileges, you are asked if you want to run Hardentools with administrative privileges. If you select "No" only a subset of the harden features is available, but you can also use hardentools if you have only restricted privileges to harden your user account. If you select "Yes", depending on your Windows security settings, you should be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
 
-![AdminPrivilegesDialogScreenshot](./graphics/AdminPrivDialog.jpg)
+![AdminPrivilegesDialogScreenshot](./graphics/AdminPrivDialog.png)
 
 Then, you will see the main Hardentools window. It's very simple, you just click on the "Harden" button, and the tool will make the changes to your Windows configuration to disable a set of features that are risky. Once completed, you will be asked to restart your computer for all the changes to have full effect.
 
-![MainWindowScreenshot](./graphics/MainWindow.jpg)
+![MainWindowScreenshot](./graphics/MainWindow.png)
 
 Note: You can select the expert settings checkbox to be able to select or deselect specific harden measures. Please only use this if you know what you are doing.
 
-![MainWindowExpertScreenshot](./graphics/MainWindowExpert.jpg)
+![MainWindowExpertScreenshot](./graphics/MainWindowExpert.png)
 
 In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again (all default settings)" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have started a newer version of hardentools and you want to make sure the most current features are applied to your user.
 
