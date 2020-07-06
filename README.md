@@ -37,7 +37,7 @@ Note: You can select the expert settings checkbox to be able to select or desele
 
 In case you wish to restore the original settings and revert the changes Hardentools made (for example, if you need to use cmd.exe), you can simply re-run the tool and instead of an "Harden" button you will be prompted with a "Harden again (all default settings)" and a "Restore..." button. Selecting "Restore" will start reverting the modifications. "Harden again" will first restore the original settings and then harden again using the default settings. This comes in handy if you have started a newer version of hardentools and you want to make sure the most current features are applied to your user.
 
-![MainWindowsHardenedScreenshot](./graphics/AlreadyHardened.jpg)
+![MainWindowsHardenedScreenshot](./graphics/AlreadyHardened.png)
 
 **Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
