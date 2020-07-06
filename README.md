@@ -12,6 +12,15 @@ Bear in mind, after running Hardentools you won't be able, for example, to do co
 
 When you're ready, you can find the latest download [here](https://github.com/securitywithoutborders/hardentools/releases).
 
+
+## What Hardentools IS NOT
+
+- **Hardentools is NOT an Antivirus**. It does not protect your computer. It doesn't identify, block, or remove any malware.
+- It does NOT prevent software from being exploited.
+- It does NOT prevent the abuse of every available risky feature.
+- It does NOT prevent the changes it implements from being reverted. If malicious code runs on the system and it is able to restore them, the premise of the tool is defeated.
+
+
 ## How to use it
 
 Once you double-click on the icon, depending on your Windows privileges, you are asked if you want to run Hardentools with administrative privileges. If you select "No" only a subset of the harden features is available, but you can also use hardentools if you have only restricted privileges to harden your user account. If you select "Yes", depending on your Windows security settings, you should be prompted with an User Access Control dialog asking you confirmation to allow Hardentools to run. Click "Yes".
@@ -32,16 +41,11 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 **Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
-## What this tool IS NOT
-
-- It does NOT prevent software from being exploited.
-- It does NOT prevent the abuse of every available risky feature.
-- **It is NOT an Antivirus**. It does not protect your computer. It doesn't identify, block, or remove any malware.
-- It does NOT prevent the changes it implements from being reverted. If malicious code runs on the system and it is able to restore them, the premise of the tool is defeated, isn't it?
 
 ## Authors
 
 This tool is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst.
+
 
 ## Credits
 
