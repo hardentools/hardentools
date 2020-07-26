@@ -1,0 +1,32 @@
+language: go
+sudo: required
+
+go:
+- '1.13'
+- '1.14'
+- master
+
+matrix:
+    allow_failures:
+    - go: master
+    fast_finish: true
+
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install mingw-w64
+
+install:
+- cd -
+
+script:
+- env GO111MODULE=on make build
+
+deploy:
+    provider: releases
+    api_key:
+        secure: h6ZbkLB0vGceEPV+XspFXSB/ZjiCh0NUGl/aXujMTaYJ4SPIKt7bOQB7WAIEkEaI4l929w7lJSVhbtN4rTvVbrANKi1KPuEn4oihOwyPiWrDBpp1MrsuRlS6oxeCsKo9nGG6JhikOByT910UxEhSgd+70OhIyGPy43IQcDsken0Kq2h89a3NvrI52fyowcOG63GzSUsQB1Hzn4nJrhcq8PDmNl1BD0nlJIduIFwWf/+c6eVreotQ54wpcEqjGXuK4SzN5cK7S7dZjWHAQtyyv12psVprLU4N3HvAVVBcMGSH8LeGBreo9ROuuuIY0+/tD6aprAy+JIG1Pf8s+xuNiBPfmQqIxPtoEwZRKQwBzJY06g6zDqz6nEG824mngpAbqNnSosSErROK8vXSyuQsVrRzIuvbiqm4UwKzp5yvjnL2+mmTRGYcc4V6596YCaCEPVF6knYWYnTDdBKdw5BYyOel1eM0sH7o5LVtxpmQkCJ7dv2SHJhde97GwDw5a0daWOZnyz7N+detlAn48PMaR4/fEBJ9+AvjcTNuSsYzPHdo41qqp4P147QB5uCOGxASnFFmVQKOTq9gCS7+UfMARj39B5uXIMWlo11Y7MZ1tB+11kvvaXKLu947N1uozdr6nflQqi1/O7zpkicMdftghL36ZzOx6EmJW6AkXnE4+zM=
+    file: build/hardentools.exe
+    on:
+        tags: true
+        repo: securitywithoutborders/hardentools
+    skip_cleanup: "true"
