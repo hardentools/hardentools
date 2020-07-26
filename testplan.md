@@ -121,7 +121,16 @@ Windows Defender Attack Surface Reduction (ASR) enables varios remediations star
 * Block Office applications from creating child processes
 * Block Office applications from creating executable content & from injecting code into other processes
 * Block JavaScript or VBScript from launching downloaded executable content
-* Block execution of potentially obfuscated scripts, Block Win32 API calls from Office macro)
+* Block execution of potentially obfuscated scripts
+* Block Win32 API calls from Office macros
+* Block executable files from running unless they meet a prevalence, age, or trusted list criterion
+* Block untrusted and unsigned processes that run from USB
+* Use advanced protection against ransomware
+* Block process creations originating from PSExec and WMI commands
+* Block Office communication application from creating child processes
+* Block Adobe Reader from creating child processes
+* Block persistence through WMI event subscription
+* Block credential stealing from the Windows local security authority subsystem
 
 
 More details can be found here:
@@ -129,22 +138,16 @@ More details can be found here:
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/enable-attack-surface-reduction
 * https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction
-* Test page (requires MS Login): https://demo.wd.microsoft.com/?ocid=cx-wddocs-testground
+* Test page (requires MS Login): https://demo.wd.microsoft.com/Page/ASR
 
 #### Test steps:
-* Please download the "Exploit Guard Evaluation Package" from Microsoft (via download link on https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction)
-* Extract ZIP contents
-* Open the "ExploitGuard ASR test tool x64" executable (if Windows Defender Smartscreen tries to block this executable you have to select "more info" to be able to select the execute anyhow button)
-* Ignore any Windows Defender Alerts
-* For each one of the rules (except "Network HIPS") check the mode and select "RunScenario"
+* Please follow the instructions on https://demo.wd.microsoft.com/Page/ASR
 
 **Expected result before hardening:**
-* Mode is always "Disabled"
-* "RunScenario" leads to successful exploits
+* none of the demo malicious files are blocked
 
 **Expected result after hardening:**
-* Mode is always "Block"
-* "RunScenario" leads to NOT successful exploits
+* ASR rules lead to the blocking of the demo malicious files
 
 ## Microsoft Office
 ### Disable Macros

@@ -341,7 +341,7 @@ func showEventsTextArea() {
 	resultBoxGroup.Hide()
 
 	messageBox = widget.NewVBox()
-	inProgressLabel = widget.NewLabelWithStyle("Hardening in progress...", fyne.TextAlignCenter, fyne.TextStyle{})
+	inProgressLabel = widget.NewLabelWithStyle("Operation in progress...", fyne.TextAlignCenter, fyne.TextStyle{})
 	messageBox.Append(inProgressLabel)
 	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
 	messageBox.Append(eventsTextAreaProgressBar)

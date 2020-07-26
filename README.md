@@ -58,11 +58,28 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 - **Activates additional LSA Protection (Optional / Expert Setting)**: With this setting enabled Windows provides additional protection for the LSA processes to prevent reading memory from and code injection by non-protected processes. This provides added security against reading of credentials by malicious processes. 
 
-- **Windows Defender Attack Surface Reduction (ASR)**. Enables various remediations using ASR starting with Windows 10 / 1709 (Block executable content from email client and webmail, Block Office applications from creating child processes, Block Office applications from creating executable content & from injecting code into other processes, Block JavaScript or VBScript from launching downloaded executable content, Block execution of potentially obfuscated scripts, Block Win32 API calls from Office macro). To be effective this needs the following prerequisites:
+- **Windows Defender Attack Surface Reduction (ASR) rules**. Enables various remediations using ASR rules starting with Windows 10 / 1709. To be effective this needs the following prerequisites:
 
   - Windows 10 version >= 1709,
   - You are using Windows Defender Antivirus as the sole antivirus protection app,
   - Real-time protection is enabled in Windows Defender.
+  - Cloud protection is enabled in Windows Defender (only needed for some of the ASR rules)
+ 
+ The following ASR rules are implemented:
+  - Block executable content from email client and webmail
+  - Block Office applications from creating child processes
+  - Block Office applications from creating executable content & from injecting code into other processes
+  - Block JavaScript or VBScript from launching downloaded executable content
+  - Block execution of potentially obfuscated scripts
+  - Block Win32 API calls from Office macros
+  - Block executable files from running unless they meet a prevalence, age, or trusted list criterion
+  - Block untrusted and unsigned processes that run from USB
+  - Use advanced protection against ransomware
+  - Block process creations originating from PSExec and WMI commands
+  - Block Office communication application from creating child processes
+  - Block Adobe Reader from creating child processes
+  - Block persistence through WMI event subscription
+  - Block credential stealing from the Windows local security authority subsystem
 
 ### Microsoft Office
 

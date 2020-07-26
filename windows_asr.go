@@ -16,20 +16,17 @@
 
 package main
 
-/**
-Windows Defender Attack Surface Reduction (ASR)
-needs the following prerequisites to work:
- Windows 10 >= 1709
- Endpoints are using Windows Defender Antivirus as the sole antivirus protection app. Using any other antivirus app will cause Windows Defender AV to disable itself.
- Real-time protection is enabled.
-
-More details here:
-	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
-	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/enable-attack-surface-reduction
-	https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction
-
-	One can use the "ExploitGuard ASR test tool" or https://demo.wd.microsoft.com/?ocid=cx-wddocs-testground from Microsoft (see third link) to verify that ASR is working
-*/
+// Windows Defender Attack Surface Reduction (ASR) rules
+// need the following prerequisites to work:
+// - Windows 10 >= 1709
+// - Endpoints are using Windows Defender Antivirus as the sole antivirus protection app.
+// - Using any other antivirus app will cause Windows Defender AV to disable itself.
+// - Real-time protection is enabled.
+// - Cloud protection is enabled (needed for some of the ASR rules only)
+// More details here:
+// - https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/attack-surface-reduction-exploit-guard
+// - https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/enable-attack-surface-reduction
+// - https://docs.microsoft.com/en-us/windows/threat-protection/windows-defender-exploit-guard/evaluate-attack-surface-reduction
 
 import (
 	"errors"
@@ -39,17 +36,27 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-var ruleIDArray = []string{"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550", //Block executable content from email client and webmail
-	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A", //Block Office applications from creating child processes
+var ruleIDArray = []string{
+	"BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550", // Block executable content from email client and webmail
+	"D4F940AB-401B-4EFC-AADC-AD5F3C50688A", // Block Office applications from creating child processes
 	"3B576869-A4EC-4529-8536-B80A7769E899", // Block Office applications from creating executable content
 	"75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84", // Block Office applications from injecting code into other processes
 	"D3E037E1-3EB8-44C8-A917-57927947596D", // Block JavaScript or VBScript from launching downloaded executable content
 	"5BEB7EFE-FD9A-4556-801D-275E5FFC04CC", // Block execution of potentially obfuscated scripts
-	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B"} // Block Win32 API calls from Office macro
-var ruleIDEnumeration = strings.Join(ruleIDArray, ",")
+	"92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B", // Block Win32 API calls from Office macro
+	"01443614-CD74-433A-B99E-2ECDC07BFC25", // Block executable files from running unless they meet a prevalence, age, or trusted list criterion
+	"B2B3F03D-6A65-4F7B-A9C7-1C7EF74A9BA4", // Block untrusted and unsigned processes that run from USB
+	"C1DB55AB-C21A-4637-BB3F-A12568109D35", // Use advanced protection against ransomware
+	"D1E49AAC-8F56-4280-B9BA-993A6D77406C", // Block process creations originating from PSExec and WMI commands
+	"26190899-1602-49e8-8b27-eb1d0a1ce869", // Block Office communication application from creating child processes
+	"7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c", // Block Adobe Reader from creating child processes
+	"e6db77e5-3df2-4cf1-b95a-636979351e5b", // Block persistence through WMI event subscription
+	"9e6c4e1f-7d60-472f-ba1a-a39ef669e4b2"} // Block credential stealing from the Windows local security authority subsystem
 
-var actionsArray = []string{"Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled", "Enabled"}
-var actionsEnumeration = strings.Join(actionsArray, ",")
+var actionsArrayHardended = []bool{true, true, true, true, true, true, true,
+	true, true, true, true, true, true, true, true}
+var actionsArrayNotHardended = []bool{false, false, false, false, false, false,
+	false, false, false, false, false, false, false, false, false}
 
 // WindowsASRStruct ist the struct for HardenInterface implementation
 type WindowsASRStruct struct {
@@ -61,9 +68,9 @@ type WindowsASRStruct struct {
 
 // WindowsASR contains Names for Windows ASR implementation of hardenInterface
 var WindowsASR = &WindowsASRStruct{
-	shortName:       "Windows ASR",
-	longName:        "Windows ASR (needs Win 10/1709)",
-	description:     "Windows Attack Surface Reduction (ASR) (needs Win 10/1709)",
+	shortName:       "Windows ASR rules",
+	longName:        "Windows ASR rules",
+	description:     "Windows Attack Surface Reduction (ASR) rules",
 	hardenByDefault: true,
 }
 
@@ -72,69 +79,40 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 	if harden {
 		// harden (but only if we have at least Windows 10 - 1709)
 		if checkWindowsVersion() {
-			// TODO: Better use Add-MpPreference (if there is already configuration
-			//  existing? Then we would have to check what settings are present
-			//  and change / remove them accordingly.
+			// TODO: Save original state and restore on restore
 
-			// Set the settings for AttackSurfaceReduction using Set-MpPreference
-			psString := fmt.Sprintf("Set-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleIDEnumeration, actionsEnumeration)
-			Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
-			out, err := executeCommand("PowerShell.exe", "-Command", psString)
-			if err != nil {
-				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
-				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
-				return errors.New("Executing powershell cmdlet Set-MpPreference failed")
+			// TODO: Warning if Windows Defender ist not activated and
+			// Cloud Protection is not enabled?
+			// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection\DisableRealtimeMonitoring == 0 (real time protection is active)
+			// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Spynet\SpyNetReporting == 2 (Cloud Protection enabled)
+			// powershell.exe Set-MpPreference -MAPSReporting Advanced
+			// powershell.exe Set-MpPreference -SubmitSamplesConsent 0
+
+			// Set the settings for AttackSurfaceReduction using Add-MpPreference
+			for i, ruleId := range ruleIDArray {
+				err := AddMPPreference(ruleId, actionsArrayHardended[i])
+				if err != nil {
+					return err
+				}
 			}
-			Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 		} else {
 			Info.Println("Windows ASR not activated, since it needs at least Windows 10 - 1709")
 		}
 	} else {
 		// restore (but only if we have at least Windows 10 - 1709)
 		if checkWindowsVersion() {
-			// This is how we switch off ASR again:
-			//   Remove-MpPreference -AttackSurfaceReductionRules_Ids <ID1>, <ID2>, ...
-			psString := fmt.Sprintf("Remove-MpPreference -AttackSurfaceReductionRules_Ids %s", ruleIDEnumeration)
-			Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
-			out, err := executeCommand("PowerShell.exe", "-Command", psString)
-			if err != nil {
-				Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
-				Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
-				return errors.New("Executing powershell cmdlet Remove-MpPreference failed")
+			// Set the settings for AttackSurfaceReduction using Add-MpPreference
+			for i, ruleId := range ruleIDArray {
+				err := AddMPPreference(ruleId, actionsArrayNotHardended[i])
+				if err != nil {
+					return err
+				}
 			}
-			Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 		}
 	}
 
 	return nil
 }
-
-/* Unmodifed State in Windows 10 / 1709:
-	   PS> Get-MpPreference
-	    AttackSurfaceReductionOnlyExclusions          :
-	    AttackSurfaceReductionRules_Actions           :
-	    AttackSurfaceReductionRules_Ids               :
-
-      Modified State:
-	    PS > $prefs = Get-MpPreference
-		PS > $prefs.AttackSurfaceReductionOnlyExclusions
-		PS > $prefs.AttackSurfaceReductionRules_Actions
-			1
-			1
-			1
-			1
-			1
-			1
-			1
-		PS > $prefs.AttackSurfaceReductionRules_Ids
-			3B576869-A4EC-4529-8536-B80A7769E899
-			5BEB7EFE-FD9A-4556-801D-275E5FFC04CC
-			75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
-			92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B
-			BE9BA2D9-53EA-4CDC-84E5-9B1EEEE46550
-			D3E037E1-3EB8-44C8-A917-57927947596D
-			D4F940AB-401B-4EFC-AADC-AD5F3C50688A
-*/
 
 // IsHardened checks if ASR is already hardened
 func (asr WindowsASRStruct) IsHardened() bool {
@@ -176,9 +154,9 @@ func (asr WindowsASRStruct) IsHardened() bool {
 		var existsAndEqual = false
 
 		for j, currentRuleID := range currentRuleIDs {
-			if ruleIDHardened == currentRuleID {
-				// verify if setting is the same (TODO: currently works only with "Enabled")
-				if currentRuleActions[j] == "1" && actionsArray[i] == "Enabled" {
+			if strings.ToLower(ruleIDHardened) == strings.ToLower(currentRuleID) {
+				// verify if setting is enabled
+				if currentRuleActions[j] == "1" && actionsArrayHardended[i] == true {
 					// everything is fine
 					existsAndEqual = true
 				} else {
@@ -195,6 +173,29 @@ func (asr WindowsASRStruct) IsHardened() bool {
 	}
 
 	return true // seems all relevant hardening is in place
+}
+
+// AddMPPreference sets a ASR rule using Add-MpPreference
+func AddMPPreference(ruleId string, enabled bool) error {
+	// Example: Add-MpPreference -AttackSurfaceReductionRules_Ids
+	//   75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
+	//   -AttackSurfaceReductionRules_Actions Enabled
+	var action string
+	if enabled {
+		action = "Enabled"
+	} else {
+		action = "Disabled"
+	}
+	psString := fmt.Sprintf("Add-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleId, action)
+	Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
+	out, err := executeCommand("PowerShell.exe", "-Command", psString)
+	if err != nil {
+		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
+		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
+		return errors.New("Executing powershell cmdlet Add-MpPreference failed (" + ruleId + " = " + action + ")")
+	}
+	Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
+	return nil
 }
 
 // Name returns Name
