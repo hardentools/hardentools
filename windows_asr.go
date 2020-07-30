@@ -85,12 +85,9 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 		if checkWindowsVersion() {
 			// TODO: Save original state and restore on restore
 
-			// TODO: Warning if Windows Defender ist not activated and
+			// Show notification if Windows Defender ist not activated and
 			// Cloud Protection is not enabled?
-			// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection\DisableRealtimeMonitoring == 0 (real time protection is active)
-			// HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Spynet\SpyNetReporting == 2 (Cloud Protection enabled)
-			// powershell.exe Set-MpPreference -MAPSReporting Advanced
-			// powershell.exe Set-MpPreference -SubmitSamplesConsent 0
+			warnIfWindowsDefenderNotActive()
 
 			// Set the settings for AttackSurfaceReduction using Add-MpPreference
 			for i, ruleId := range ruleIDArray {
@@ -255,4 +252,44 @@ func checkWindowsVersion() bool {
 	}
 
 	return true
+}
+
+// warnIfWindowsDefenderNotActive shows a notification if Windows Defender
+// settings might prevent ASR rules from working
+func warnIfWindowsDefenderNotActive() {
+
+	// Cloud Protection
+	{
+		command := "(Get-MpPreference).MAPSReporting"
+		expectedValue := "2"
+		out, err := executeCommand("PowerShell.exe", "-Command", command)
+		if err != nil {
+			Info.Printf("Could not verify if Windows Defender Cloud Protection is enabled due to error accessing registry")
+			return
+		}
+
+		out = strings.ReplaceAll(out, "\r\n", "")
+		if out != expectedValue {
+			// show notification
+			showInfoDialog("Windows Defender Cloud Protection  is not enabled.\nSome ASR rules won't work.")
+		}
+	}
+
+	// real time protection
+	{
+		command := "(Get-MpPreference).DisableRealtimeMonitoring"
+		expectedValue := "False"
+		out, err := executeCommand("PowerShell.exe", "-Command", command)
+		if err != nil {
+			Info.Printf("Could not verify if Windows Defender Cloud Protection is enabled due to error accessing registry")
+			return
+		}
+
+		out = strings.ReplaceAll(out, "\r\n", "")
+
+		if out != expectedValue {
+			// show notification
+			showInfoDialog("Windows Defender Realtime Protection is not enabled.\nASR rules won't work.")
+		}
+	}
 }

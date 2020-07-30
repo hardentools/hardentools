@@ -23,6 +23,10 @@ import (
 	"testing"
 )
 
+// func TestWarnIfWindowsDefenderNotActive(t *testing.T) {
+// 	warnIfWindowsDefenderNotActive()
+// }
+
 // IsHardened checks if ASR is already hardened
 func TestIsHardened(t *testing.T) {
 	initLogging(ioutil.Discard, ioutil.Discard)
