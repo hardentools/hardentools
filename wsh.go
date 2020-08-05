@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// WSH contains registry keys for Windows Script Host Settings
+// WSH contains registry keys for Windows Script Host Settings.
 var WSH = &RegistrySingleValueDWORD{
 	RootKey:         registry.CURRENT_USER,
 	Path:            "SOFTWARE\\Microsoft\\Windows Script Host\\Settings",

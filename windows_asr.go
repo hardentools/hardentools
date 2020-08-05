@@ -90,8 +90,8 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 			warnIfWindowsDefenderNotActive()
 
 			// Set the settings for AttackSurfaceReduction using Add-MpPreference
-			for i, ruleId := range ruleIDArray {
-				err := AddMPPreference(ruleId, actionsArrayHardended[i])
+			for i, ruleID := range ruleIDArray {
+				err := AddMPPreference(ruleID, actionsArrayHardended[i])
 				if err != nil {
 					return err
 				}
@@ -103,8 +103,8 @@ func (asr WindowsASRStruct) Harden(harden bool) error {
 		// restore (but only if we have at least Windows 10 - 1709)
 		if checkWindowsVersion() {
 			// Set the settings for AttackSurfaceReduction using Add-MpPreference
-			for i, ruleId := range ruleIDArray {
-				err := AddMPPreference(ruleId, actionsArrayNotHardended[i])
+			for i, ruleID := range ruleIDArray {
+				err := AddMPPreference(ruleID, actionsArrayNotHardended[i])
 				if err != nil {
 					return err
 				}
@@ -177,7 +177,7 @@ func (asr WindowsASRStruct) IsHardened() bool {
 }
 
 // AddMPPreference sets a ASR rule using Add-MpPreference
-func AddMPPreference(ruleId string, enabled bool) error {
+func AddMPPreference(ruleID string, enabled bool) error {
 	// Example: Add-MpPreference -AttackSurfaceReductionRules_Ids
 	//   75668C1F-73B5-4CF0-BB93-3ECF5CB7CC84
 	//   -AttackSurfaceReductionRules_Actions Enabled
@@ -187,13 +187,13 @@ func AddMPPreference(ruleId string, enabled bool) error {
 	} else {
 		action = "Disabled"
 	}
-	psString := fmt.Sprintf("Add-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleId, action)
+	psString := fmt.Sprintf("Add-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleID, action)
 	Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
 	out, err := executeCommand("PowerShell.exe", "-Command", psString)
 	if err != nil {
 		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
 		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
-		return errors.New("Executing powershell cmdlet Add-MpPreference failed (" + ruleId + " = " + action + ")")
+		return errors.New("Executing powershell cmdlet Add-MpPreference failed (" + ruleID + " = " + action + ")")
 	}
 	Trace.Printf("WindowsASR: Powershell output was:\n%s", out)
 	return nil
