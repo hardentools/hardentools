@@ -3,6 +3,7 @@
 # Hardentools
 
 [![Build Status](https://travis-ci.org/securitywithoutborders/hardentools.svg?branch=master)](https://travis-ci.org/securitywithoutborders/hardentools)
+[![Go Report Card][goreportcard-badge]][goreportcard]
 
 Hardentools is a collection of simple utilities designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now), and primary consumer applications. These features, commonly thought for enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply reduce the attack surface by disabling the low-hanging fruit. **Hardentools is intended for individuals at risk, who might want an extra level of security at the price of *some* usability**. It is not intended for corporate environments.
 
@@ -47,3 +48,6 @@ In case you wish to restore the original settings and revert the changes Hardent
 This tool is developed by Claudio Guarnieri, Mariano Graziano and Florian Probst. You can find [here](https://github.com/securitywithoutborders/hardentools/graphs/contributors) a full list of contributors.
 
 Hammer icon by Travis Avery from the Noun Project.
+
+[goreportcard]: https://goreportcard.com/report/github.com/securitywithoutborders/hardentools
+[goreportcard-badge]: https://goreportcard.com/badge/github.com/securitywithoutborders/hardentools
