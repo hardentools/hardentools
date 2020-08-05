@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -192,7 +192,7 @@ func getRootKeyFromName(rootKeyName string) (rootKey registry.Key, err error) {
 	case "PERFORMANCE_DATA":
 		rootKey = registry.PERFORMANCE_DATA
 	default:
-		// invalid rootKeyName?
+		// Invalid rootKeyName?
 		Info.Println("Invalid rootKeyName provided to restore registry function")
 		err = errors.New("Invalid rootKeyName provided to restore registry function")
 		return registry.CURRENT_USER, err
@@ -205,7 +205,8 @@ func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValu
 	rootKeyName, _ := getRootKeyName(rootKey)
 	key, _, err := registry.CreateKey(rootKey, path, registry.WRITE)
 	if err != nil {
-		return fmt.Errorf("Couldn't create / open registry key for write access: %s\\%s", rootKeyName, path)
+		return fmt.Errorf("Couldn't create / open registry key for write access: %s\\%s",
+			rootKeyName, path)
 	}
 	defer key.Close()
 
@@ -217,7 +218,8 @@ func hardenKey(rootKey registry.Key, path string, valueName string, hardenedValu
 	// Harden.
 	err = key.SetDWordValue(valueName, hardenedValue)
 	if err != nil {
-		return fmt.Errorf("Couldn't set registry value: %s \\ %s \\ %s", rootKeyName, path, valueName)
+		return fmt.Errorf("Couldn't set registry value: %s \\ %s \\ %s",
+			rootKeyName, path, valueName)
 	}
 
 	return nil
@@ -257,7 +259,7 @@ func saveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName s
 		} else {
 			// save value
 			Trace.Println("Saving value for: " + "SavedStateNew_" + rootKeyName + "\\" + keyName + "_" + valueName)
-			err = hardentoolsKey.SetDWordValue("SavedStateNew_" + rootKeyName + "\\" + keyName + "____" + valueName, uint32(originalValue))
+			err = hardentoolsKey.SetDWordValue("SavedStateNew_"+rootKeyName+"\\"+keyName+"____"+valueName, uint32(originalValue))
 			if err != nil {
 				Info.Println("Could not save state due to error: " + err.Error())
 			}
@@ -267,7 +269,7 @@ func saveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName s
 	if saveNonExisting {
 		// Save as not existing before hardening.
 		Trace.Println("Saving " + rootKeyName + "\\" + keyName + "_" + valueName + " as not existing before hardening")
-		err = hardentoolsKey.SetDWordValue("SavedStateNotExisting_" + rootKeyName + "\\" + keyName + "____" + valueName, 0)
+		err = hardentoolsKey.SetDWordValue("SavedStateNotExisting_"+rootKeyName+"\\"+keyName+"____"+valueName, 0)
 		if err != nil {
 			Info.Println("Could not save state due to error: " + err.Error())
 			return err
@@ -368,7 +370,8 @@ func restoreSavedRegistryKeys() error {
 			regKey = strings.TrimPrefix(regKey, "\\")
 			valueName := regKey[strings.LastIndex(regKey, "_")+1:]
 			regKey = strings.TrimSuffix(regKey, "_"+valueName)
-			Trace.Printf("to be restored: %s\\%s\\%s = %d\n", rootKeyName, regKey, valueName, regValue)
+			Trace.Printf("to be restored: %s\\%s\\%s = %d\n", rootKeyName,
+				regKey, valueName, regValue)
 
 			rootKey, err := getRootKeyFromName(rootKeyName)
 			if err == nil {
@@ -378,10 +381,12 @@ func restoreSavedRegistryKeys() error {
 				} else {
 					defer key.Close()
 
-					Info.Printf("restoreSavedRegistryKeys: Restoring registry value %s\\%s = %d", regKey, valueName, regValue)
+					Info.Printf("restoreSavedRegistryKeys: Restoring registry value %s\\%s = %d",
+						regKey, valueName, regValue)
 					err = key.SetDWordValue(valueName, uint32(regValue))
 					if err != nil {
-						Info.Printf("Could not restore registry value %s\\%s = %d due to error: %s\n", regKey, valueName, regValue, err.Error())
+						Info.Printf("Could not restore registry value %s\\%s = %d due to error: %s\n",
+							regKey, valueName, regValue, err.Error())
 					}
 				}
 			}
@@ -402,10 +407,12 @@ func restoreSavedRegistryKeys() error {
 				} else {
 					defer key.Close()
 
-					Info.Printf("restoreSavedRegistryKeys: Restoring registry value %s\\%s = %d", regKey, valueName, regValue)
+					Info.Printf("restoreSavedRegistryKeys: Restoring registry value %s\\%s = %d",
+						regKey, valueName, regValue)
 					err = key.SetDWordValue(valueName, uint32(regValue))
 					if err != nil {
-						Info.Printf("Could not restore registry value %s\\%s = %d due to error: %s\n", regKey, valueName, regValue, err.Error())
+						Info.Printf("Could not restore registry value %s\\%s = %d due to error: %s\n",
+							regKey, valueName, regValue, err.Error())
 					}
 				}
 			}
@@ -428,7 +435,8 @@ func restoreSavedRegistryKeys() error {
 
 					err = key.DeleteValue(valueName)
 					if err != nil {
-						Info.Printf("Could not restore registry value (by deleting) %s\\%s due to error: %s\n", regKey, valueName, err.Error())
+						Info.Printf("Could not restore registry value (by deleting) %s\\%s due to error: %s\n",
+							regKey, valueName, err.Error())
 					}
 				}
 			}

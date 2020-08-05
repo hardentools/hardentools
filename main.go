@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://wweventsDialog.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -33,61 +33,6 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// Global configuration constants.
-const hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
-const logpath = "hardentools.log"
-const defaultLogLevel = "Info"
-
-// allHardenSubjects contains all top level harden subjects that should
-// be considered.
-// Elevated rights are needed by:
-// UAC, PowerShell, FileAssociations, Autorun, WindowsASR
-var allHardenSubjects = []HardenInterface{}
-var allHardenSubjectsWithAndWithoutElevatedPrivileges = []HardenInterface{
-	// WSH.
-	WSH,
-	// Office.
-	OfficeOLE,
-	OfficeMacros,
-	OfficeActiveX,
-	OfficeDDE,
-	// PDF.
-	AdobePDFJS,
-	AdobePDFObjects,
-	AdobePDFProtectedMode,
-	AdobePDFProtectedView,
-	AdobePDFEnhancedSecurity,
-	// Autorun.
-	Autorun,
-	// PowerShell.
-	PowerShell,
-	// cmd.exe.
-	Cmd,
-	// UAC.
-	UAC,
-	// Explorer.
-	FileAssociations,
-	ShowFileExt,
-	// Windows 10 / 1709 ASR
-	WindowsASR,
-	LSA,
-}
-var allHardenSubjectsForUnprivilegedUsers = []HardenInterface{
-	// WSH.
-	WSH,
-	// Office.
-	OfficeOLE,
-	OfficeMacros,
-	OfficeActiveX,
-	OfficeDDE,
-	// PDF.
-	AdobePDFJS,
-	AdobePDFObjects,
-	AdobePDFProtectedMode,
-	AdobePDFProtectedView,
-	AdobePDFEnhancedSecurity,
-}
-
 // Loggers for log output (we only need info and trace, errors have to be
 // displayed in the GUI).
 var (
@@ -97,6 +42,39 @@ var (
 
 var mainWindow fyne.Window
 var expertConfig map[string]bool
+
+// allHardenSubjects contains all top level harden subjects that should
+// be considered.
+var allHardenSubjects = []HardenInterface{}
+var hardenSubjectsForUnprivilegedUsers = []HardenInterface{
+	WSH,
+	OfficeOLE,
+	OfficeMacros,
+	OfficeActiveX,
+	OfficeDDE,
+	AdobePDFJS,
+	AdobePDFObjects,
+	AdobePDFProtectedMode,
+	AdobePDFProtectedView,
+	AdobePDFEnhancedSecurity,
+}
+var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers, []HardenInterface{
+	Autorun,
+	PowerShell,
+	Cmd,
+	UAC,
+	FileAssociations,
+	ShowFileExt,
+	WindowsASR,
+	LSA,
+}...)
+
+// Global configuration constants.
+const (
+	hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
+	logpath            = "hardentools.log"
+	defaultLogLevel    = "Info"
+)
 
 // initLogging initializes loggers.
 func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
@@ -114,7 +92,8 @@ func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 // checkStatus checks status of hardentools registry key
 // (that tells if user environment is hardened / not hardened).
 func checkStatus() bool {
-	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.READ)
+	key, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath,
+		registry.READ)
 	if err != nil {
 		return false
 	}
@@ -137,7 +116,8 @@ func checkStatus() bool {
 func markStatus(hardened bool) {
 
 	if hardened {
-		key, _, err := registry.CreateKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.ALL_ACCESS)
+		key, _, err := registry.CreateKey(registry.CURRENT_USER,
+			hardentoolsKeyPath, registry.ALL_ACCESS)
 		if err != nil {
 			Info.Println(err.Error())
 			panic(err)
@@ -165,7 +145,7 @@ func markStatus(hardened bool) {
 func hardenAll() {
 	showEventsTextArea()
 
-	// use goroutine to allow gui to update window
+	// Use goroutine to allow gui to update window.
 	go func() {
 		triggerAll(true)
 		markStatus(true)

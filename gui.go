@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020 Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://wweventsDialog.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -123,9 +123,9 @@ func createMainGUIContent(elevationStatus bool) {
 
 	// Check if we are running with elevated rights.
 	if elevationStatus == false {
-		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+		allHardenSubjects = hardenSubjectsForUnprivilegedUsers
 	} else {
-		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+		allHardenSubjects = hardenSubjectsForPrivilegedUsers
 	}
 
 	// Check hardening status.
@@ -323,11 +323,14 @@ func restartWithElevatedPrivileges() {
 // the final status of the hardenend settings.
 func showEventsTextArea() {
 	// init map that remembers stateIcons.
-	stateLabels = make(map[string]*widget.Label, len(allHardenSubjectsWithAndWithoutElevatedPrivileges))
+	stateLabels = make(map[string]*widget.Label, len(hardenSubjectsForPrivilegedUsers))
 
-	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name",
+		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result",
+		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result",
+		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 
 	resultBox := widget.NewHBox(
 		firstColumn,
@@ -340,7 +343,8 @@ func showEventsTextArea() {
 	resultBoxGroup.Hide()
 
 	messageBox = widget.NewVBox()
-	inProgressLabel = widget.NewLabelWithStyle("Operation in progress...", fyne.TextAlignCenter, fyne.TextStyle{})
+	inProgressLabel = widget.NewLabelWithStyle("Operation in progress...",
+		fyne.TextAlignCenter, fyne.TextStyle{})
 	messageBox.Append(inProgressLabel)
 	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
 	messageBox.Append(eventsTextAreaProgressBar)
@@ -357,7 +361,6 @@ func showEventsTextArea() {
 
 func ShowSuccess(name string) {
 	stateLabels[name] = widget.NewLabel("...")
-
 	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
 	secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
 	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
@@ -365,12 +368,10 @@ func ShowSuccess(name string) {
 
 func ShowFailure(name, failureText string) {
 	stateLabels[name] = widget.NewLabel("...")
-
 	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
 	secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
 	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 
-	//additionally show error dialog
 	showErrorDialog(name + " failed with error:\n" + failureText)
 }
 

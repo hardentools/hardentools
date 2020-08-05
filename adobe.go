@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,11 +23,12 @@ import (
 )
 
 var standardAdobeVersions = []string{
-	"DC", // Acrobat Reader DC
-	"XI", // Acrobat Reader XI
+	"DC", // Acrobat Reader DC.
+	"XI", // Acrobat Reader XI.
 }
 
-// AdobeRegistryRegExSingleDWORD is the data type for a RegEx Path / Single Value DWORD combination
+// AdobeRegistryRegExSingleDWORD is the data type for a RegEx Path and
+// Single Value DWORD combination.
 type AdobeRegistryRegExSingleDWORD struct {
 	RootKey         registry.Key
 	PathRegEx       string
@@ -40,7 +41,7 @@ type AdobeRegistryRegExSingleDWORD struct {
 	hardenByDefault bool
 }
 
-// AdobePDFJS hardens Acrobat JavaScript
+// AdobePDFJS hardens Acrobat JavaScript.
 // bEnableJS possible values:
 // 0 - Disable AcroJS
 // 1 - Enable AcroJS
@@ -56,7 +57,7 @@ var AdobePDFJS = &AdobeRegistryRegExSingleDWORD{
 	hardenByDefault: true,
 }
 
-// AdobePDFObjects hardens Adobe Reader Embedded Objects
+// AdobePDFObjects hardens Adobe Reader Embedded Objects.
 // bAllowOpenFile set to 0 and
 // bSecureOpenFile set to 1 to disable
 // the opening of non-PDF documents
@@ -85,7 +86,8 @@ var AdobePDFObjects = &MultiHardenInterfaces{
 	hardenByDefault: true,
 }
 
-// AdobePDFProtectedMode switches on the Protected Mode setting under "Security (Enhanced)" (enabled by default in current versions)
+// AdobePDFProtectedMode switches on the Protected Mode setting under
+// "Security (Enhanced)" (enabled by default in current versions).
 // (HKEY_LOCAL_USER\Software\Adobe\Acrobat Reader<version>\Privileged -> DWORD „bProtectedMode“)
 // 0 - Disable Protected Mode
 // 1 - Enable Protected Mode
@@ -101,7 +103,8 @@ var AdobePDFProtectedMode = &AdobeRegistryRegExSingleDWORD{
 	hardenByDefault: true,
 }
 
-// AdobePDFProtectedView switches on Protected View for all files from untrusted sources
+// AdobePDFProtectedView switches on Protected View for all files from
+// untrusted sources.
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\<version>\TrustManager -> iProtectedView)
 // 0 - Disable Protected View
 // 1 - Enable Protected View
@@ -117,7 +120,8 @@ var AdobePDFProtectedView = &AdobeRegistryRegExSingleDWORD{
 	hardenByDefault: true,
 }
 
-// AdobePDFEnhancedSecurity switches on Enhanced Security setting under "Security (Enhanced)"
+// AdobePDFEnhancedSecurity switches on Enhanced Security setting under
+// "Security (Enhanced)".
 // (enabled by default in current versions)
 // (HKEY_CURRENT_USER\SOFTWARE\Adobe\Acrobat Reader\DC\TrustManager -> bEnhancedSecurityInBrowser = 1 & bEnhancedSecurityStandalone = 1)
 var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
@@ -145,15 +149,13 @@ var AdobePDFEnhancedSecurity = &MultiHardenInterfaces{
 	},
 }
 
-//// HardenInterface methods
-
-// Harden hardens / restores AdobeRegistryRegExSingleDWORD registry keys
+// Harden hardens / restores AdobeRegistryRegExSingleDWORD registry keys.
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	// Harden.
 	for _, adobeVersion := range adobeRegEx.AdobeVersions {
 		path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
 
-		// build a RegistrySingleValueDWORD so we can reuse the Harden() method
+		// Build a RegistrySingleValueDWORD so we can reuse the Harden() method.
 		var singleDWORD = &RegistrySingleValueDWORD{
 			RootKey:       adobeRegEx.RootKey,
 			Path:          path,
@@ -164,7 +166,7 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
 			description:   adobeRegEx.description,
 		}
 
-		// call RegistrySingleValueDWORD Harden method to Harden or Restore.
+		// Call RegistrySingleValueDWORD Harden method to Harden or Restore.
 		err := singleDWORD.Harden(harden)
 		if err != nil {
 			return err
@@ -174,14 +176,15 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	return nil
 }
 
-// IsHardened checks if AdobeRegistryRegExSingleDWORD is hardened
+// IsHardened checks if AdobeRegistryRegExSingleDWORD is hardened.
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
 	var hardened = true
 
 	for _, adobeVersion := range adobeRegEx.AdobeVersions {
 		path := fmt.Sprintf(adobeRegEx.PathRegEx, adobeVersion)
 
-		// build a RegistrySingleValueDWORD so we can reuse the isHardened() method
+		// Build a RegistrySingleValueDWORD so we can reuse the isHardened()
+		// method.
 		var singleDWORD = &RegistrySingleValueDWORD{
 			RootKey:       adobeRegEx.RootKey,
 			Path:          path,
@@ -199,22 +202,22 @@ func (adobeRegEx *AdobeRegistryRegExSingleDWORD) IsHardened() bool {
 	return hardened
 }
 
-// Name returns name of hardening modulels
+// Name returns name of hardening modulels.
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Name() string {
 	return adobeRegEx.shortName
 }
 
-// LongName returns LongName of hardening module
+// LongName returns LongName of hardening module.
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) LongName() string {
 	return adobeRegEx.longName
 }
 
-// Description return description of hardening module
+// Description return description of hardening module.
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) Description() string {
 	return adobeRegEx.description
 }
 
-// HardenByDefault returns if subject should be hardened by default
+// HardenByDefault returns if subject should be hardened by default.
 func (adobeRegEx *AdobeRegistryRegExSingleDWORD) HardenByDefault() bool {
 	return adobeRegEx.hardenByDefault
 }

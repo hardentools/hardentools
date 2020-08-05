@@ -17,18 +17,16 @@
 package main
 
 import (
-	"golang.org/x/sys/windows/registry"
+	"os/exec"
+	"syscall"
 )
 
-// LSA contains the registry keys to be hardened.
-// For details regarding LSA please refer to:
-// https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection
-var LSA = &RegistrySingleValueDWORD{
-	RootKey:         registry.LOCAL_MACHINE,
-	Path:            "SYSTEM\\CurrentControlSet\\Control\\Lsa",
-	ValueName:       "RunAsPPL",
-	HardenedValue:   1,
-	shortName:       "LSA",
-	longName:        "LSA Protection",
-	hardenByDefault: false,
+// Helper method for executing cmd commands (does not open cmd window).
+func executeCommand(cmd string, args ...string) (string, error) {
+	var out []byte
+	command := exec.Command(cmd, args...)
+	command.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	out, err := command.CombinedOutput()
+
+	return string(out), err
 }

@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import (
 // - HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer!NoAutorun
 // - HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers!DisableAutoplay 1
 
-// Autorun is a Multi Value Registry struct for autorun registry keys
+// Autorun is a Multi Value Registry struct for autorun registry keys.
 var Autorun = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
 		{
