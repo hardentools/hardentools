@@ -69,13 +69,6 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	LSA,
 }...)
 
-// Global configuration constants.
-const (
-	hardentoolsKeyPath = "SOFTWARE\\Security Without Borders\\"
-	logpath            = "hardentools.log"
-	defaultLogLevel    = "Info"
-)
-
 // initLogging initializes loggers.
 func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
 	Trace = log.New(traceHandle,
@@ -259,14 +252,14 @@ func main() {
 		if f.Name == "log-level" {
 			// Init logging.
 			if strings.EqualFold(f.Value.String(), "Info") {
-				var logfile, err = os.Create(logpath)
+				var logfile, err = os.Create(logPath)
 				if err != nil {
 					panic(err)
 				}
 
 				initLogging(ioutil.Discard, logfile)
 			} else if strings.EqualFold(f.Value.String(), "Trace") {
-				var logfile, err = os.Create(logpath)
+				var logfile, err = os.Create(logPath)
 				if err != nil {
 					panic(err)
 				}

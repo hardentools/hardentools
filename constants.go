@@ -17,6 +17,9 @@
 package main
 
 const (
+	hardentoolsKeyPath            = "SOFTWARE\\Security Without Borders\\"
+	logPath                       = "hardentools.log"
+	defaultLogLevel               = "Info"
 	explorerPoliciesKey           = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
 	explorerDisallowRunKey        = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun"
 	errorRestoreDisallowRunFailed = "Fully restoring DisableRun settings failed"
