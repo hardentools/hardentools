@@ -299,9 +299,9 @@ func restoreKey(rootKey registry.Key, keyName string, valueName string) (err err
 	} else {
 		// TODO: here it is assumed that registry keys which were not safed did not
 		// exist during hardening. This assumption is from old versions of
-		// hardentools and still included to beeing able to restore old hardens
+		// hardentools and still included to being able to restore old hardens
 		// with the current version of hardentools. Since this would also lead
-		// to settings beeing deleted when introducing new functionality in
+		// to settings being deleted when introducing new functionality in
 		// hardentools, this will be removed in upcoming versions
 		Info.Println("Restore: Could not get saved reg. value, deleting " + keyName + "\\" + valueName)
 		err = key.DeleteValue(valueName)

@@ -29,7 +29,7 @@ import (
 //
 // What to disable:
 // - .hta allows execution of JavaScript and other scripting languages;
-//   seldomly run by user directly).
+//   seldom run by user directly).
 // - .js allows execution of JavaScript.
 // - .jse JScript Encoded Script File.
 // - .WSF Windows Script files.
@@ -148,7 +148,7 @@ func (explAssoc ExplorerAssociations) Harden(harden bool) error {
 }
 
 // IsHardened returns true, even if only one extension is hardened (to prevent
-// restore from not beeing executed), due to errors in hardening quite common.
+// restore from not being executed), due to errors in hardening quite common.
 func (explAssoc ExplorerAssociations) IsHardened() (isHardened bool) {
 	var hardened = false
 

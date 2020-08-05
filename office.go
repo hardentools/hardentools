@@ -319,7 +319,7 @@ func (officeRegEx OfficeRegistryRegExSingleDWORD) Harden(harden bool) error {
 	return nil
 }
 
-// IsHardened verifies if OfficeRegistryRegExSingleDWORD is already hardenend.
+// IsHardened verifies if OfficeRegistryRegExSingleDWORD is already hardened.
 func (officeRegEx OfficeRegistryRegExSingleDWORD) IsHardened() bool {
 	var hardened = true
 

@@ -48,7 +48,7 @@ func (mhInterfaces *MultiHardenInterfaces) Harden(harden bool) error {
 	return nil
 }
 
-// IsHardened verifies if all MultiHardenInterfaces members are hardenend.
+// IsHardened verifies if all MultiHardenInterfaces members are hardened.
 func (mhInterfaces *MultiHardenInterfaces) IsHardened() bool {
 	var hardened = true
 

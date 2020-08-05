@@ -143,10 +143,10 @@ func createMainGUIContent(elevationStatus bool) {
 			// All checkboxes checked by default, disabled only if subject is already hardened.
 			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
 
-			// Only enable, if not already hardenend.
+			// Only enable, if not already hardened.
 			enableField = !subjectIsHardened
 		} else {
-			// Restore: only checkboxes checked which are hardenend.
+			// Restore: only checkboxes checked which are hardened.
 			expertConfig[hardenSubject.Name()] = subjectIsHardened
 
 			// Disable all, since the user must restore all settings because otherwise
@@ -320,7 +320,7 @@ func restartWithElevatedPrivileges() {
 }
 
 // showEventsTextArea updates the UI to show the harden/restore progress and
-// the final status of the hardenend settings.
+// the final status of the hardened settings.
 func showEventsTextArea() {
 	// init map that remembers stateIcons.
 	stateLabels = make(map[string]*widget.Label, len(hardenSubjectsForPrivilegedUsers))
