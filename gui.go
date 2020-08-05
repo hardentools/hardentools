@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://wweventsDialog.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -70,6 +70,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"fyne.io/fyne"
@@ -357,22 +358,32 @@ func showEventsTextArea() {
 }
 
 func ShowSuccess(name string) {
-	stateLabels[name] = widget.NewLabel("...")
+	if mainWindow != nil {
+		stateLabels[name] = widget.NewLabel("...")
 
-	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-	secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
-	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
+		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+	} else {
+		Info.Println(name + ": Success")
+	}
 }
 
 func ShowFailure(name, failureText string) {
-	stateLabels[name] = widget.NewLabel("...")
+	if mainWindow != nil {
 
-	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-	secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
-	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+		stateLabels[name] = widget.NewLabel("...")
 
-	//additionally show error dialog
-	showErrorDialog(name + " failed with error:\n" + failureText)
+		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
+		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+
+		//additionally show error dialog
+		showErrorDialog(name + " failed with error:\n" + failureText)
+	} else {
+		Info.Println(name + " failed with error: " + failureText)
+	}
+
 }
 
 func ShowIsHardened(name string) {
@@ -399,4 +410,97 @@ func ShowNotHardened(name string) {
 		secondColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
 		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 	}
+}
+
+func cmdHarden() {
+	// check if hardentools has been started with elevated rights.
+	elevationStatus := false
+	if C.IsElevated() == 1 {
+		elevationStatus = true
+		Info.Println("Started with elevated rights")
+	}
+	Info.Println("Started without elevated rights")
+
+	// check if we are running with elevated rights
+	if elevationStatus == false {
+		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+	} else {
+		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+	}
+
+	// check hardening status
+	status := checkStatus()
+	if status == true {
+		fmt.Println("Already hardened. Please restore before hardening again.")
+		os.Exit(-1)
+	}
+
+	// build up expert settings checkboxes and map
+	expertConfig = make(map[string]bool)
+	//	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
+
+	for _, hardenSubject := range allHardenSubjects {
+		var subjectIsHardened = hardenSubject.IsHardened()
+		//var enableField bool
+
+		if status == false {
+			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
+		} else {
+			expertConfig[hardenSubject.Name()] = subjectIsHardened
+		}
+	}
+
+	triggerAll(true)
+	markStatus(true)
+	showStatus(true)
+
+	Info.Println("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
+	os.Exit(0)
+}
+
+func cmdRestore() {
+	// check if hardentools has been started with elevated rights.
+	elevationStatus := false
+	if C.IsElevated() == 1 {
+		elevationStatus = true
+		Info.Println("Started with elevated rights")
+	}
+	Info.Println("Started without elevated rights")
+
+	// check if we are running with elevated rights
+	if elevationStatus == false {
+		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+	} else {
+		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+	}
+
+	// check hardening status
+	status := checkStatus()
+	if status == false {
+		fmt.Println("Not hardened. Please harden before restoring.")
+		os.Exit(-1)
+	}
+
+	// build up expert settings checkboxes and map
+	expertConfig = make(map[string]bool)
+	//	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
+
+	for _, hardenSubject := range allHardenSubjects {
+		var subjectIsHardened = hardenSubject.IsHardened()
+		//var enableField bool
+
+		if status == false {
+			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
+		} else {
+			expertConfig[hardenSubject.Name()] = subjectIsHardened
+		}
+	}
+
+	triggerAll(false)
+	restoreSavedRegistryKeys()
+	markStatus(false)
+	showStatus(true)
+
+	Info.Println("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
+	os.Exit(0)
 }

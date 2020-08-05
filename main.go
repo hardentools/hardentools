@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://wweventsDialog.gnu.org/licenses/>.
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -168,7 +168,7 @@ func hardenAll() {
 	go func() {
 		triggerAll(true)
 		markStatus(true)
-		showStatus()
+		showStatus(false)
 
 		showEndDialog("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
@@ -184,7 +184,7 @@ func restoreAll() {
 		triggerAll(false)
 		restoreSavedRegistryKeys()
 		markStatus(false)
-		showStatus()
+		showStatus(false)
 
 		showEndDialog("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
@@ -199,10 +199,10 @@ func restoreAll() {
 func triggerAll(harden bool) {
 	var outputString string
 	if harden {
-		//PrintEvent("Now we are hardening ")
+		Info.Println("Now we are hardening...")
 		outputString = "Hardening"
 	} else {
-		//PrintEvent("Now we are restoring ")
+		Info.Println("Now we are restoring...")
 		outputString = "Restoring"
 	}
 
@@ -245,7 +245,7 @@ func hardenDefaultsAgain() {
 		// harden all settings
 		triggerAll(true)
 		markStatus(true)
-		showStatus()
+		showStatus(false)
 
 		showEndDialog("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 		os.Exit(0)
@@ -254,15 +254,19 @@ func hardenDefaultsAgain() {
 
 // showStatus iterates all harden subjects and prints status of each
 // (checks real status on system)
-func showStatus() {
+func showStatus(commandline bool) {
 	for _, hardenSubject := range allHardenSubjects {
 		if hardenSubject.IsHardened() {
 			eventText := fmt.Sprintf("%s is now hardened\r\n", hardenSubject.Name())
-			ShowIsHardened(hardenSubject.Name())
+			if !commandline {
+				ShowIsHardened(hardenSubject.Name())
+			}
 			Info.Print(eventText)
 		} else {
 			eventText := fmt.Sprintf("%s is now NOT hardened\r\n", hardenSubject.Name())
-			ShowNotHardened(hardenSubject.Name())
+			if !commandline {
+				ShowNotHardened(hardenSubject.Name())
+			}
 			Info.Print(eventText)
 		}
 	}
@@ -271,32 +275,79 @@ func showStatus() {
 // main method for hardentools
 func main() {
 	// parse command line parameters/flags
-	flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
+	logLevelPtr := flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
+	restorePtr := flag.Bool("restore", false, "restore without GUI (only command line and log output)")
+	hardenPtr := flag.Bool("harden", false, "harden without GUI (only command line and log output)")
 	flag.Parse()
-	flag.VisitAll(func(f *flag.Flag) {
-		// only supports log-level right now
-		if f.Name == "log-level" {
-			// Init logging
-			if strings.EqualFold(f.Value.String(), "Info") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
+	// Init logging
+	fmt.Println("logLevel: ", *logLevelPtr)
+	fmt.Println("restorePtr: ", *restorePtr)
+	fmt.Println("hardenPtr: ", *hardenPtr)
 
-				initLogging(ioutil.Discard, logfile)
-			} else if strings.EqualFold(f.Value.String(), "Trace") {
-				var logfile, err = os.Create(logpath)
-				if err != nil {
-					panic(err)
-				}
-
-				initLogging(logfile, logfile)
-			} else {
-				// Off
-				initLogging(ioutil.Discard, ioutil.Discard)
-			}
+	if strings.EqualFold(*logLevelPtr, "Info") {
+		var logfile, err = os.Create(logpath)
+		if err != nil {
+			panic(err)
 		}
-	})
+
+		initLogging(ioutil.Discard, logfile)
+	} else if strings.EqualFold(*logLevelPtr, "Trace") {
+		var logfile, err = os.Create(logpath)
+		if err != nil {
+			panic(err)
+		}
+
+		initLogging(logfile, logfile)
+	}
+	if *hardenPtr == true {
+		// no GUI, just harden with default settings
+		initLogging(ioutil.Discard, os.Stdout)
+		cmdHarden()
+	}
+	if *restorePtr == true {
+		// no GUI, just restore
+		initLogging(ioutil.Discard, os.Stdout)
+		cmdRestore()
+	}
+
+	// flag.VisitAll(func(f *flag.Flag) {
+	// 	// only supports log-level right now
+	// 	if f.Name == "log-level" {
+	// 		// Init logging
+	// 		if strings.EqualFold(f.Value.String(), "Info") {
+	// 			var logfile, err = os.Create(logpath)
+	// 			if err != nil {
+	// 				panic(err)
+	// 			}
+
+	// 			initLogging(ioutil.Discard, logfile)
+	// 		} else if strings.EqualFold(f.Value.String(), "Trace") {
+	// 			var logfile, err = os.Create(logpath)
+	// 			if err != nil {
+	// 				panic(err)
+	// 			}
+
+	// 			initLogging(logfile, logfile)
+	// 		} else {
+	// 			// Off
+	// 			initLogging(ioutil.Discard, ioutil.Discard)
+	// 		}
+	// 	} else if f.Name == "harden" && restorePtr == true {
+	// 		// no GUI, just harden with default settings
+	// 		initLogging(ioutil.Discard, os.Stdout)
+	// 		cmdHarden()
+	// 	} else if f.Name == "restore" && f.Value == true {
+	// 		// no GUI, just restore
+	// 		initLogging(ioutil.Discard, os.Stdout)
+	// 		cmdRestore()
+	// 	}
+	// })
+
+	if Info == nil {
+		// default logging
+		var logfile, _ = os.Create(logpath)
+		initLogging(ioutil.Discard, logfile)
+	}
 
 	// init main window
 	appl := app.New()
