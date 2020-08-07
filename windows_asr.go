@@ -47,7 +47,7 @@ var ruleIDArray = []string{
 
 	// leaving the following out for now, since it also blocks hardentools
 	// and perhaps also other "not well known to Microsoft" tools
-	// "01443614-CD74-433A-B99E-2ECDC07BFC25", // Block executable files from running unless they meet a prevalence, age, or trusted list criterion
+	"01443614-CD74-433A-B99E-2ECDC07BFC25", // Block executable files from running unless they meet a prevalence, age, or trusted list criterion
 
 	"B2B3F03D-6A65-4F7B-A9C7-1C7EF74A9BA4", // Block untrusted and unsigned processes that run from USB
 	"C1DB55AB-C21A-4637-BB3F-A12568109D35", // Use advanced protection against ransomware

@@ -99,14 +99,8 @@ var expertConfig map[string]bool
 
 // initLogging inits loggers
 func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
-	Trace = log.New(traceHandle,
-		"TRACE: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
-	Info = log.New(infoHandle,
-		"INFO: ",
-		log.Ldate|log.Ltime|log.Lshortfile)
-
+	Trace = log.New(traceHandle, "TRACE: ", log.Lshortfile)
+	Info = log.New(infoHandle, "INFO: ", log.Lshortfile)
 	log.SetOutput(infoHandle)
 }
 
@@ -276,78 +270,22 @@ func showStatus(commandline bool) {
 func main() {
 	// parse command line parameters/flags
 	logLevelPtr := flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
-	restorePtr := flag.Bool("restore", false, "restore without GUI (only command line and log output)")
-	hardenPtr := flag.Bool("harden", false, "harden without GUI (only command line and log output)")
+	restorePtr := flag.Bool("restore", false, "restore without GUI (only command line)")
+	hardenPtr := flag.Bool("harden", false, "harden without GUI, only default settings (only command line)")
 	flag.Parse()
-	// Init logging
-	fmt.Println("logLevel: ", *logLevelPtr)
-	fmt.Println("restorePtr: ", *restorePtr)
-	fmt.Println("hardenPtr: ", *hardenPtr)
 
-	if strings.EqualFold(*logLevelPtr, "Info") {
-		var logfile, err = os.Create(logpath)
-		if err != nil {
-			panic(err)
-		}
-
-		initLogging(ioutil.Discard, logfile)
-	} else if strings.EqualFold(*logLevelPtr, "Trace") {
-		var logfile, err = os.Create(logpath)
-		if err != nil {
-			panic(err)
-		}
-
-		initLogging(logfile, logfile)
-	}
 	if *hardenPtr == true {
 		// no GUI, just harden with default settings
-		initLogging(ioutil.Discard, os.Stdout)
+		initLoggingWithCmdParameters(logLevelPtr, true)
 		cmdHarden()
 	}
 	if *restorePtr == true {
 		// no GUI, just restore
-		initLogging(ioutil.Discard, os.Stdout)
+		initLoggingWithCmdParameters(logLevelPtr, true)
 		cmdRestore()
 	}
 
-	// flag.VisitAll(func(f *flag.Flag) {
-	// 	// only supports log-level right now
-	// 	if f.Name == "log-level" {
-	// 		// Init logging
-	// 		if strings.EqualFold(f.Value.String(), "Info") {
-	// 			var logfile, err = os.Create(logpath)
-	// 			if err != nil {
-	// 				panic(err)
-	// 			}
-
-	// 			initLogging(ioutil.Discard, logfile)
-	// 		} else if strings.EqualFold(f.Value.String(), "Trace") {
-	// 			var logfile, err = os.Create(logpath)
-	// 			if err != nil {
-	// 				panic(err)
-	// 			}
-
-	// 			initLogging(logfile, logfile)
-	// 		} else {
-	// 			// Off
-	// 			initLogging(ioutil.Discard, ioutil.Discard)
-	// 		}
-	// 	} else if f.Name == "harden" && restorePtr == true {
-	// 		// no GUI, just harden with default settings
-	// 		initLogging(ioutil.Discard, os.Stdout)
-	// 		cmdHarden()
-	// 	} else if f.Name == "restore" && f.Value == true {
-	// 		// no GUI, just restore
-	// 		initLogging(ioutil.Discard, os.Stdout)
-	// 		cmdRestore()
-	// 	}
-	// })
-
-	if Info == nil {
-		// default logging
-		var logfile, _ = os.Create(logpath)
-		initLogging(ioutil.Discard, logfile)
-	}
+	initLoggingWithCmdParameters(logLevelPtr, false)
 
 	// init main window
 	appl := app.New()
@@ -366,4 +304,28 @@ func main() {
 	go main2()
 
 	mainWindow.ShowAndRun()
+}
+
+func initLoggingWithCmdParameters(logLevelPtr *string, cmd bool) {
+	var logfile *os.File
+	var err error
+
+	if cmd {
+		logfile = os.Stdout
+	} else {
+		logfile, err = os.Create(logpath)
+		if err != nil {
+			panic(err)
+		}
+	}
+	if strings.EqualFold(*logLevelPtr, "Info") {
+		initLogging(ioutil.Discard, logfile)
+	} else if strings.EqualFold(*logLevelPtr, "Trace") {
+		initLogging(logfile, logfile)
+	} else if strings.EqualFold(*logLevelPtr, "Off") {
+		initLogging(ioutil.Discard, ioutil.Discard)
+	} else {
+		// default logging
+		initLogging(ioutil.Discard, logfile)
+	}
 }

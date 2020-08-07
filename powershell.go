@@ -201,7 +201,7 @@ func (pwShell PowerShellDisallowRunMembers) IsHardened() bool {
 
 	keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun", registry.READ)
 	if err != nil {
-		Info.Printf("Could not open registry key Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun due to error %s", err.Error())
+		Trace.Printf("IsHardened(): Could not open registry key Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun due to error %s", err.Error())
 		return false
 	}
 	defer keyDisallow.Close()

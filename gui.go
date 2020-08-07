@@ -413,52 +413,20 @@ func ShowNotHardened(name string) {
 }
 
 func cmdHarden() {
-	// check if hardentools has been started with elevated rights.
-	elevationStatus := false
-	if C.IsElevated() == 1 {
-		elevationStatus = true
-		Info.Println("Started with elevated rights")
-	}
-	Info.Println("Started without elevated rights")
-
-	// check if we are running with elevated rights
-	if elevationStatus == false {
-		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
-	} else {
-		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
-	}
-
-	// check hardening status
-	status := checkStatus()
-	if status == true {
-		fmt.Println("Already hardened. Please restore before hardening again.")
-		os.Exit(-1)
-	}
-
-	// build up expert settings checkboxes and map
-	expertConfig = make(map[string]bool)
-	//	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
-
-	for _, hardenSubject := range allHardenSubjects {
-		var subjectIsHardened = hardenSubject.IsHardened()
-		//var enableField bool
-
-		if status == false {
-			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
-		} else {
-			expertConfig[hardenSubject.Name()] = subjectIsHardened
-		}
-	}
-
-	triggerAll(true)
-	markStatus(true)
-	showStatus(true)
+	cmdHardenRestore(true)
 
 	Info.Println("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
 	os.Exit(0)
 }
 
 func cmdRestore() {
+	cmdHardenRestore(false)
+
+	Info.Println("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
+	os.Exit(0)
+}
+
+func cmdHardenRestore(harden bool) {
 	// check if hardentools has been started with elevated rights.
 	elevationStatus := false
 	if C.IsElevated() == 1 {
@@ -477,31 +445,33 @@ func cmdRestore() {
 
 	// check hardening status
 	status := checkStatus()
-	if status == false {
+	if status == false && harden == false {
 		fmt.Println("Not hardened. Please harden before restoring.")
+		os.Exit(-1)
+	} else if status == true && harden == true {
+		fmt.Println("Already hardened. Please restore before hardening again.")
 		os.Exit(-1)
 	}
 
 	// build up expert settings checkboxes and map
 	expertConfig = make(map[string]bool)
-	//	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
-
 	for _, hardenSubject := range allHardenSubjects {
 		var subjectIsHardened = hardenSubject.IsHardened()
 		//var enableField bool
 
 		if status == false {
+			// harden only settings which are not hardened yet
 			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
 		} else {
+			// restore only hardened settings
 			expertConfig[hardenSubject.Name()] = subjectIsHardened
 		}
 	}
 
-	triggerAll(false)
-	restoreSavedRegistryKeys()
-	markStatus(false)
+	triggerAll(harden)
+	if !harden {
+		restoreSavedRegistryKeys()
+	}
+	markStatus(harden)
 	showStatus(true)
-
-	Info.Println("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
-	os.Exit(0)
 }
