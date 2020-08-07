@@ -464,8 +464,9 @@ func cmdRestore() {
 	if C.IsElevated() == 1 {
 		elevationStatus = true
 		Info.Println("Started with elevated rights")
+	} else {
+		Info.Println("Started without elevated rights")
 	}
-	Info.Println("Started without elevated rights")
 
 	// check if we are running with elevated rights
 	if elevationStatus == false {
