@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,17 +16,11 @@
 
 package main
 
-import (
-	"os/exec"
-	"syscall"
+const (
+	hardentoolsKeyPath            = "SOFTWARE\\Security Without Borders\\"
+	logPath                       = "hardentools.log"
+	defaultLogLevel               = "Info"
+	explorerPoliciesKey           = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
+	explorerDisallowRunKey        = "Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\DisallowRun"
+	errorRestoreDisallowRunFailed = "Fully restoring DisableRun settings failed"
 )
-
-// helper method for executing cmd commands (does not open cmd window)
-func executeCommand(cmd string, args ...string) (string, error) {
-	var out []byte
-	command := exec.Command(cmd, args...)
-	command.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	out, err := command.CombinedOutput()
-
-	return string(out), err
-}

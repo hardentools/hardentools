@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// ShowFileExt contains the Unhide Explorer File Extensions registry keys
+// ShowFileExt contains the Unhide Explorer File Extensions registry keys.
 var ShowFileExt = &RegistryMultiValue{
 	ArraySingleDWORD: []*RegistrySingleValueDWORD{
 		{

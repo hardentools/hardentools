@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020  Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// UAC contains the registry keys to be hardened
+// UAC contains the registry keys to be hardened.
 var UAC = &RegistrySingleValueDWORD{
 	RootKey:         registry.LOCAL_MACHINE,
 	Path:            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",

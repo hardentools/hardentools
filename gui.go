@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2020 Security Without Borders
+// Copyright (C) 2017-2020 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ package main
 #include <windows.h>
 #include <shellapi.h>
 
-// checks if we are running with elevated privileges (admin rights)
+// Checks if we are running with elevated privileges (admin rights).
 int IsElevated( ) {
     boolean fRet = FALSE;
     HANDLE hToken = NULL;
@@ -43,8 +43,8 @@ int IsElevated( ) {
 	}
 }
 
-// executes the executable in the current directory (or in path) with "runas"
-// to aquire admin privileges
+// Executes the executable in the current directory (or in path) with "runas"
+// to aquire admin privileges.
 int ExecuteWithRunas(char execName[]){
 	SHELLEXECUTEINFO shExecInfo;
 
@@ -84,11 +84,11 @@ var eventsTextAreaProgressBar *widget.ProgressBarInfinite
 var stateLabels map[string]*widget.Label
 var inProgressLabel *widget.Label
 
-func main2() {
-	// check if hardentools has been started with elevated rights. If not
-	// ask user if he wants to elevate
+func mainGUI() {
+	// Check if hardentools has been started with elevated rights. If not
+	// ask user if she wants to elevate.
 	if C.IsElevated() == 0 {
-		// main window must already be open for this dialog to work
+		// Main window must already be open for this dialog to work.
 		askElevationDialog()
 	}
 	elevationStatus := false
@@ -96,15 +96,15 @@ func main2() {
 		elevationStatus = true
 	}
 
-	// show splash screen since loading takes some time (at least with admin
-	// privileges) due to sequential reading of all the settings
+	// Show splash screen since loading takes some time (at least with admin
+	// privileges) due to sequential reading of all the settings.
 	showSplash()
 
-	// show main screen
+	// Show main screen.
 	createMainGUIContent(elevationStatus)
 }
 
-// showSplash shows an splash content during initialization
+// showSplash shows an splash content during initialization.
 func showSplash() {
 	splashContent := widget.NewVBox(
 		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
@@ -114,25 +114,25 @@ func showSplash() {
 }
 
 // createMainGUIContent shows the main GUI screen that allows to harden or
-// restore the settings
+// restore the settings.
 func createMainGUIContent(elevationStatus bool) {
-	// init variables
+	// Init variables.
 	var labelText, buttonText, expertSettingsText string
 	var enableHardenAdditionalButton bool
 	var buttonFunc func()
 	var expertSettingsCheckBox *widget.Check
 
-	// check if we are running with elevated rights
+	// Check if we are running with elevated rights.
 	if elevationStatus == false {
-		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+		allHardenSubjects = hardenSubjectsForUnprivilegedUsers
 	} else {
-		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+		allHardenSubjects = hardenSubjectsForPrivilegedUsers
 	}
 
-	// check hardening status
+	// Check hardening status.
 	var status = checkStatus()
 
-	// build up expert settings checkboxes and map
+	// Build up expert settings checkboxes and map.
 	expertConfig = make(map[string]bool)
 	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
 
@@ -141,20 +141,20 @@ func createMainGUIContent(elevationStatus bool) {
 		var enableField bool
 
 		if status == false {
-			// all checkboxes checked by default, disabled only if subject is already hardened
+			// All checkboxes checked by default, disabled only if subject is already hardened.
 			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
 
-			// only enable, if not already hardenend
+			// Only enable, if not already hardened.
 			enableField = !subjectIsHardened
 		} else {
-			// restore: only checkboxes checked which are hardenend
+			// Restore: only checkboxes checked which are hardened.
 			expertConfig[hardenSubject.Name()] = subjectIsHardened
 
-			// disable all, since the user must restore all settings because otherwise
+			// Disable all, since the user must restore all settings because otherwise
 			// consecutive execution of hardentools might fail (e.g. starting powershell
 			// or cmd commands) or might be ineffectiv (settings are already hardened) or
 			// hardened settings might get saved as "before" settings, so user
-			// can't revert to the state "before"
+			// can't revert to the state "before".
 			enableField = false
 		}
 
@@ -165,7 +165,7 @@ func createMainGUIContent(elevationStatus bool) {
 		}
 	}
 
-	// set labels / text fields (harden or restore)
+	// Set labels / text fields (harden or restore).
 	if status == false {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
@@ -180,7 +180,7 @@ func createMainGUIContent(elevationStatus bool) {
 		enableHardenAdditionalButton = true
 	}
 
-	// expert tab
+	// Expert tab.
 	countExpertSettings := len(expertCompWidgetArray)
 	expertTab1 := widget.NewVBox()
 	expertTab2 := widget.NewVBox()
@@ -197,8 +197,7 @@ func createMainGUIContent(elevationStatus bool) {
 		expertSettingsHBox,
 	)
 
-	// build up main GUI window
-	// main tab
+	// Build main GUI window's main tab.
 	hardenAgainButton := widget.NewButton("Harden again (all default settings)",
 		hardenDefaultsAgain)
 	hardenAgainButton.Hidden = !enableHardenAdditionalButton
@@ -236,7 +235,7 @@ func createMainGUIContent(elevationStatus bool) {
 	mainWindow.CenterOnScreen()
 }
 
-// showErrorDialog shows an error message
+// showErrorDialog shows an error message.
 func showErrorDialog(errorMessage string) {
 	ch := make(chan bool)
 	err := errors.New(errorMessage)
@@ -248,7 +247,7 @@ func showErrorDialog(errorMessage string) {
 	<-ch
 }
 
-// showInfoDialog shows an info message
+// showInfoDialog shows an info message.
 func showInfoDialog(infoMessage string) {
 	ch := make(chan bool)
 	infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
@@ -260,7 +259,7 @@ func showInfoDialog(infoMessage string) {
 
 }
 
-// showEndDialog shows the close button after hardening/restoring
+// showEndDialog shows the close button after hardening/restoring.
 func showEndDialog(infoMessage string) {
 	ch := make(chan bool)
 
@@ -276,7 +275,7 @@ func showEndDialog(infoMessage string) {
 	<-ch
 }
 
-// askElevationDialog asks the user if he wants to elevates his rights
+// askElevationDialog asks the user if she wants to elevates her rights.
 func askElevationDialog() {
 	ch := make(chan int)
 	dialogText := "You are currently running hardentools as normal user.\n" +
@@ -297,7 +296,7 @@ func askElevationDialog() {
 
 // checkBoxEventGenerator is a helper function that allows GUI checkbox elements
 // to call this function as a callback method. checkBoxEventGenerator then saves
-// the requested expert config setting for the checkbox in the corresponding map
+// the requested expert config setting for the checkbox in the corresponding map.
 func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
 	var hardenSubjectName = hardenSubjName
 	return func(on bool) {
@@ -306,30 +305,33 @@ func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
 }
 
 // restartWithElevatedPrivileges tries to restart hardentools.exe with admin
-// privileges
+// privileges.
 func restartWithElevatedPrivileges() {
-	// find out our program (exe) name
+	// Find out our program (exe) name.
 	progName := os.Args[0]
 
-	// start us again, this time with elevated privileges
+	// Start us again, this time with elevated privileges.
 	if C.ExecuteWithRunas(C.CString(progName)) == 1 {
-		// exit this instance (the unprivileged one)
+		// Exit this instance (the unprivileged one).
 		os.Exit(0)
 	} else {
-		// something went wrong
+		// Something went wrong.
 		showErrorDialog("Error while trying to gain elevated privileges. Starting in unprivileged mode...")
 	}
 }
 
 // showEventsTextArea updates the UI to show the harden/restore progress and
-// the final status of the hardenend settings
+// the final status of the hardened settings.
 func showEventsTextArea() {
-	// init map that remembers stateIcons
-	stateLabels = make(map[string]*widget.Label, len(allHardenSubjectsWithAndWithoutElevatedPrivileges))
+	// init map that remembers stateIcons.
+	stateLabels = make(map[string]*widget.Label, len(hardenSubjectsForPrivilegedUsers))
 
-	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name",
+		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result",
+		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
+	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result",
+		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 
 	resultBox := widget.NewHBox(
 		firstColumn,
@@ -342,7 +344,8 @@ func showEventsTextArea() {
 	resultBoxGroup.Hide()
 
 	messageBox = widget.NewVBox()
-	inProgressLabel = widget.NewLabelWithStyle("Operation in progress...", fyne.TextAlignCenter, fyne.TextStyle{})
+	inProgressLabel = widget.NewLabelWithStyle("Operation in progress...",
+		fyne.TextAlignCenter, fyne.TextStyle{})
 	messageBox.Append(inProgressLabel)
 	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
 	messageBox.Append(eventsTextAreaProgressBar)
@@ -357,6 +360,7 @@ func showEventsTextArea() {
 	mainWindow.SetContent(eventsArea)
 }
 
+// ShowSuccess sets GUI status of name field to success
 func ShowSuccess(name string) {
 	if mainWindow != nil {
 		stateLabels[name] = widget.NewLabel("...")
@@ -369,23 +373,21 @@ func ShowSuccess(name string) {
 	}
 }
 
+// ShowFailure sets GUI status of name field to failureText
 func ShowFailure(name, failureText string) {
 	if mainWindow != nil {
-
 		stateLabels[name] = widget.NewLabel("...")
-
 		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
 		secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
 		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 
-		//additionally show error dialog
 		showErrorDialog(name + " failed with error:\n" + failureText)
 	} else {
 		Info.Println(name + " failed with error: " + failureText)
 	}
-
 }
 
+// ShowIsHardened sets GUI result for name to is hardened
 func ShowIsHardened(name string) {
 	label := stateLabels[name]
 	if label != nil {
@@ -399,6 +401,7 @@ func ShowIsHardened(name string) {
 	}
 }
 
+// ShowNotHardened sets GUI result for name to not hardened
 func ShowNotHardened(name string) {
 	label := stateLabels[name]
 	if label != nil {
@@ -438,9 +441,9 @@ func cmdHardenRestore(harden bool) {
 
 	// check if we are running with elevated rights
 	if elevationStatus == false {
-		allHardenSubjects = allHardenSubjectsForUnprivilegedUsers
+		allHardenSubjects = hardenSubjectsForUnprivilegedUsers
 	} else {
-		allHardenSubjects = allHardenSubjectsWithAndWithoutElevatedPrivileges
+		allHardenSubjects = hardenSubjectsForPrivilegedUsers
 	}
 
 	// check hardening status
