@@ -42,6 +42,18 @@ In case you wish to restore the original settings and revert the changes Hardent
 
 **Please note**: the modifications made by Hardentools are exclusively contextual to the Windows user account used to run the tool from. In case you want Hardentools to change settings for other Windows users as well, you will have to run it from each one of them logged in.
 
+## Known Issues
+### Hardentools not working in a Virtual Machine or if used with RDP
+Hardentools might not start when used on a Virtual Machine or of used via RDP. If started on the command line an error similar to the following appears:
+```
+2020/09/06 02:24:47 Fyne error:  window creation error
+2020/09/06 02:24:47   Cause: APIUnavailable: WGL: The driver does not appear to support OpenGL
+2020/09/06 02:24:47   At: /home/travis/gopath/pkg/mod/fyne.io/fyne@v1.3.0/internal/driver/glfw/window.go:1133
+```
+
+This is due to a bug in the UI framework used (https://github.com/fyne-io/fyne/issues/410). You can check if your VM supports an OpenGL 2.0 graphics driver and install that to get it working. We are also working on a command line interface to remediate this.
+
+
 
 ## Credits
 
