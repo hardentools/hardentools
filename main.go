@@ -33,16 +33,6 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// Loggers for log output (we only need info and trace, errors have to be
-// displayed in the GUI).
-var (
-	Trace *log.Logger
-	Info  *log.Logger
-)
-
-var mainWindow fyne.Window
-var expertConfig map[string]bool
-
 // allHardenSubjects contains all top level harden subjects that should
 // be considered.
 var allHardenSubjects = []HardenInterface{}
@@ -68,6 +58,16 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	WindowsASR,
 	LSA,
 }...)
+
+var mainWindow fyne.Window
+var expertConfig map[string]bool
+
+// Loggers for log output (we only need info and trace, errors have to be
+// displayed in the GUI).
+var (
+	Trace *log.Logger // set this logger to get trace level verbosity logging output
+	Info  *log.Logger // set this logger to get standard logging output
+)
 
 // initLogging initializes loggers.
 func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
@@ -243,9 +243,9 @@ func showStatus(commandline bool) {
 // Main method for hardentools.
 func main() {
 	// parse command line parameters/flags
-	logLevelPtr := flag.String("log-level", defaultLogLevel, "Info|Trace: enables logging with verbosity; Off: disables logging")
-	restorePtr := flag.Bool("restore", false, "restore without GUI (only command line)")
-	hardenPtr := flag.Bool("harden", false, "harden without GUI, only default settings (only command line)")
+	logLevelPtr := flag.String("log-level", defaultLogLevel, "\"Info\": Enables logging with standard verbosity; \"Trace\": Verbose logging; \"Off\": Disables logging")
+	restorePtr := flag.Bool("restore", false, "restore without GUI (command line only)")
+	hardenPtr := flag.Bool("harden", false, "harden without GUI, only default settings (command line only)")
 	flag.Parse()
 
 	if *hardenPtr == true {
@@ -285,21 +285,26 @@ func initLoggingWithCmdParameters(logLevelPtr *string, cmd bool) {
 	var err error
 
 	if cmd {
+		// command line only => use stdout
 		logfile = os.Stdout
 	} else {
+		// UI => use logfile
 		logfile, err = os.Create(logPath)
 		if err != nil {
 			panic(err)
 		}
 	}
 	if strings.EqualFold(*logLevelPtr, "Info") {
+		// only standard log output
 		initLogging(ioutil.Discard, logfile)
 	} else if strings.EqualFold(*logLevelPtr, "Trace") {
+		// standard + trace logging
 		initLogging(logfile, logfile)
 	} else if strings.EqualFold(*logLevelPtr, "Off") {
+		// no logging
 		initLogging(ioutil.Discard, ioutil.Discard)
 	} else {
-		// default logging
+		// default logging (only standard log output)
 		initLogging(ioutil.Discard, logfile)
 	}
 }
