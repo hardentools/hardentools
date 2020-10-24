@@ -17,6 +17,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"io"
@@ -180,6 +181,7 @@ func triggerAll(harden bool) {
 		if expertConfig[hardenSubject.Name()] == true {
 
 			err := hardenSubject.Harden(harden)
+
 			if err != nil {
 				ShowFailure(hardenSubject.Name(), err.Error())
 				Info.Printf("Error for operation %s: %s", hardenSubject.Name(), err.Error())
@@ -270,8 +272,13 @@ func main() {
 	emptyContainer := widget.NewScrollContainer(widget.NewVBox())
 	emptyContainer.SetMinSize(fyne.NewSize(700, 300))
 	mainWindow.SetContent(emptyContainer)
-	// TODO
-	// mainWindow.SetIcon()
+	// set window icon
+	iconContent, _ := base64.StdEncoding.DecodeString(IconBase64)
+	var windowIcon = HardentoolsWindowIconStruct{
+		"HardentoolsWindowIcon",
+		iconContent,
+	}
+	mainWindow.SetIcon(windowIcon)
 
 	Trace.Println("Starting up hardentools")
 
