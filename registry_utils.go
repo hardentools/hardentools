@@ -246,7 +246,7 @@ func saveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName s
 	// Open registry key.
 	keyToSave, err := registry.OpenKey(rootKey, keyName, registry.READ)
 	if err != nil {
-		Trace.Println("Could not open registry key to save due to error: " + err.Error())
+		//Trace.Println("Could not open registry key to save due to error: " + err.Error())
 		saveNonExisting = true
 	} else {
 		defer keyToSave.Close()
@@ -254,7 +254,7 @@ func saveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName s
 		// Now finally get value to save.
 		originalValue, _, err := keyToSave.GetIntegerValue(valueName)
 		if err != nil {
-			Trace.Println("Could not retrieve registry value to save (" + keyName + ", " + valueName + ") due to error: " + err.Error())
+			//Trace.Println("Could not retrieve registry value to save (" + keyName + ", " + valueName + ") due to error: " + err.Error())
 			saveNonExisting = true
 		} else {
 			// save value
@@ -294,7 +294,7 @@ func restoreKey(rootKey registry.Key, keyName string, valueName string) (err err
 	// Get original state value.
 	value, err := retrieveOriginalRegistryDWORD(rootKey, keyName, valueName)
 	if err == nil {
-		Info.Printf("Restore: Restoring registry value %s\\%s = %d", keyName, valueName, value)
+		Trace.Printf("Restore: Restoring registry value %s\\%s = %d", keyName, valueName, value)
 		err = key.SetDWordValue(valueName, value)
 	} else {
 		// TODO: here it is assumed that registry keys which were not safed did not
@@ -303,7 +303,7 @@ func restoreKey(rootKey registry.Key, keyName string, valueName string) (err err
 		// with the current version of hardentools. Since this would also lead
 		// to settings being deleted when introducing new functionality in
 		// hardentools, this will be removed in upcoming versions
-		Info.Println("Restore: Could not get saved reg. value, deleting " + keyName + "\\" + valueName)
+		Trace.Println("Restore: Could not get saved reg. value, deleting " + keyName + "\\" + valueName)
 		err = key.DeleteValue(valueName)
 	}
 	return err
@@ -407,7 +407,7 @@ func restoreSavedRegistryKeys() error {
 				} else {
 					defer key.Close()
 
-					Info.Printf("restoreSavedRegistryKeys: Restoring registry value %s\\%s = %d",
+					Trace.Printf("restoreSavedRegistryKeys: Restoring registry value %s\\%s = %d",
 						regKey, valueName, regValue)
 					err = key.SetDWordValue(valueName, uint32(regValue))
 					if err != nil {
@@ -435,7 +435,9 @@ func restoreSavedRegistryKeys() error {
 
 					err = key.DeleteValue(valueName)
 					if err != nil {
-						Info.Printf("Could not restore registry value (by deleting) %s\\%s due to error: %s\n",
+						// should be Info logger in the future, when registry
+						// keys are not deleted by restoreKey() anymore
+						Trace.Printf("Could not restore registry value (by deleting) %s\\%s due to error: %s\n",
 							regKey, valueName, err.Error())
 					}
 				}

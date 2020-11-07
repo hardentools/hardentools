@@ -70,6 +70,7 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"fyne.io/fyne"
@@ -359,22 +360,34 @@ func showEventsTextArea() {
 	mainWindow.SetContent(eventsArea)
 }
 
+// ShowSuccess sets GUI status of name field to success
 func ShowSuccess(name string) {
-	stateLabels[name] = widget.NewLabel("...")
-	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-	secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
-	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+	if mainWindow != nil {
+		stateLabels[name] = widget.NewLabel("...")
+
+		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
+		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+	} else {
+		Info.Println(name + ": Success")
+	}
 }
 
+// ShowFailure sets GUI status of name field to failureText
 func ShowFailure(name, failureText string) {
-	stateLabels[name] = widget.NewLabel("...")
-	firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-	secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
-	thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+	if mainWindow != nil {
+		stateLabels[name] = widget.NewLabel("...")
+		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
+		secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
+		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 
-	showErrorDialog(name + " failed with error:\n" + failureText)
+		showErrorDialog(name + " failed with error:\n" + failureText)
+	} else {
+		Info.Println(name + " failed with error: " + failureText)
+	}
 }
 
+// ShowIsHardened sets GUI result for name to is hardened
 func ShowIsHardened(name string) {
 	label := stateLabels[name]
 	if label != nil {
@@ -388,6 +401,7 @@ func ShowIsHardened(name string) {
 	}
 }
 
+// ShowNotHardened sets GUI result for name to not hardened
 func ShowNotHardened(name string) {
 	label := stateLabels[name]
 	if label != nil {
@@ -399,4 +413,68 @@ func ShowNotHardened(name string) {
 		secondColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
 		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
 	}
+}
+
+func cmdHarden() {
+	cmdHardenRestore(true)
+
+	Info.Println("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
+	os.Exit(0)
+}
+
+func cmdRestore() {
+	cmdHardenRestore(false)
+
+	Info.Println("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
+	os.Exit(0)
+}
+
+func cmdHardenRestore(harden bool) {
+	// check if hardentools has been started with elevated rights.
+	elevationStatus := false
+	if C.IsElevated() == 1 {
+		elevationStatus = true
+		Info.Println("Started with elevated rights")
+	} else {
+		Info.Println("Started without elevated rights")
+	}
+
+	// check if we are running with elevated rights
+	if elevationStatus == false {
+		allHardenSubjects = hardenSubjectsForUnprivilegedUsers
+	} else {
+		allHardenSubjects = hardenSubjectsForPrivilegedUsers
+	}
+
+	// check hardening status
+	status := checkStatus()
+	if status == false && harden == false {
+		fmt.Println("Not hardened. Please harden before restoring.")
+		os.Exit(-1)
+	} else if status == true && harden == true {
+		fmt.Println("Already hardened. Please restore before hardening again.")
+		os.Exit(-1)
+	}
+
+	// build up expert settings checkboxes and map
+	expertConfig = make(map[string]bool)
+	for _, hardenSubject := range allHardenSubjects {
+		var subjectIsHardened = hardenSubject.IsHardened()
+		//var enableField bool
+
+		if status == false {
+			// harden only settings which are not hardened yet
+			expertConfig[hardenSubject.Name()] = !subjectIsHardened && hardenSubject.HardenByDefault()
+		} else {
+			// restore only hardened settings
+			expertConfig[hardenSubject.Name()] = subjectIsHardened
+		}
+	}
+
+	triggerAll(harden)
+	if !harden {
+		restoreSavedRegistryKeys()
+	}
+	markStatus(harden)
+	showStatus(true)
 }

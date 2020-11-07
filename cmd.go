@@ -203,7 +203,7 @@ func (cmd CmdDisallowRunMembers) IsHardened() bool {
 
 	keyDisallow, err := registry.OpenKey(registry.CURRENT_USER, explorerDisallowRunKey, registry.READ)
 	if err != nil {
-		Info.Printf("Could not open DisallowRun registry key due to error %s", err.Error())
+		Trace.Printf("IsHardened(): Could not open DisallowRun registry key due to error %s", err.Error())
 		return false
 	}
 	defer keyDisallow.Close()
