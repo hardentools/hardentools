@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2021 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,9 @@ import (
 )
 
 var standardAdobeVersions = []string{
-	"DC", // Acrobat Reader DC.
-	"XI", // Acrobat Reader XI.
+	"DC",   // Acrobat Reader DC.
+	"2020", // Acrobat Reader 2020
+	"XI",   // Acrobat Reader XI (outdated)
 }
 
 // AdobeRegistryRegExSingleDWORD is the data type for a RegEx Path and
