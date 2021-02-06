@@ -1,4 +1,4 @@
-module hardentools_obsti_master
+module github.com/securitywithoutborders/hardentools
 
 go 1.14
 
