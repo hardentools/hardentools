@@ -48,6 +48,7 @@ var hardenSubjectsForUnprivilegedUsers = []HardenInterface{
 	AdobePDFProtectedMode,
 	AdobePDFProtectedView,
 	AdobePDFEnhancedSecurity,
+	ShowFileExt,
 }
 var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers, []HardenInterface{
 	Autorun,
@@ -55,7 +56,6 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	Cmd,
 	UAC,
 	FileAssociations,
-	ShowFileExt,
 	WindowsASR,
 	LSA,
 }...)
