@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2021 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ var hardenSubjectsForUnprivilegedUsers = []HardenInterface{
 	AdobePDFProtectedMode,
 	AdobePDFProtectedView,
 	AdobePDFEnhancedSecurity,
+	ShowFileExt,
 }
 var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers, []HardenInterface{
 	Autorun,
@@ -55,7 +56,6 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	Cmd,
 	UAC,
 	FileAssociations,
-	ShowFileExt,
 	WindowsASR,
 	LSA,
 }...)
