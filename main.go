@@ -34,6 +34,12 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+func init() {
+	// Tries to prevent DLL preloading/sideloading for dynamically loaded
+	// DLLs (loaded by fyne.io and dependencies)
+	SaferDLLLoading()
+}
+
 // allHardenSubjects contains all top level harden subjects that should
 // be considered.
 var allHardenSubjects = []HardenInterface{}
