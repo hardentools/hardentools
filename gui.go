@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2021 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -73,13 +73,14 @@ import (
 	"fmt"
 	"os"
 
-	"fyne.io/fyne"
-	"fyne.io/fyne/dialog"
-	"fyne.io/fyne/theme"
-	"fyne.io/fyne/widget"
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
-var messageBox, firstColumn, secondColumn, thirdColumn *widget.Box
+var messageBox, firstColumn, secondColumn, thirdColumn *fyne.Container
 var eventsTextAreaProgressBar *widget.ProgressBarInfinite
 var stateLabels map[string]*widget.Label
 var inProgressLabel *widget.Label
@@ -106,7 +107,7 @@ func mainGUI() {
 
 // showSplash shows an splash content during initialization.
 func showSplash() {
-	splashContent := widget.NewVBox(
+	splashContent := container.NewVBox(
 		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
 		widget.NewProgressBarInfinite())
 
@@ -182,20 +183,19 @@ func createMainGUIContent(elevationStatus bool) {
 
 	// Expert tab.
 	countExpertSettings := len(expertCompWidgetArray)
-	expertTab1 := widget.NewVBox()
-	expertTab2 := widget.NewVBox()
+	expertTab1 := container.NewVBox()
+	expertTab2 := container.NewVBox()
 	for i, compWidget := range expertCompWidgetArray {
 		if i < countExpertSettings/2 {
-			expertTab1.Append(compWidget)
+			expertTab1.Add(compWidget)
 		} else {
-			expertTab2.Append(compWidget)
+			expertTab2.Add(compWidget)
 		}
 	}
-	expertSettingsHBox := widget.NewHBox(expertTab1, expertTab2)
-	expertTabWidget := widget.NewGroup("Expert Settings",
-		widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{Italic: true}),
-		expertSettingsHBox,
-	)
+	expertSettingsHBox := container.NewHBox(expertTab1, expertTab2)
+	expertTabWidget := widget.NewCard("", "Expert Settings",
+		container.NewVBox(widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{Italic: true}),
+			expertSettingsHBox))
 
 	// Build main GUI window's main tab.
 	hardenAgainButton := widget.NewButton("Harden again (all default settings)",
@@ -215,23 +215,23 @@ func createMainGUIContent(elevationStatus bool) {
 		"at the price of some usability. It is not intended for corporate environments.\n",
 		fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 
-	mainTabContent := widget.NewVBox(
+	mainTabContent := container.NewVBox(
 		widget.NewLabelWithStyle(labelText, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
 		hardenButton,
 		hardenAgainButton,
 	)
-	mainTabWidget := widget.NewGroup("Harden", mainTabContent)
+	mainTabWidget := widget.NewCard("", "", mainTabContent)
 
 	expertSettingsCheckBox = widget.NewCheck("Show Expert Settings", func(on bool) {
 		if on {
-			mainWindow.SetContent(widget.NewVBox(expertTabWidget, mainTabWidget))
+			mainWindow.SetContent(container.NewVBox(expertTabWidget, mainTabWidget))
 		} else {
-			mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
+			mainWindow.SetContent(container.NewVBox(widget.NewCard("", "Introduction", introText), mainTabWidget))
 		}
+		mainWindow.CenterOnScreen()
 	})
-	mainTabContent.Append(expertSettingsCheckBox)
-
-	mainWindow.SetContent(widget.NewVBox(widget.NewGroup("Introduction", introText), mainTabWidget))
+	mainTabContent.Add(expertSettingsCheckBox)
+	mainWindow.SetContent(container.NewVBox(widget.NewCard("", "Introduction", introText), mainTabWidget))
 	mainWindow.CenterOnScreen()
 }
 
@@ -267,7 +267,7 @@ func showEndDialog(infoMessage string) {
 	inProgressLabel.Hide()
 
 	message := widget.NewLabelWithStyle(infoMessage, fyne.TextAlignCenter, fyne.TextStyle{Monospace: true})
-	messageBox.Prepend(widget.NewVBox(message,
+	messageBox.Add(container.NewVBox(message,
 		widget.NewButton("Close", func() {
 			ch <- true
 		})))
@@ -326,38 +326,32 @@ func showEventsTextArea() {
 	// init map that remembers stateIcons.
 	stateLabels = make(map[string]*widget.Label, len(hardenSubjectsForPrivilegedUsers))
 
-	firstColumn = widget.NewVBox(widget.NewLabelWithStyle("Harden Item Name",
+	firstColumn = container.NewVBox(widget.NewLabelWithStyle("Harden Item Name",
 		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	secondColumn = widget.NewVBox(widget.NewLabelWithStyle("Operation Result",
+	secondColumn = container.NewVBox(widget.NewLabelWithStyle("Operation Result",
 		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-	thirdColumn = widget.NewVBox(widget.NewLabelWithStyle("Verification Result",
+	thirdColumn = container.NewVBox(widget.NewLabelWithStyle("Verification Result",
 		fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
 
-	resultBox := widget.NewHBox(
+	resultBox := container.NewHBox(
 		firstColumn,
 		secondColumn,
 		thirdColumn)
 
-	resultBoxScrollContainer := widget.NewScrollContainer(resultBox)
-	resultBoxScrollContainer.SetMinSize(fyne.NewSize(500, 400))
-	resultBoxGroup := widget.NewGroup("Result Details", resultBoxScrollContainer)
-	resultBoxGroup.Hide()
+	resultBoxContainer := container.NewVScroll(resultBox)
+	resultBoxContainer.SetMinSize(fyne.NewSize(500, 600))
+	resultBoxGroup := widget.NewCard("", "", resultBoxContainer)
 
-	messageBox = widget.NewVBox()
+	messageBox = container.NewVBox()
 	inProgressLabel = widget.NewLabelWithStyle("Operation in progress...",
 		fyne.TextAlignCenter, fyne.TextStyle{})
-	messageBox.Append(inProgressLabel)
+	messageBox.Add(inProgressLabel)
 	eventsTextAreaProgressBar = widget.NewProgressBarInfinite()
-	messageBox.Append(eventsTextAreaProgressBar)
-	var resultDetailsButton *widget.Button
-	resultDetailsButton = widget.NewButton("Show Result Details", func() {
-		resultBoxGroup.Show()
-		resultDetailsButton.Hide()
-	})
-	messageBox.Append((resultDetailsButton))
+	messageBox.Add(eventsTextAreaProgressBar)
 
-	eventsArea := widget.NewVBox(messageBox, resultBoxGroup)
+	eventsArea := container.NewVBox(messageBox, resultBoxGroup)
 	mainWindow.SetContent(eventsArea)
+	mainWindow.CenterOnScreen()
 }
 
 // ShowSuccess sets GUI status of name field to success
@@ -365,9 +359,9 @@ func ShowSuccess(name string) {
 	if mainWindow != nil {
 		stateLabels[name] = widget.NewLabel("...")
 
-		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-		secondColumn.Append(widget.NewHBox(widget.NewLabel("Success")))
-		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+		firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
+		secondColumn.Add(container.NewHBox(widget.NewLabel("Success")))
+		thirdColumn.Add(container.NewHBox(stateLabels[name]))
 	} else {
 		Info.Println(name + ": Success")
 	}
@@ -377,9 +371,9 @@ func ShowSuccess(name string) {
 func ShowFailure(name, failureText string) {
 	if mainWindow != nil {
 		stateLabels[name] = widget.NewLabel("...")
-		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-		secondColumn.Append(widget.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
-		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+		firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
+		secondColumn.Add(container.NewHBox(widget.NewLabelWithStyle("FAIL", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})))
+		thirdColumn.Add(container.NewHBox(stateLabels[name]))
 
 		showErrorDialog(name + " failed with error:\n" + failureText)
 	} else {
@@ -395,9 +389,9 @@ func ShowIsHardened(name string) {
 	} else {
 		stateLabels[name] = widget.NewLabel("is hardened")
 
-		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-		secondColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
-		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+		firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
+		secondColumn.Add(container.NewHBox(widget.NewLabel("not selected")))
+		thirdColumn.Add(container.NewHBox(stateLabels[name]))
 	}
 }
 
@@ -409,23 +403,23 @@ func ShowNotHardened(name string) {
 	} else {
 		stateLabels[name] = widget.NewLabel("not hardened")
 
-		firstColumn.Append(widget.NewHBox(widget.NewLabel(name)))
-		secondColumn.Append(widget.NewHBox(widget.NewLabel("not selected")))
-		thirdColumn.Append(widget.NewHBox(stateLabels[name]))
+		firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
+		secondColumn.Add(container.NewHBox(widget.NewLabel("not selected")))
+		thirdColumn.Add(container.NewHBox(stateLabels[name]))
 	}
 }
 
 func cmdHarden() {
 	cmdHardenRestore(true)
 
-	Info.Println("Done!\nRisky features have been hardened!\nFor all changes to take effect please restart Windows.")
+	Info.Println("Done! Risky features have been hardened!\nFor all changes to take effect please restart Windows.")
 	os.Exit(0)
 }
 
 func cmdRestore() {
 	cmdHardenRestore(false)
 
-	Info.Println("Done!\nRestored settings to their original state.\nFor all changes to take effect please restart Windows.")
+	Info.Println("Done! Restored settings to their original state.\nFor all changes to take effect please restart Windows.")
 	os.Exit(0)
 }
 
