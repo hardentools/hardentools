@@ -55,11 +55,11 @@ This is due to a bug in the UI framework used (https://github.com/fyne-io/fyne/i
 
 In cases you get this error, you can use the hardentools_cmd.exe to harden the system using the default settings with:
 
-    .\hardentools_cmd.exe -harden
+    .\hardentools-cli.exe -harden
 
 and restore with:
 
-    .\hardentools_cmd.exe -restore
+    .\hardentools-cli.exe -restore
 
 
 ## Credits
