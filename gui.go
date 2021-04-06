@@ -237,26 +237,36 @@ func createMainGUIContent(elevationStatus bool) {
 
 // showErrorDialog shows an error message.
 func showErrorDialog(errorMessage string) {
-	ch := make(chan bool)
-	err := errors.New(errorMessage)
-	errorDialog := dialog.NewError(err, mainWindow)
-	errorDialog.SetOnClosed(func() {
-		ch <- true
-	})
-	errorDialog.Show()
-	<-ch
+	if mainWindow != nil {
+		ch := make(chan bool)
+		err := errors.New(errorMessage)
+		errorDialog := dialog.NewError(err, mainWindow)
+		errorDialog.SetOnClosed(func() {
+			ch <- true
+		})
+		errorDialog.Show()
+		<-ch
+	} else {
+		// no main windows - seem to be in command line mode.
+		Info.Println("Error: " + errorMessage)
+	}
+
 }
 
 // showInfoDialog shows an info message.
 func showInfoDialog(infoMessage string) {
-	ch := make(chan bool)
-	infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
-	infoDialog.SetOnClosed(func() {
-		ch <- true
-	})
-	infoDialog.Show()
-	<-ch
-
+	if mainWindow != nil {
+		ch := make(chan bool)
+		infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
+		infoDialog.SetOnClosed(func() {
+			ch <- true
+		})
+		infoDialog.Show()
+		<-ch
+	} else {
+		// no main windows - seem to be in command line mode.
+		Info.Println("Information: " + infoMessage)
+	}
 }
 
 // showEndDialog shows the close button after hardening/restoring.
