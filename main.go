@@ -158,7 +158,7 @@ func restoreAll() {
 	// Use goroutine to allow gui to update window.
 	go func() {
 		triggerAll(false)
-		restoreSavedRegistryKeys()
+		restoreSavedRegistryKeys() // TODO: add error handling/visibility to user
 		markStatus(false)
 		showStatus(false)
 

@@ -55,7 +55,7 @@ func (regValue *RegistrySingleValueDWORD) Harden(harden bool) error {
 		// Restore.
 		// don't do anything here since this is done by restoreSavedRegistryKeys()
 		// in the main procedure
-		return true
+		return nil
 	}
 
 	// else: Harden.
