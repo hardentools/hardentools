@@ -53,7 +53,7 @@ Hardentools might not start when used on a Virtual Machine or of used via RDP. I
 
 This is due to a bug in the UI framework used (https://github.com/fyne-io/fyne/issues/410). You can check if your VM supports an OpenGL 2.0 graphics driver and install that to get it working. We are also working on a command line interface to remediate this.
 
-In cases you get this error, you can use the hardentools_cmd.exe to harden the system using the default settings with:
+In cases you get this error, you can use the hardentools-cli.exe to harden the system using the default settings with:
 
     .\hardentools-cli.exe -harden
 
