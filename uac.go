@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2021 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,13 +20,38 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
-// UAC contains the registry keys to be hardened.
-var UAC = &RegistrySingleValueDWORD{
-	RootKey:         registry.LOCAL_MACHINE,
-	Path:            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
-	ValueName:       "ConsentPromptBehaviorAdmin",
-	HardenedValue:   2,
+var UAC = &MultiHardenInterfaces{
+	hardenInterfaces: []HardenInterface{
+		&RegistrySingleValueDWORD{
+			RootKey:         registry.LOCAL_MACHINE,
+			Path:            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+			ValueName:       "ConsentPromptBehaviorAdmin",
+			HardenedValue:   3,
+			shortName:       "UAC Prompt",
+			longName:        "UAC Prompt",
+			hardenByDefault: true,
+		},
+		&RegistrySingleValueDWORD{
+			RootKey:         registry.LOCAL_MACHINE,
+			Path:            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+			ValueName:       "PromptOnSecureDesktop",
+			HardenedValue:   1,
+			shortName:       "UAC SecureDesktop",
+			longName:        "UAC PromptOnSecureDesktop",
+			hardenByDefault: true,
+		},
+		&RegistrySingleValueDWORD{
+			RootKey:         registry.LOCAL_MACHINE,
+			Path:            "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+			ValueName:       "EnableLUA",
+			HardenedValue:   1,
+			shortName:       "UAC EnableLUA",
+			longName:        "UAC EnableLUA",
+			hardenByDefault: true,
+		},
+	},
 	shortName:       "UAC",
-	longName:        "UAC Prompt",
+	longName:        "User Account Control",
+	description:     "Enables UAC with secure desktop and admin password",
 	hardenByDefault: true,
 }

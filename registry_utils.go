@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2021 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,7 +53,9 @@ type RegistryMultiValue struct {
 func (regValue *RegistrySingleValueDWORD) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
-		return restoreKey(regValue.RootKey, regValue.Path, regValue.ValueName)
+		// don't do anything here since this is done by restoreSavedRegistryKeys()
+		// in the main procedure
+		return nil
 	}
 
 	// else: Harden.
@@ -282,7 +284,7 @@ func saveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName s
 // Helper method for restoring original state of a DWORD registry key.
 // TODO: remove this method and replace with restoreSavedRegistryKeys
 //       in future version (see inline comment)
-func restoreKey(rootKey registry.Key, keyName string, valueName string) (err error) {
+/*func restoreKey(rootKey registry.Key, keyName string, valueName string) (err error) {
 	// Open key to be restored.
 	key, err := registry.OpenKey(rootKey, keyName, registry.ALL_ACCESS)
 	if err != nil {
@@ -307,7 +309,7 @@ func restoreKey(rootKey registry.Key, keyName string, valueName string) (err err
 		err = key.DeleteValue(valueName)
 	}
 	return err
-}
+}*/
 
 // Helper method for restoring registry key from saved state.
 func retrieveOriginalRegistryDWORD(rootKey registry.Key, keyName string, valueName string) (value uint32, err error) {
