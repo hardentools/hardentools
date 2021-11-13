@@ -206,12 +206,13 @@ func createMainGUIContent(elevationStatus bool) {
 	hardenButton.SetIcon(theme.ConfirmIcon())
 
 	introText := widget.NewLabelWithStyle("Hardentools is designed to disable a number of \"features\" exposed by Microsoft\n"+
-		"Windows and is primarily a consumer application. These features, commonly thought\n"+
-		"for enterprise customers, are generally useless to regular users and rather\n"+
-		"pose as dangers as they are very commonly abused by attackers to execute\n"+
-		"malicious code on a victim's computer. The intent of this tool is to simply\n"+
-		"reduce the attack surface by disabling the low-hanging fruit. Hardentools is\n"+
-		"intended for individuals at risk, who might want an extra level of security\n"+
+		"Windows and some widely used applications (Microsoft Office and Adobe PDF Reader,\n"+
+		"for now). These features, commonly thought for enterprise customers,\n"+
+		"are generally useless to regular users and rather pose as dangers as\n"+
+		"they are very commonly abused by attackers to execute malicious code\n"+
+		"on a victim's computer. The intent of this tool is to simply reduce\n"+
+		"the attack surface by disabling the low-hanging fruit. Hardentools is\n"+
+		"for individuals at risk, who might want an extra level of security intended\n"+
 		"at the price of some usability. It is not intended for corporate environments.\n",
 		fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 

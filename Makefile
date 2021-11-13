@@ -10,7 +10,7 @@ pre: clean
 	@mkdir -p $(BUILD_FOLDER)
 	env go get -d ./
 	env go mod download
-	go get github.com/akavel/rsrc
+	go install github.com/akavel/rsrc
 
 build: pre lint vet
 ifndef MINGW32GCC
