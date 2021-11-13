@@ -12,7 +12,7 @@ pre: clean
 	env go mod download
 	go get github.com/akavel/rsrc
 
-build: pre lint
+build: pre lint vet
 ifndef MINGW32GCC
 	$(error "i686-w64-mingw32-gcc is not available. Please install package mingw32-cross-gcc")
 endif
@@ -33,3 +33,8 @@ lint: fmt
 fmt:
 	@echo "[gofmt] Formatting code"
 	gofmt -s -w .
+
+vet: fmt
+	@echo "[go vet] Checking code"
+	$(FLAGS_WINDOWS) go vet ./...
+

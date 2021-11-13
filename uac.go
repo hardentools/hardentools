@@ -20,6 +20,7 @@ import (
 	"golang.org/x/sys/windows/registry"
 )
 
+// UAC is a Multi Value Registry struct for UAC registry keys.
 var UAC = &MultiHardenInterfaces{
 	hardenInterfaces: []HardenInterface{
 		&RegistrySingleValueDWORD{
