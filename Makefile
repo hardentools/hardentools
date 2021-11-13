@@ -12,7 +12,7 @@ pre: clean
 	env go mod download
 	go get github.com/akavel/rsrc
 
-build: pre
+build: pre lint
 ifndef MINGW32GCC
 	$(error "i686-w64-mingw32-gcc is not available. Please install package mingw32-cross-gcc")
 endif
@@ -26,7 +26,7 @@ endif
 	@echo "[builder] Done!"
 
 
-lint:
+lint: fmt
 	@echo "[lint] Running linter on codebase"
 	@golint ./...
 
