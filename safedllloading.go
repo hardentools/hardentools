@@ -3,6 +3,8 @@
 // source: https://github.com/keybase/kbfs/blob/master/vendor/github.com/
 //         keybase/client/go/libkb/saferdllloading_windows.go
 
+//go:build !cli
+
 package main
 
 import (

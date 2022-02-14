@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -107,13 +107,6 @@ func executeCommand(cmd string, args ...string) (string, error) {
 	out, err := command.CombinedOutput()
 
 	return string(out), err
-}
-
-// initLogging initializes loggers.
-func initLogging(traceHandle io.Writer, infoHandle io.Writer) {
-	Trace = log.New(traceHandle, "TRACE: ", log.Lshortfile)
-	Info = log.New(infoHandle, "INFO: ", log.Lshortfile)
-	log.SetOutput(infoHandle)
 }
 
 // checkStatus checks status of hardentools registry key
@@ -248,6 +241,19 @@ func cmdHardenRestore(harden bool) {
 	showStatus()
 }
 
+// initLogging initializes loggers.
+func initLogging(traceHandle io.Writer, infoHandle io.Writer, guiVersion bool) {
+	if guiVersion {
+		Trace = log.New(traceHandle, "TRACE: ", log.Lshortfile)
+		Info = log.New(infoHandle, "INFO: ", log.Lshortfile)
+	} else {
+		Trace = log.New(traceHandle, "", 0)
+		Info = log.New(infoHandle, "", 0)
+	}
+	log.SetOutput(infoHandle)
+}
+
+// initLoggingWithCmdParameters initializes logging considering if cli version specifics
 func initLoggingWithCmdParameters(logLevelPtr *string, cmd bool) {
 	var logfile *os.File
 	var err error
@@ -264,15 +270,15 @@ func initLoggingWithCmdParameters(logLevelPtr *string, cmd bool) {
 	}
 	if strings.EqualFold(*logLevelPtr, "Info") {
 		// only standard log output
-		initLogging(ioutil.Discard, logfile)
+		initLogging(ioutil.Discard, logfile, !cmd)
 	} else if strings.EqualFold(*logLevelPtr, "Trace") {
 		// standard + trace logging
-		initLogging(logfile, logfile)
+		initLogging(logfile, logfile, !cmd)
 	} else if strings.EqualFold(*logLevelPtr, "Off") {
 		// no logging
-		initLogging(ioutil.Discard, ioutil.Discard)
+		initLogging(ioutil.Discard, ioutil.Discard, !cmd)
 	} else {
 		// default logging (only standard log output)
-		initLogging(ioutil.Discard, logfile)
+		initLogging(ioutil.Discard, logfile, !cmd)
 	}
 }
