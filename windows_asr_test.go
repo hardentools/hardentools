@@ -29,7 +29,7 @@ import (
 
 // IsHardened checks if ASR is already hardened
 func TestIsHardened(t *testing.T) {
-	initLogging(ioutil.Discard, ioutil.Discard)
+	initLogging(ioutil.Discard, ioutil.Discard, false)
 
 	if !checkWindowsVersion() {
 		t.Error("Invalid Windows Version")

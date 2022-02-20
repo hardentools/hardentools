@@ -22,7 +22,7 @@ endif
 	$(GOPATH)/bin/rsrc -arch 386 -manifest harden.manifest -ico harden.ico -o rsrc.syso
 	$(FLAGS_WINDOWS) go build --ldflags '-s -w -extldflags "-static" -H windowsgui' -o $(BUILD_FOLDER)/hardentools.exe
 	@echo "[builder] Building Windows commandline executable"
-	$(FLAGS_WINDOWS) go build --ldflags '-s -w -extldflags "-static"' -o $(BUILD_FOLDER)/hardentools-cli.exe
+	$(FLAGS_WINDOWS) go build -tags cli --ldflags '-s -w -extldflags "-static"' -o $(BUILD_FOLDER)/hardentools-cli.exe
 	@echo "[builder] Done!"
 
 
