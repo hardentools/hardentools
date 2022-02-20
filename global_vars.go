@@ -42,6 +42,7 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	FileAssociations,
 	WindowsASR,
 	LSA,
+	PUA,
 }...)
 
 var expertConfig map[string]bool
