@@ -17,17 +17,21 @@
 package main
 
 // :: Enable Defender signatures for Potentially Unwanted Applications (PUA)
-// powershell.exe Set-MpPreference -PUAProtection enable
-// test via : https://www.amtso.org/feature-settings-check-potentially-unwanted-applications/
-
-// alternatively:
 // HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender
 // PUAProtection DWORD 1 (= enable) (2 = Audit Mode)
 // HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine
 // MpEnablePus DWORD 1
-
-// powershell.exe Get-MpPreference
-// PUAProtection                                 : 1
+// 
+// alternatively one can use (not used in hardentools):
+// powershell.exe Set-MpPreference -PUAProtection enable
+//
+// test via : https://www.amtso.org/feature-settings-check-potentially-unwanted-applications/
+//
+// Further literature:
+// https://docs.microsoft.com/de-de/microsoft-365/security/defender-endpoint/detect-block-potentially-unwanted-apps-microsoft-defender-antivirus?view=o365-worldwide
+// https://www.deskmodder.de/blog/2018/08/20/pua-schutzfunktion-im-windows-defender-aktivieren-windows-10/
+// https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsDefender::Root_PUAProtection&Language=de-de
+// https://social.technet.microsoft.com/wiki/contents/articles/32909.windows-defender-how-to-activate-potentially-unwanted-applications-pua-protection.aspx
 
 import (
 	"golang.org/x/sys/windows/registry"
