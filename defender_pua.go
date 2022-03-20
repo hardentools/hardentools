@@ -21,7 +21,7 @@ package main
 // PUAProtection DWORD 1 (= enable) (2 = Audit Mode)
 // HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender\MpEngine
 // MpEnablePus DWORD 1
-// 
+//
 // alternatively one can use (not used in hardentools):
 // powershell.exe Set-MpPreference -PUAProtection enable
 //
