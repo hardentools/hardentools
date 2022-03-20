@@ -47,7 +47,7 @@ var PUA = &MultiHardenInterfaces{
 			HardenedValue:   1,
 			shortName:       "Defender PUA",
 			longName:        "Defender PUA Protection",
-			hardenByDefault: false,
+			hardenByDefault: true,
 		},
 		&RegistrySingleValueDWORD{
 			RootKey: registry.LOCAL_MACHINE,
@@ -56,10 +56,10 @@ var PUA = &MultiHardenInterfaces{
 			ValueName:       "MpEnablePus",
 			shortName:       "Defender PUA MpEnablePus",
 			longName:        "Defender PUA MpEnablePus",
-			hardenByDefault: false,
+			hardenByDefault: true,
 		},
 	},
-	shortName:       "Defender PUA Protection",
-	longName:        "Defender Potentially Unwanted Applications Protection",
-	hardenByDefault: false,
+	shortName:       "PUA Protection",
+	longName:        "Defender PUA Protection",
+	hardenByDefault: true,
 }
