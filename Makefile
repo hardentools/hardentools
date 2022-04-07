@@ -8,7 +8,6 @@ clean:
 
 pre: clean
 	@mkdir -p $(BUILD_FOLDER)
-	env go get -d ./
 	env go mod download
 	go install github.com/akavel/rsrc
 
