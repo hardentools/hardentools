@@ -8,7 +8,7 @@ clean:
 
 pre: clean
 	@mkdir -p $(BUILD_FOLDER)
-	go install github.com/akavel/rsrc@latest
+	go install github.com/akavel/rsrc
 	env go mod download
 
 build: pre lint vet
