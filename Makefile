@@ -19,9 +19,9 @@ endif
 	@echo "[builder] Building Windows executable"
 	@mkdir -p $(BUILD_FOLDER)/
 	$(GOPATH)/bin/rsrc -arch 386 -manifest harden.manifest -ico harden.ico -o rsrc.syso
-	$(FLAGS_WINDOWS) go build -buildvcs=false --ldflags '-s -w -extldflags "-static" -H windowsgui' -o $(BUILD_FOLDER)/hardentools.exe
+	$(FLAGS_WINDOWS) go build -trimpath -buildvcs=false --ldflags '-s -w -extldflags "-static" -H windowsgui' -o $(BUILD_FOLDER)/hardentools.exe
 	@echo "[builder] Building Windows commandline executable"
-	$(FLAGS_WINDOWS) go build -buildvcs=false -tags cli --ldflags '-s -w -extldflags "-static"' -o $(BUILD_FOLDER)/hardentools-cli.exe
+	$(FLAGS_WINDOWS) go build -trimpath -buildvcs=false -tags cli --ldflags '-s -w -extldflags "-static"' -o $(BUILD_FOLDER)/hardentools-cli.exe
 	@echo "[builder] Done!"
 
 
