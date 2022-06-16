@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:35e3f1ed-a2ca-4a7a-a1dc-3e28dd6faece" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:027489dd-ce0f-4972-a732-51ec9964f609" version="1">
   <metadata>
-    <timestamp>2022-06-16T10:14:24+02:00</timestamp>
+    <timestamp>2022-06-16T10:31:23+02:00</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
@@ -50,14 +50,14 @@
     </component>
   </metadata>
   <components>
-    <component bom-ref="pkg:golang/golang.org/x/sys@v0.0.0-20210313110737-8e9fff1a3a18?type=module" type="library">
+    <component bom-ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module" type="library">
       <name>golang.org/x/sys</name>
-      <version>v0.0.0-20210313110737-8e9fff1a3a18</version>
+      <version>v0.0.0-20210809222454-d867a43fc93e</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">8f1afbfdd128fab476f6e101a0b496275b511c214033015b19453d9d1ab3a5db</hash>
+        <hash alg="SHA-256">594a3228f9ba9c2a35067354bcf1a7146dd3e435157a6e36c8325967808dc4c0</hash>
       </hashes>
-      <purl>pkg:golang/golang.org/x/sys@v0.0.0-20210313110737-8e9fff1a3a18?type=module</purl>
+      <purl>pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module</purl>
       <evidence>
         <licenses>
           <license>
@@ -69,8 +69,8 @@
   </components>
   <dependencies>
     <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.0.1-0.20200706105200-0fa98bc62bfb?type=module">
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210313110737-8e9fff1a3a18?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210313110737-8e9fff1a3a18?type=module"></dependency>
+    <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
   </dependencies>
 </bom>
