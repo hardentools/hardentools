@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:9d19ce5b-d961-4a0d-bd32-52d043bc35f2" version="1">
+  <metadata>
+    <timestamp>2022-06-16T10:54:33+02:00</timestamp>
+    <tools>
+      <tool>
+        <vendor>CycloneDX</vendor>
+        <name>cyclonedx-gomod</name>
+        <version>v0.0.0-unset</version>
+        <hashes>
+          <hash alg="MD5">6d3f1632939c4d2b62fdedf47236cc9e</hash>
+          <hash alg="SHA-1">18c1ccac2836495ff25a1ac26d4be84f6a910716</hash>
+          <hash alg="SHA-256">c4cfe91200956dab160383e090c9994ab13f0ef0e6054f699561afefa66e7379</hash>
+          <hash alg="SHA-384">3bfbd7abcc3375ee45ed28d1af5be67a3b03bccd58d22bfe0983ad4512fe960e82463ae9bb66318166e969404189c2a2</hash>
+          <hash alg="SHA-512">81e76233439e3db07080ee61012bb1bbd5f7d844701dbbfc412e1bc5430c3159f892cfe8ff01a48920463385cc5aa292b0e72672effe36e59b64e6f54d0b9029</hash>
+        </hashes>
+        <externalReferences>
+          <reference type="vcs">
+            <url>https://github.com/CycloneDX/cyclonedx-gomod</url>
+          </reference>
+          <reference type="website">
+            <url>https://cyclonedx.org</url>
+          </reference>
+        </externalReferences>
+      </tool>
+    </tools>
+    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.0.1-0.20200706105200-0fa98bc62bfb?type=module" type="application">
+      <name>github.com/securitywithoutborders/hardentools</name>
+      <version>v2.0.1-0.20200706105200-0fa98bc62bfb</version>
+      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.0.1-0.20200706105200-0fa98bc62bfb?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/securitywithoutborders/hardentools</url>
+        </reference>
+      </externalReferences>
+      <properties>
+        <property name="cdx:gomod:build:env:CGO_ENABLED">1</property>
+        <property name="cdx:gomod:build:env:GOARCH">386</property>
+        <property name="cdx:gomod:build:env:GOOS">windows</property>
+        <property name="cdx:gomod:build:env:GOVERSION">go1.18.3</property>
+        <property name="cdx:gomod:build:tag">cli</property>
+      </properties>
+      <evidence>
+        <licenses>
+          <license>
+            <id>GPL-3.0-only</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+  </metadata>
+  <components>
+    <component bom-ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module" type="library">
+      <name>golang.org/x/sys</name>
+      <version>v0.0.0-20210809222454-d867a43fc93e</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">594a3228f9ba9c2a35067354bcf1a7146dd3e435157a6e36c8325967808dc4c0</hash>
+      </hashes>
+      <purl>pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module</purl>
+      <evidence>
+        <licenses>
+          <license>
+            <id>BSD-3-Clause</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+  </components>
+  <dependencies>
+    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.0.1-0.20200706105200-0fa98bc62bfb?type=module">
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
+    </dependency>
+    <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
+  </dependencies>
+</bom>
