@@ -11,6 +11,7 @@ clean:
 pre: clean
 	@mkdir -p $(BUILD_FOLDER)
 	go install github.com/akavel/rsrc
+	go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
 	go mod download
 
 build: pre lint vet
