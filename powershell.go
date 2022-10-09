@@ -56,11 +56,12 @@ var PowerShell = &MultiHardenInterfaces{
 }
 
 // Harden disables Powershell.
-//  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
-//  "DisallowRun"=dword:00000001
-//  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
-//  "1"="powershell_ise.exe"
-//  "2"="powershell.exe"
+//
+//	[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+//	"DisallowRun"=dword:00000001
+//	[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
+//	"1"="powershell_ise.exe"
+//	"2"="powershell.exe"
 func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
