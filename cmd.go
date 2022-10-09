@@ -50,10 +50,11 @@ var Cmd = &MultiHardenInterfaces{
 }
 
 // Harden disables cmd.exe.
-//  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
-//  "DisallowRun"=dword:00000001
-//  [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
-//  "3"="cmd.exe"
+//
+//	[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
+//	"DisallowRun"=dword:00000001
+//	[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun]
+//	"3"="cmd.exe"
 func (cmd CmdDisallowRunMembers) Harden(harden bool) error {
 	if harden == false {
 		// Restore.
