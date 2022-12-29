@@ -5,7 +5,7 @@
 [![Build Status](https://travis-ci.org/securitywithoutborders/hardentools.svg?branch=master)](https://travis-ci.org/securitywithoutborders/hardentools)
 [![Go Report Card][goreportcard-badge]][goreportcard]
 
-Hardentools is designed to disable a number of "features" exposed by operating systems (Microsoft Windows, for now) and some widely used applications (Microsoft Office and Adobe PDF Reader, for now). These features, commonly thought for enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply reduce the attack surface by disabling the low-hanging fruit. **Hardentools is intended for individuals at risk, who might want an extra level of security at the price of *some* usability**. It is not intended for corporate environments.
+Hardentools is designed to disable a number of "features" exposed by Microsoft Windows 10 and 11 and some widely used applications (Microsoft Office and Adobe PDF Reader, for now). These features, commonly thought for enterprise customers, are generally useless to regular users and rather pose as dangers as they are very commonly abused by attackers to execute malicious code on a victim's computer. The intent of this tool is to simply reduce the attack surface by disabling the low-hanging fruit. **Hardentools is intended for individuals at risk, who might want an extra level of security at the price of *some* usability**. It is not intended for corporate environments.
 
 > **WARNING**: This tool disables a number of features, including of Microsoft Office, Adobe Reader, and Windows, that might cause malfunctions to certain applications. You can find a complete list of changes [here](https://github.com/securitywithoutborders/hardentools/wiki). Use this at your own risk.
 
@@ -29,6 +29,8 @@ Once you double-click on the icon of 'hardentools.exe', depending on your Window
 ![AdminPrivilegesDialogScreenshot](./graphics/AdminPrivDialog.png)
 
 Then, you will see the main Hardentools window. It's very simple, you just click on the "Harden" button, and the tool will make the changes to your Windows configuration to disable a set of features that are risky. Once completed, you will be asked to restart your computer for all the changes to have full effect.
+
+You can get some technical information about the configuration changes that will be done by Hardentools by clicking the help button: ![MainWindowScreenshot](./graphics/helpButtonSymbol.png)
 
 ![MainWindowScreenshot](./graphics/MainWindow.png)
 

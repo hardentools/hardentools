@@ -51,8 +51,11 @@ var UAC = &MultiHardenInterfaces{
 			hardenByDefault: true,
 		},
 	},
-	shortName:       "UAC",
-	longName:        "User Account Control",
-	description:     "Enables UAC with secure desktop and admin password",
+	shortName: "UAC",
+	longName:  "User Account Control",
+	description: "Enables UAC with secure desktop and admin\n" +
+		"password. You have to enter your password for every\n" +
+		"administrative action (e.g. installing a programm\n" +
+		"or changing settings.)",
 	hardenByDefault: true,
 }

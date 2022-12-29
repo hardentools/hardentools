@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:cb0e8653-8b8c-4bfe-a761-c8dbbf9bd895" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:9f3da6f7-81c4-4b8b-9d54-9b2886b8921b" version="1">
   <metadata>
-    <timestamp>2022-10-09T10:54:11+02:00</timestamp>
+    <timestamp>2022-12-29T12:12:46+01:00</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
         <name>cyclonedx-gomod</name>
-        <version>v0.0.0-unset</version>
+        <version>v1.3.0</version>
         <hashes>
-          <hash alg="MD5">d46198ca50425f25438895641a0812cf</hash>
-          <hash alg="SHA-1">12bc3756e17d44f3e555f1844ecfdb4255c87ed8</hash>
-          <hash alg="SHA-256">b29dc8762ad2c01916fb751ee62c93d8d490cf227f702390c9249c13e697d025</hash>
-          <hash alg="SHA-384">a600fb874cd09293c8ee3cbb85126ffa860726353e41678da5f8f2d1bba4f09d5ea0324fcc8ebb398d1b7ffbc6938cae</hash>
-          <hash alg="SHA-512">27ad4edbd819846a0caf1eef3838bdb91a1b9fb4f82fe45391bdbcc1d7b3b9d45da666436a1eefa3efe6f68d37af3108f33fe8b0453a9cc49d309bdce25ed3ef</hash>
+          <hash alg="MD5">774046eebfbf3a9780d8c589a748a9c2</hash>
+          <hash alg="SHA-1">96dec365a0363ca4053702f86ade81ec8213aa1f</hash>
+          <hash alg="SHA-256">abbcc1fce0dd518a3f80a846c7c43e40ca9ed0ef4356b3d9552afa87da14f560</hash>
+          <hash alg="SHA-384">cac710aab3d7c014522fcf87596f91de57b567771248327d0f5a543d45ad39f42a5834a7fa96fd221dd6562c3cb7ea2b</hash>
+          <hash alg="SHA-512">5da4f6531f4b762e7d47e657e69726b175a0ad68a80994386291c6e8a037cefb63fcbb36a99fe8a22a001f55433b615a3c60e349f0c44de8686af5b6d3b6578d</hash>
         </hashes>
         <externalReferences>
           <reference type="vcs">
@@ -24,10 +24,10 @@
         </externalReferences>
       </tool>
     </tools>
-    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.2.1-0.20220616092657-ff73b6513ff5?type=module" type="application">
+    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module" type="application">
       <name>github.com/securitywithoutborders/hardentools</name>
-      <version>v2.2.1-0.20220616092657-ff73b6513ff5</version>
-      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.2.1-0.20220616092657-ff73b6513ff5?type=module</purl>
+      <version>v2.3</version>
+      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/securitywithoutborders/hardentools</url>
@@ -50,14 +50,14 @@
     </component>
   </metadata>
   <components>
-    <component bom-ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module" type="library">
+    <component bom-ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module" type="library">
       <name>golang.org/x/sys</name>
-      <version>v0.0.0-20210809222454-d867a43fc93e</version>
+      <version>v0.3.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">594a3228f9ba9c2a35067354bcf1a7146dd3e435157a6e36c8325967808dc4c0</hash>
+        <hash alg="SHA-256">c3c64e79cbfa35a35aff30bcf78e094d4defcf8bba2da81f93844f431bfdd8d4</hash>
       </hashes>
-      <purl>pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module</purl>
+      <purl>pkg:golang/golang.org/x/sys@v0.3.0?type=module</purl>
       <evidence>
         <licenses>
           <license>
@@ -68,9 +68,9 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.2.1-0.20220616092657-ff73b6513ff5?type=module">
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module">
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
+    <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
   </dependencies>
 </bom>

@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,9 +35,11 @@ type CmdDisallowRunMembers struct {
 // Cmd is the struct for hardentools interface that combines registry keys
 // and CmdDisallowRunMembers.
 var Cmd = &MultiHardenInterfaces{
-	shortName:       "Disable cmd.exe",
-	longName:        "Disable cmd.exe",
-	description:     "Disables cmd.exe",
+	shortName: "Disable cmd.exe",
+	longName:  "Disable cmd.exe",
+	description: "Disables cmd.exe to prevent some malware from\n" +
+		"executing scripts. You will not be\n" +
+		"able to open cmd.exe anymore.",
 	hardenByDefault: false,
 	hardenInterfaces: []HardenInterface{
 		CmdDisallowRunMembers{

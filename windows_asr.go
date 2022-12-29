@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2021 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -72,9 +72,25 @@ type WindowsASRStruct struct {
 
 // WindowsASR contains Names for Windows ASR implementation of hardenInterface.
 var WindowsASR = &WindowsASRStruct{
-	shortName:       "Windows ASR rules",
-	longName:        "Windows ASR rules",
-	description:     "Windows Attack Surface Reduction (ASR) rules",
+	shortName: "Windows ASR rules",
+	longName:  "Windows ASR rules",
+	description: `Windows Attack Surface Reduction (ASR) rules are activated 
+that prevents certain action commonly used by malware to be executed.
+Complete list is: 
+- Block executable content from email client and webmail.
+- Block Office applications from creating child processes.
+- Block Office applications from creating executable content.
+- Block Office applications from injecting code into other processes.
+- Block JavaScript or VBScript from launching downloaded executable content.
+- Block execution of potentially obfuscated scripts.
+- Block Win32 API calls from Office macro.
+- Block untrusted and unsigned processes that run from USB.
+- Use advanced protection against ransomware.
+- Block process creations originating from PSExec and WMI commands.
+- Block Office communication application from creating child processes.
+- Block Adobe Reader from creating child processes.
+- Block persistence through WMI event subscription.
+- Block credential stealing from the Windows local security authority subsystem.`,
 	hardenByDefault: true,
 }
 

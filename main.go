@@ -37,6 +37,7 @@ func init() {
 }
 
 var mainWindow fyne.Window
+var appl fyne.App
 
 // Main method for hardentools.
 func main() {
@@ -60,7 +61,7 @@ func main() {
 	initLoggingWithCmdParameters(logLevelPtr, false)
 
 	// Init main window.
-	appl := app.New()
+	appl = app.New()
 	appl.Settings().SetTheme(theme.LightTheme())
 	mainWindow = appl.NewWindow("Hardentools")
 	// emptyContainer needed to get minimum window size to be able to show

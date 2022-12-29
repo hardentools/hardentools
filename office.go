@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -53,14 +53,16 @@ type OfficeRegistryRegExSingleDWORD struct {
 // 1 - Prompt from Office when user clicks, object executes.
 // 2 - No prompt, Object does not execute.
 var OfficeOLE = &OfficeRegistryRegExSingleDWORD{
-	RootKey:         registry.CURRENT_USER,
-	PathRegEx:       "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
-	ValueName:       "PackagerPrompt",
-	HardenedValue:   2,
-	OfficeApps:      standardOfficeApps,
-	OfficeVersions:  standardOfficeVersions,
-	shortName:       "Office OLE",
-	longName:        "Office Packager Objects (OLE)",
+	RootKey:        registry.CURRENT_USER,
+	PathRegEx:      "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Security",
+	ValueName:      "PackagerPrompt",
+	HardenedValue:  2,
+	OfficeApps:     standardOfficeApps,
+	OfficeVersions: standardOfficeVersions,
+	shortName:      "Office OLE",
+	longName:       "Office Packager Objects (OLE)",
+	description: "Disables OLE object execution within MS Office.\n" +
+		"Files that use OLE objects might not work as expected.",
 	hardenByDefault: true,
 }
 
@@ -78,17 +80,20 @@ var OfficeMacros = &OfficeRegistryRegExSingleDWORD{
 	OfficeVersions:  standardOfficeVersions,
 	shortName:       "Office Macros",
 	longName:        "Office Macros",
+	description:     "Disables macros in MS Office. Files\nthat use macros might not work as expected.",
 	hardenByDefault: true,
 }
 
 // OfficeActiveX contains ActiveX registry keys.
 var OfficeActiveX = &RegistrySingleValueDWORD{
-	RootKey:         registry.CURRENT_USER,
-	Path:            "SOFTWARE\\Microsoft\\Office\\Common\\Security",
-	ValueName:       "DisableAllActiveX",
-	HardenedValue:   1,
-	shortName:       "Office ActiveX",
-	longName:        "Office ActiveX",
+	RootKey:       registry.CURRENT_USER,
+	Path:          "SOFTWARE\\Microsoft\\Office\\Common\\Security",
+	ValueName:     "DisableAllActiveX",
+	HardenedValue: 1,
+	shortName:     "Office ActiveX",
+	longName:      "Office ActiveX",
+	description: "Disables ActiveX macros in MS Office. Files\n" +
+		"that use ActiveX macros might not work as expected.",
 	hardenByDefault: true,
 }
 
@@ -286,8 +291,15 @@ var OfficeDDE = &MultiHardenInterfaces{
 			shortName:     "OfficeDDE_Word2007",
 		},
 	},
-	shortName:       "Office DDE",
-	longName:        "Office DDE Mitigations",
+	shortName: "Office DDE",
+	longName:  "Office DDE Mitigations",
+	description: "Disables Dynamic Data Exchange (DDE) in MS Office Word and\n" +
+		"Excel. Files that use DDE might not work as expected.\n" +
+		"Disabling this feature could prevent Excel spreadsheets\n" +
+		"from updating dynamically if disabled in the registry.\n" +
+		"Data that is fetched from other files or systems will\n" +
+		"not be update automatically. The user must start then\n" +
+		"update manually.",
 	hardenByDefault: true,
 }
 
