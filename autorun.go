@@ -53,5 +53,6 @@ var Autorun = &RegistryMultiValue{
 	},
 	shortName:       "Autorun",
 	longName:        "AutoRun and AutoPlay",
+	description:     "Disables automatic start of executables from\nremovable media (e.g. USB storage or DVDs)",
 	hardenByDefault: true,
 }

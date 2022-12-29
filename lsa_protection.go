@@ -24,11 +24,18 @@ import (
 // For details regarding LSA please refer to:
 // https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection
 var LSA = &RegistrySingleValueDWORD{
-	RootKey:         registry.LOCAL_MACHINE,
-	Path:            "SYSTEM\\CurrentControlSet\\Control\\Lsa",
-	ValueName:       "RunAsPPL",
-	HardenedValue:   1,
-	shortName:       "LSA",
-	longName:        "LSA Protection",
+	RootKey:       registry.LOCAL_MACHINE,
+	Path:          "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+	ValueName:     "RunAsPPL",
+	HardenedValue: 1,
+	shortName:     "LSA",
+	longName:      "LSA Protection",
+	description: "Additional protection for the Local Security\n" +
+		"Authority (LSA) process is activated to prevent\n" +
+		"code injection that could compromise credentials.\n" +
+		"The LSA, which includes the Local Security\n" +
+		"Authority Server Service (LSASS) process,\n" +
+		"validates users for local and remote\n" +
+		"sign-ins and enforces local security policies",
 	hardenByDefault: false,
 }

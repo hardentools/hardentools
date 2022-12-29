@@ -10,7 +10,7 @@ clean:
 
 pre: clean
 	@mkdir -p $(BUILD_FOLDER)
-	cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
+	cat tools.go | grep _ | awk -F'"' '{print $$2"@latest"}' | xargs -tI % go install %
 	go mod download
 
 build: pre lint vet

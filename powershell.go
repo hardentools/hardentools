@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,9 +41,11 @@ type PowerShellDisallowRunMembers struct {
 // PowerShell is the struct for hardentools interface that combines
 // registry keys and PowerShellDisallowRunMembers.
 var PowerShell = &MultiHardenInterfaces{
-	shortName:       "Powershell",
-	longName:        "Disable Powershell",
-	description:     "Disables Powershell and Powershell ISE",
+	shortName: "Powershell",
+	longName:  "Disable Powershell",
+	description: "Disables Powershell and Powershell ISE to protect\n" +
+		"you from some malwares to execute Powershell scripts.\n" +
+		"You won't be able to start Powershell anymore.",
 	hardenByDefault: true,
 	hardenInterfaces: []HardenInterface{
 		PowerShellDisallowRunMembers{

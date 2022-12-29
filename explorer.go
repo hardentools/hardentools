@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2020 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,8 +76,12 @@ var FileAssociations = ExplorerAssociations{
 		{".pif", "piffile"},
 		{".mht", "mhtmlfile"},
 	},
-	shortName:       "File Associations",
-	longName:        "File associations",
+	shortName: "File Associations",
+	longName:  "File associations",
+	description: "The following file extensions will be unassigned and you\n" +
+		"can't use this files anymore with explorer:\n" +
+		".hta, .js, .JSE, .WSH, .WSF, .scf, .scr,\n" +
+		".vbs, .VBE, .pif, .mht",
 	hardenByDefault: true,
 }
 

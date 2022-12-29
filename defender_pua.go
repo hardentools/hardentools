@@ -69,7 +69,12 @@ var PUA = &MultiHardenInterfaces{
 			hardenByDefault: true,
 		},
 	},
-	shortName:       "PUA Protection",
-	longName:        "Defender PUA Protection",
+	shortName: "PUA Protection",
+	longName:  "Defender PUA Protection",
+	description: `Enables Potentially Unwanted Applications (PUA) in Windows
+Defender and Microsoft Edge. This protects you from software
+that can cause your machine to run slowly, display unexpected
+ads, or at worst, install other software that might be
+unexpected or unwanted.`,
 	hardenByDefault: true,
 }

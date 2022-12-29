@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2021 Security Without Borders
+// Copyright (C) 2017-2022 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ package main
 import (
 	"errors"
 	"os"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -35,6 +36,8 @@ var stateLabels map[string]*widget.Label
 var inProgressLabel *widget.Label
 
 func mainGUI() {
+	mainWindow.CenterOnScreen()
+
 	// Check if hardentools has been started with elevated rights. If not
 	// ask user if she wants to elevate.
 	elevationStatus := isElevated()
@@ -53,11 +56,14 @@ func mainGUI() {
 
 // showSplash shows an splash content during initialization.
 func showSplash() {
+	progressBar := widget.NewProgressBarInfinite()
+	progressBar.Show()
 	splashContent := container.NewVBox(
 		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
-		widget.NewProgressBarInfinite())
-
+		progressBar)
 	mainWindow.SetContent(splashContent)
+	mainWindow.Resize(fyne.NewSize(550, 80))
+	mainWindow.CenterOnScreen()
 }
 
 // createMainGUIContent shows the main GUI screen that allows to harden or
@@ -81,7 +87,7 @@ func createMainGUIContent(elevationStatus bool) {
 
 	// Build up expert settings checkboxes and map.
 	expertConfig = make(map[string]bool)
-	expertCompWidgetArray := make([]*widget.Check, len(allHardenSubjects))
+	expertCompWidgetArray := make([]*fyne.Container, len(allHardenSubjects))
 
 	for i, hardenSubject := range allHardenSubjects {
 		var subjectIsHardened = hardenSubject.IsHardened()
@@ -105,14 +111,30 @@ func createMainGUIContent(elevationStatus bool) {
 			enableField = false
 		}
 
-		expertCompWidgetArray[i] = widget.NewCheck(hardenSubject.LongName(), checkBoxEventGenerator(hardenSubject.Name()))
-		expertCompWidgetArray[i].SetChecked(expertConfig[hardenSubject.Name()])
+		// setup check box widget
+		checkBoxEventFunc := func(hardenSubjName string) func(on bool) {
+			return func(on bool) {
+				expertConfig[hardenSubjName] = on
+			}
+		}(hardenSubject.Name())
+		check := widget.NewCheck(hardenSubject.LongName(), checkBoxEventFunc)
+		check.SetChecked(expertConfig[hardenSubject.Name()])
 		if !enableField {
-			expertCompWidgetArray[i].Disable()
+			check.Disable()
 		}
+
+		// setup help widget
+		onTapFunc := func(description string) func() {
+			return func() {
+				showInfoDialog(description)
+			}
+		}(hardenSubject.Description())
+		help := widget.NewButtonWithIcon("", theme.HelpIcon(), onTapFunc)
+
+		expertCompWidgetArray[i] = container.NewHBox(help, check)
 	}
 
-	// Set labels / text fields (harden or restore).
+	// Setup labels / text fields (harden or restore).
 	if status == false {
 		buttonText = "Harden!"
 		buttonFunc = hardenAll
@@ -140,7 +162,7 @@ func createMainGUIContent(elevationStatus bool) {
 	}
 	expertSettingsHBox := container.NewHBox(expertTab1, expertTab2)
 	expertTabWidget := widget.NewCard("", "Expert Settings",
-		container.NewVBox(widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{Italic: true}),
+		container.NewVBox(widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{}),
 			expertSettingsHBox))
 
 	// Build main GUI window's main tab.
@@ -151,8 +173,9 @@ func createMainGUIContent(elevationStatus bool) {
 	hardenButton := widget.NewButton(buttonText, func() { buttonFunc() })
 	hardenButton.SetIcon(theme.ConfirmIcon())
 
-	introText := widget.NewLabelWithStyle("Hardentools is designed to disable a number of \"features\" exposed by Microsoft\n"+
-		"Windows and some widely used applications (Microsoft Office and Adobe PDF Reader,\n"+
+	introText := widget.NewLabelWithStyle("Hardentools is designed to disable a number of"+
+		" \"features\" exposed by Microsoft\n"+
+		"Windows and some widely used applications (Microsoft Office and Adobe PDF\n Reader, "+
 		"for now). These features, commonly thought for enterprise customers,\n"+
 		"are generally useless to regular users and rather pose as dangers as\n"+
 		"they are very commonly abused by attackers to execute malicious code\n"+
@@ -160,7 +183,7 @@ func createMainGUIContent(elevationStatus bool) {
 		"the attack surface by disabling the low-hanging fruit. Hardentools is\n"+
 		"for individuals at risk, who might want an extra level of security intended\n"+
 		"at the price of some usability. It is not intended for corporate environments.\n",
-		fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
+		fyne.TextAlignCenter, fyne.TextStyle{})
 
 	mainTabContent := container.NewVBox(
 		widget.NewLabelWithStyle(labelText, fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
@@ -169,16 +192,41 @@ func createMainGUIContent(elevationStatus bool) {
 	)
 	mainTabWidget := widget.NewCard("", "", mainTabContent)
 
+	// setup help widget
+	onTapFuncForMainTab := func(allHardenSubjects []HardenInterface) func() {
+		helpText := "The following hardenings will be activated by default\n(you" +
+			" can deactivate hardenings or activate additional\nhardenings using the expert settings):\n\n"
+		for _, hardenSubject := range allHardenSubjects {
+			if hardenSubject.HardenByDefault() {
+				helpText += "• " + hardenSubject.LongName() + ":\n\t" +
+					strings.Replace(hardenSubject.Description(), "\n", "\n\t", -1) + "\n\n"
+			}
+		}
+		return func() {
+			w := appl.NewWindow("Hardentools - Help")
+			scroller := container.NewVScroll(widget.NewLabel(helpText))
+			scroller.SetMinSize(fyne.NewSize(500, 600))
+			w.SetContent(scroller)
+			w.Show()
+		}
+	}(allHardenSubjects)
+	help := widget.NewButtonWithIcon("", theme.HelpIcon(), onTapFuncForMainTab)
+
 	expertSettingsCheckBox = widget.NewCheck("Show Expert Settings", func(on bool) {
 		if on {
 			mainWindow.SetContent(container.NewVBox(expertTabWidget, mainTabWidget))
 		} else {
-			mainWindow.SetContent(container.NewVBox(widget.NewCard("", "Introduction", introText), mainTabWidget))
+			introTextWidget := widget.NewCard("", "Introduction", introText)
+			introAndHelpContainer := container.NewBorder(nil, nil, nil, help, introTextWidget)
+			mainWindow.SetContent(container.NewVBox(introAndHelpContainer, mainTabWidget))
 		}
 		mainWindow.CenterOnScreen()
 	})
 	mainTabContent.Add(expertSettingsCheckBox)
-	mainWindow.SetContent(container.NewVBox(widget.NewCard("", "Introduction", introText), mainTabWidget))
+
+	introTextWidget := widget.NewCard("", "Introduction", introText)
+	introAndHelpContainer := container.NewBorder(nil, nil, nil, help, introTextWidget)
+	mainWindow.SetContent(container.NewVBox(introAndHelpContainer, mainTabWidget))
 	mainWindow.CenterOnScreen()
 }
 
@@ -203,13 +251,14 @@ func showErrorDialog(errorMessage string) {
 // showInfoDialog shows an info message.
 func showInfoDialog(infoMessage string) {
 	if mainWindow != nil {
-		ch := make(chan bool)
+		//ch := make(chan bool)
 		infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
-		infoDialog.SetOnClosed(func() {
-			ch <- true
-		})
+		//infoDialog.SetOnClosed(func() {
+		//	ch <- true
+		//})
 		infoDialog.Show()
-		<-ch
+		//<-ch
+		//infoDialog.Hide()
 	} else {
 		// no main windows - seem to be in command line mode.
 		Info.Println("Information: " + infoMessage)
@@ -249,16 +298,6 @@ func askElevationDialog() {
 	cnf.Show()
 
 	<-ch
-}
-
-// checkBoxEventGenerator is a helper function that allows GUI checkbox elements
-// to call this function as a callback method. checkBoxEventGenerator then saves
-// the requested expert config setting for the checkbox in the corresponding map.
-func checkBoxEventGenerator(hardenSubjName string) func(on bool) {
-	var hardenSubjectName = hardenSubjName
-	return func(on bool) {
-		expertConfig[hardenSubjectName] = on
-	}
 }
 
 // restartWithElevatedPrivileges tries to restart hardentools.exe with admin

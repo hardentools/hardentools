@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:3a19cb3f-7111-4897-9807-06b1b894af1b" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:db004882-97b9-47cc-bb2a-944d6709e48e" version="1">
   <metadata>
-    <timestamp>2022-10-09T10:54:02+02:00</timestamp>
+    <timestamp>2022-12-29T12:12:41+01:00</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
         <name>cyclonedx-gomod</name>
-        <version>v0.0.0-unset</version>
+        <version>v1.3.0</version>
         <hashes>
-          <hash alg="MD5">d46198ca50425f25438895641a0812cf</hash>
-          <hash alg="SHA-1">12bc3756e17d44f3e555f1844ecfdb4255c87ed8</hash>
-          <hash alg="SHA-256">b29dc8762ad2c01916fb751ee62c93d8d490cf227f702390c9249c13e697d025</hash>
-          <hash alg="SHA-384">a600fb874cd09293c8ee3cbb85126ffa860726353e41678da5f8f2d1bba4f09d5ea0324fcc8ebb398d1b7ffbc6938cae</hash>
-          <hash alg="SHA-512">27ad4edbd819846a0caf1eef3838bdb91a1b9fb4f82fe45391bdbcc1d7b3b9d45da666436a1eefa3efe6f68d37af3108f33fe8b0453a9cc49d309bdce25ed3ef</hash>
+          <hash alg="MD5">774046eebfbf3a9780d8c589a748a9c2</hash>
+          <hash alg="SHA-1">96dec365a0363ca4053702f86ade81ec8213aa1f</hash>
+          <hash alg="SHA-256">abbcc1fce0dd518a3f80a846c7c43e40ca9ed0ef4356b3d9552afa87da14f560</hash>
+          <hash alg="SHA-384">cac710aab3d7c014522fcf87596f91de57b567771248327d0f5a543d45ad39f42a5834a7fa96fd221dd6562c3cb7ea2b</hash>
+          <hash alg="SHA-512">5da4f6531f4b762e7d47e657e69726b175a0ad68a80994386291c6e8a037cefb63fcbb36a99fe8a22a001f55433b615a3c60e349f0c44de8686af5b6d3b6578d</hash>
         </hashes>
         <externalReferences>
           <reference type="vcs">
@@ -24,10 +24,10 @@
         </externalReferences>
       </tool>
     </tools>
-    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.2.1-0.20220616092657-ff73b6513ff5?type=module" type="application">
+    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module" type="application">
       <name>github.com/securitywithoutborders/hardentools</name>
-      <version>v2.2.1-0.20220616092657-ff73b6513ff5</version>
-      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.2.1-0.20220616092657-ff73b6513ff5?type=module</purl>
+      <version>v2.3</version>
+      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/securitywithoutborders/hardentools</url>
@@ -65,14 +65,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/fredbi/uri@v0.0.0-20181227131451-3dcfdacbaaf3?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/fredbi/uri@v1.0.0?type=module" type="library">
       <name>github.com/fredbi/uri</name>
-      <version>v0.0.0-20181227131451-3dcfdacbaaf3</version>
+      <version>v1.0.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">143aa10e6ee972c2e185697542d0fcbe5cc8e269b9f65951bcdceb160ebf2c00</hash>
+        <hash alg="SHA-256">b3843050067c7f3fa66d3b2e90d0fee15e5ffa627fc23693a24c2cb465007a68</hash>
       </hashes>
-      <purl>pkg:golang/github.com/fredbi/uri@v0.0.0-20181227131451-3dcfdacbaaf3?type=module</purl>
+      <purl>pkg:golang/github.com/fredbi/uri@v1.0.0?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/fredbi/uri</url>
@@ -86,14 +86,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/fsnotify/fsnotify@v1.4.9?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module" type="library">
       <name>github.com/fsnotify/fsnotify</name>
-      <version>v1.4.9</version>
+      <version>v1.6.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">86c9acd50caed23827c0d5c8c5afbf57f3c3b14e827cb7fa08d3bc1fb216a12e</hash>
+        <hash alg="SHA-256">9fee56aae1b47dc5a85a9eb13d67c775bb2430241a1671ba3df06b8752b2e076</hash>
       </hashes>
-      <purl>pkg:golang/github.com/fsnotify/fsnotify@v1.4.9?type=module</purl>
+      <purl>pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/fsnotify/fsnotify</url>
@@ -107,14 +107,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20190320180904-bf2b1f2f34d7?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20211210172815-726fda9656d6?type=module" type="library">
       <name>github.com/go-gl/gl</name>
-      <version>v0.0.0-20190320180904-bf2b1f2f34d7</version>
+      <version>v0.0.0-20211210172815-726fda9656d6</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">48260c70227cf4b8d11b011ad2d465b8d4623236476a5419ad5aef4db3e1faac</hash>
+        <hash alg="SHA-256">cc3c39bfbaa6e321fb37c0bcb9677ef088bdad139d816c50b86a09f560d7c5f9</hash>
       </hashes>
-      <purl>pkg:golang/github.com/go-gl/gl@v0.0.0-20190320180904-bf2b1f2f34d7?type=module</purl>
+      <purl>pkg:golang/github.com/go-gl/gl@v0.0.0-20211210172815-726fda9656d6?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/go-gl/gl</url>
@@ -128,14 +128,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20200625191551-73d3c3675aa3?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20221017161538-93cebf72946b?type=module" type="library">
       <name>github.com/go-gl/glfw/v3.3/glfw</name>
-      <version>v0.0.0-20200625191551-73d3c3675aa3</version>
+      <version>v0.0.0-20221017161538-93cebf72946b</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">ab9db53df4a9e7fcfafec0fd15964e5a3e1dd4c2e67d05bc3e446723d33a3c21</hash>
+        <hash alg="SHA-256">1a069b29a9b239882e1ea1e34a40c009c8283c8cf7c340e2b3fcc9d70c871c75</hash>
       </hashes>
-      <purl>pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20200625191551-73d3c3675aa3?type=module</purl>
+      <purl>pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20221017161538-93cebf72946b?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/go-gl/glfw/v3.3/glfw</url>
@@ -149,14 +149,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/goki/freetype@v0.0.0-20181231101311-fa8a33aabaff?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module" type="library">
       <name>github.com/goki/freetype</name>
-      <version>v0.0.0-20181231101311-fa8a33aabaff</version>
+      <version>v0.0.0-20220119013949-7a161fd3728c</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">5bbd6f4c22a8c6d7578279b51020c591f427a5da803b4d33cc65cb039c9a117f</hash>
+        <hash alg="SHA-256">2460a6ffeb49f600ba4c7531a284e5752f82503b1b6b4aaf92f5370c7925a96f</hash>
       </hashes>
-      <purl>pkg:golang/github.com/goki/freetype@v0.0.0-20181231101311-fa8a33aabaff?type=module</purl>
+      <purl>pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/goki/freetype</url>
@@ -170,14 +170,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20200311192757-870daf9aa564?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20221011165216-be6e8873101c?type=module" type="library">
       <name>github.com/srwiley/oksvg</name>
-      <version>v0.0.0-20200311192757-870daf9aa564</version>
+      <version>v0.0.0-20221011165216-be6e8873101c</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">1ee9d989a10a34655d853450395a4c9a3e4c4271a7bfe7bcb9936edf114b8323</hash>
+        <hash alg="SHA-256">926f06a6842eb74e5e6371a261611e75b4d3d2a9d2c6b0a3b156dbef2298d4a1</hash>
       </hashes>
-      <purl>pkg:golang/github.com/srwiley/oksvg@v0.0.0-20200311192757-870daf9aa564?type=module</purl>
+      <purl>pkg:golang/github.com/srwiley/oksvg@v0.0.0-20221011165216-be6e8873101c?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/srwiley/oksvg</url>
@@ -191,14 +191,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20200120212402-85cb7272f5e9?type=module" type="library">
+    <component bom-ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module" type="library">
       <name>github.com/srwiley/rasterx</name>
-      <version>v0.0.0-20200120212402-85cb7272f5e9</version>
+      <version>v0.0.0-20220730225603-2ab79fcdd4ef</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">9b9f6620e04ee247dc34213324dcbbd5491e1785c8c7611598bf4a2f00d07663</hash>
+        <hash alg="SHA-256">0a1e90f80654c4304256a76423c152a45c990ed09505cd9599e8dd36b9b9ad14</hash>
       </hashes>
-      <purl>pkg:golang/github.com/srwiley/rasterx@v0.0.0-20200120212402-85cb7272f5e9?type=module</purl>
+      <purl>pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/srwiley/rasterx</url>
@@ -212,14 +212,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/golang.org/x/image@v0.0.0-20200430140353-33d19683fad8?type=module" type="library">
+    <component bom-ref="pkg:golang/golang.org/x/image@v0.2.0?type=module" type="library">
       <name>golang.org/x/image</name>
-      <version>v0.0.0-20200430140353-33d19683fad8</version>
+      <version>v0.2.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">e965ba577c753ff8e890906945061426730744fea2b12b50c02a33c6753b5d0c</hash>
+        <hash alg="SHA-256">fc3710d30dd51ca082e69d3f3f6074269019f59fbe57628ea367f253cf425c14</hash>
       </hashes>
-      <purl>pkg:golang/golang.org/x/image@v0.0.0-20200430140353-33d19683fad8?type=module</purl>
+      <purl>pkg:golang/golang.org/x/image@v0.2.0?type=module</purl>
       <evidence>
         <licenses>
           <license>
@@ -228,14 +228,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/golang.org/x/net@v0.0.0-20211112202133-69e39bad7dc2?type=module" type="library">
+    <component bom-ref="pkg:golang/golang.org/x/net@v0.4.0?type=module" type="library">
       <name>golang.org/x/net</name>
-      <version>v0.0.0-20211112202133-69e39bad7dc2</version>
+      <version>v0.4.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">08827be9bb48711dde148e44812a3a935a8ac3d2897b126e44b23d1bb1e9e701</hash>
+        <hash alg="SHA-256">43940f70c96f7f115300f574fb4ed7cff3292bd3535eed950d4bb2d0578c7da5</hash>
       </hashes>
-      <purl>pkg:golang/golang.org/x/net@v0.0.0-20211112202133-69e39bad7dc2?type=module</purl>
+      <purl>pkg:golang/golang.org/x/net@v0.4.0?type=module</purl>
       <evidence>
         <licenses>
           <license>
@@ -244,14 +244,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module" type="library">
+    <component bom-ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module" type="library">
       <name>golang.org/x/sys</name>
-      <version>v0.0.0-20210809222454-d867a43fc93e</version>
+      <version>v0.3.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">594a3228f9ba9c2a35067354bcf1a7146dd3e435157a6e36c8325967808dc4c0</hash>
+        <hash alg="SHA-256">c3c64e79cbfa35a35aff30bcf78e094d4defcf8bba2da81f93844f431bfdd8d4</hash>
       </hashes>
-      <purl>pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module</purl>
+      <purl>pkg:golang/golang.org/x/sys@v0.3.0?type=module</purl>
       <evidence>
         <licenses>
           <license>
@@ -260,14 +260,14 @@
         </licenses>
       </evidence>
     </component>
-    <component bom-ref="pkg:golang/golang.org/x/text@v0.3.7?type=module" type="library">
+    <component bom-ref="pkg:golang/golang.org/x/text@v0.5.0?type=module" type="library">
       <name>golang.org/x/text</name>
-      <version>v0.3.7</version>
+      <version>v0.5.0</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">a25a70bcfd8a69c5b5656bec47bb90868c9362f280ba97d0ad118114cdf9d869</hash>
+        <hash alg="SHA-256">38b9afa7428ff85546f7d0adfea1622ff161938ce9e1042767b6f653ee698943</hash>
       </hashes>
-      <purl>pkg:golang/golang.org/x/text@v0.3.7?type=module</purl>
+      <purl>pkg:golang/golang.org/x/text@v0.5.0?type=module</purl>
       <evidence>
         <licenses>
           <license>
@@ -278,40 +278,49 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.2.1-0.20220616092657-ff73b6513ff5?type=module">
+    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module">
       <dependency ref="pkg:golang/fyne.io/fyne/v2@v2.0.1?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
     </dependency>
     <dependency ref="pkg:golang/fyne.io/fyne/v2@v2.0.1?type=module">
-      <dependency ref="pkg:golang/github.com/fredbi/uri@v0.0.0-20181227131451-3dcfdacbaaf3?type=module"></dependency>
-      <dependency ref="pkg:golang/github.com/fsnotify/fsnotify@v1.4.9?type=module"></dependency>
-      <dependency ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20190320180904-bf2b1f2f34d7?type=module"></dependency>
-      <dependency ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20200625191551-73d3c3675aa3?type=module"></dependency>
-      <dependency ref="pkg:golang/github.com/goki/freetype@v0.0.0-20181231101311-fa8a33aabaff?type=module"></dependency>
-      <dependency ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20200311192757-870daf9aa564?type=module"></dependency>
-      <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20200120212402-85cb7272f5e9?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/image@v0.0.0-20200430140353-33d19683fad8?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/net@v0.0.0-20211112202133-69e39bad7dc2?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/text@v0.3.7?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/fredbi/uri@v1.0.0?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20211210172815-726fda9656d6?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20221017161538-93cebf72946b?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20221011165216-be6e8873101c?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/net@v0.4.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/github.com/fredbi/uri@v0.0.0-20181227131451-3dcfdacbaaf3?type=module"></dependency>
-    <dependency ref="pkg:golang/github.com/fsnotify/fsnotify@v1.4.9?type=module">
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/fredbi/uri@v1.0.0?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module">
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20190320180904-bf2b1f2f34d7?type=module"></dependency>
-    <dependency ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20200625191551-73d3c3675aa3?type=module"></dependency>
-    <dependency ref="pkg:golang/github.com/goki/freetype@v0.0.0-20181231101311-fa8a33aabaff?type=module"></dependency>
-    <dependency ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20200311192757-870daf9aa564?type=module"></dependency>
-    <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20200120212402-85cb7272f5e9?type=module"></dependency>
-    <dependency ref="pkg:golang/golang.org/x/image@v0.0.0-20200430140353-33d19683fad8?type=module">
-      <dependency ref="pkg:golang/golang.org/x/text@v0.3.7?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20211210172815-726fda9656d6?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20221017161538-93cebf72946b?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20221011165216-be6e8873101c?type=module">
+      <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/net@v0.4.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/golang.org/x/net@v0.0.0-20211112202133-69e39bad7dc2?type=module">
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/text@v0.3.7?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module">
+      <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/golang.org/x/sys@v0.0.0-20210809222454-d867a43fc93e?type=module"></dependency>
-    <dependency ref="pkg:golang/golang.org/x/text@v0.3.7?type=module"></dependency>
+    <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module">
+      <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module"></dependency>
+    </dependency>
+    <dependency ref="pkg:golang/golang.org/x/net@v0.4.0?type=module">
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module"></dependency>
+    </dependency>
+    <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
+    <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module">
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
+    </dependency>
   </dependencies>
 </bom>
