@@ -193,12 +193,16 @@ func createMainGUIContent(elevationStatus bool) {
 	mainTabWidget := widget.NewCard("", "", mainTabContent)
 
 	// setup help widget
-	onTapFuncForMainTab := func(allHardenSubjects []HardenInterface) func() {
-		helpText := "The following hardenings will be activated by default\n(you" +
-			" can deactivate hardenings or activate additional\nhardenings using the expert settings):\n\n"
-		for _, hardenSubject := range allHardenSubjects {
+	onTapFuncForMainTab := func(hardenSubjects []HardenInterface) func() {
+		helpText := "The following hardenings are available in Hardentools.\nYou" +
+			" can deactivate hardenings or activate additional\nhardenings using the expert settings.\n" +
+			"Note: Most hardenings are only available with admin privileges.:\n\n"
+		for _, hardenSubject := range hardenSubjects {
 			if hardenSubject.HardenByDefault() {
 				helpText += "• " + hardenSubject.LongName() + ":\n\t" +
+					strings.Replace(hardenSubject.Description(), "\n", "\n\t", -1) + "\n\n"
+			} else {
+				helpText += "• " + hardenSubject.LongName() + " (not active by default):\n\t" +
 					strings.Replace(hardenSubject.Description(), "\n", "\n\t", -1) + "\n\n"
 			}
 		}
@@ -209,7 +213,7 @@ func createMainGUIContent(elevationStatus bool) {
 			w.SetContent(scroller)
 			w.Show()
 		}
-	}(allHardenSubjects)
+	}(hardenSubjectsForPrivilegedUsers)
 	help := widget.NewButtonWithIcon("", theme.HelpIcon(), onTapFuncForMainTab)
 
 	expertSettingsCheckBox = widget.NewCheck("Show Expert Settings", func(on bool) {
