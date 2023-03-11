@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:db004882-97b9-47cc-bb2a-944d6709e48e" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:23dddce8-d701-4f0e-9e29-d1601f9aa1a4" version="1">
   <metadata>
-    <timestamp>2022-12-29T12:12:41+01:00</timestamp>
+    <timestamp>2023-02-18T14:23:18+01:00</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
         <name>cyclonedx-gomod</name>
         <version>v1.3.0</version>
         <hashes>
-          <hash alg="MD5">774046eebfbf3a9780d8c589a748a9c2</hash>
-          <hash alg="SHA-1">96dec365a0363ca4053702f86ade81ec8213aa1f</hash>
-          <hash alg="SHA-256">abbcc1fce0dd518a3f80a846c7c43e40ca9ed0ef4356b3d9552afa87da14f560</hash>
-          <hash alg="SHA-384">cac710aab3d7c014522fcf87596f91de57b567771248327d0f5a543d45ad39f42a5834a7fa96fd221dd6562c3cb7ea2b</hash>
-          <hash alg="SHA-512">5da4f6531f4b762e7d47e657e69726b175a0ad68a80994386291c6e8a037cefb63fcbb36a99fe8a22a001f55433b615a3c60e349f0c44de8686af5b6d3b6578d</hash>
+          <hash alg="MD5">dd2175b52eaaf8f9c104647a8955a075</hash>
+          <hash alg="SHA-1">9f9e5d2a7792bab6be5841d1e45891443ba01cef</hash>
+          <hash alg="SHA-256">a2fbd41851dd34b83201f6d9e9b0af2e5a578642d729f37540f471a028cc7a80</hash>
+          <hash alg="SHA-384">da4e31012db27384d99e07e209f2f4da8e189098745b8b9f0ffc8d83b3c6c778193e9a734f4c6b07d3812ba5b745b0cc</hash>
+          <hash alg="SHA-512">684016de3380cc02afa2e8bcdd8ab3cc602f6ad27e16c89070e45ec0aca2138d7f4394727b3c36ed38d4a430d7e5b8bc29f7d7bf92572b5c92eb331cdefb38f9</hash>
         </hashes>
         <externalReferences>
           <reference type="vcs">
@@ -24,10 +24,10 @@
         </externalReferences>
       </tool>
     </tools>
-    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module" type="application">
+    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.4?type=module" type="application">
       <name>github.com/securitywithoutborders/hardentools</name>
-      <version>v2.3</version>
-      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module</purl>
+      <version>v2.4</version>
+      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.4?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/securitywithoutborders/hardentools</url>
@@ -37,7 +37,7 @@
         <property name="cdx:gomod:build:env:CGO_ENABLED">1</property>
         <property name="cdx:gomod:build:env:GOARCH">386</property>
         <property name="cdx:gomod:build:env:GOOS">windows</property>
-        <property name="cdx:gomod:build:env:GOVERSION">go1.19.2</property>
+        <property name="cdx:gomod:build:env:GOVERSION">go1.20</property>
       </properties>
       <evidence>
         <licenses>
@@ -49,18 +49,55 @@
     </component>
   </metadata>
   <components>
-    <component bom-ref="pkg:golang/fyne.io/fyne/v2@v2.0.1?type=module" type="library">
+    <component bom-ref="pkg:golang/fyne.io/fyne/v2@v2.3.1?type=module" type="library">
       <name>fyne.io/fyne/v2</name>
-      <version>v2.0.1</version>
+      <version>v2.3.1</version>
       <scope>required</scope>
       <hashes>
-        <hash alg="SHA-256">1a55b600702ddc22b997f729af48cf7ecc56160368ef9d7268b93fbf7faff3cf</hash>
+        <hash alg="SHA-256">dbf7477915c4a67fc3e0cc931dd2b8de0dffa7178b3a2dc571d34923e8a98653</hash>
       </hashes>
-      <purl>pkg:golang/fyne.io/fyne/v2@v2.0.1?type=module</purl>
+      <purl>pkg:golang/fyne.io/fyne/v2@v2.3.1?type=module</purl>
       <evidence>
         <licenses>
           <license>
             <id>BSD-3-Clause</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+    <component bom-ref="pkg:golang/fyne.io/systray@v1.10.1-0.20230207085535-4a244dbb9d03?type=module" type="library">
+      <name>fyne.io/systray</name>
+      <version>v1.10.1-0.20230207085535-4a244dbb9d03</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">cdbf38cba5fa9488b801ea3c7a1bba42dbb67e2a4167a5b3a78d4a8bf178a9d8</hash>
+      </hashes>
+      <purl>pkg:golang/fyne.io/systray@v1.10.1-0.20230207085535-4a244dbb9d03?type=module</purl>
+      <evidence>
+        <licenses>
+          <license>
+            <id>Apache-2.0</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+    <component bom-ref="pkg:golang/github.com/benoitkugler/textlayout@v0.3.0?type=module" type="library">
+      <name>github.com/benoitkugler/textlayout</name>
+      <version>v0.3.0</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">d9e8565c49206fa454a244e35e1d4bcdd1b01b87513fa5f776a8586036215159</hash>
+      </hashes>
+      <purl>pkg:golang/github.com/benoitkugler/textlayout@v0.3.0?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/benoitkugler/textlayout</url>
+        </reference>
+      </externalReferences>
+      <evidence>
+        <licenses>
+          <license>
+            <id>MIT</id>
           </license>
         </licenses>
       </evidence>
@@ -97,6 +134,27 @@
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/fsnotify/fsnotify</url>
+        </reference>
+      </externalReferences>
+      <evidence>
+        <licenses>
+          <license>
+            <id>BSD-3-Clause</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+    <component bom-ref="pkg:golang/github.com/fyne-io/image@v0.0.0-20220602074514-4956b0afb3d2?type=module" type="library">
+      <name>github.com/fyne-io/image</name>
+      <version>v0.0.0-20220602074514-4956b0afb3d2</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">8672eafb9e5bed987bff6211cd60a9893700be3bff3fc11117e37bfb15db6619</hash>
+      </hashes>
+      <purl>pkg:golang/github.com/fyne-io/image@v0.0.0-20220602074514-4956b0afb3d2?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/fyne-io/image</url>
         </reference>
       </externalReferences>
       <evidence>
@@ -149,6 +207,27 @@
         </licenses>
       </evidence>
     </component>
+    <component bom-ref="pkg:golang/github.com/go-text/typesetting@v0.0.0-20221212183139-1eb938670a1f?type=module" type="library">
+      <name>github.com/go-text/typesetting</name>
+      <version>v0.0.0-20221212183139-1eb938670a1f</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">71613ffdd76f67b6d90181ad362dfe48f1af5054de4d150bfd343d2d49d038fd</hash>
+      </hashes>
+      <purl>pkg:golang/github.com/go-text/typesetting@v0.0.0-20221212183139-1eb938670a1f?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/go-text/typesetting</url>
+        </reference>
+      </externalReferences>
+      <evidence>
+        <licenses>
+          <license>
+            <id>Unlicense</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
     <component bom-ref="pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module" type="library">
       <name>github.com/goki/freetype</name>
       <version>v0.0.0-20220119013949-7a161fd3728c</version>
@@ -166,6 +245,27 @@
         <licenses>
           <license>
             <id>GPL-2.0-or-later</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+    <component bom-ref="pkg:golang/github.com/jsummers/gobmp@v0.0.0-20151104160322-e2ba15ffa76e?type=module" type="library">
+      <name>github.com/jsummers/gobmp</name>
+      <version>v0.0.0-20151104160322-e2ba15ffa76e</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">2ef2f85ec23bd10c4e18779deb2850b40537e0ac7742adb0c01cc614a63ccca9</hash>
+      </hashes>
+      <purl>pkg:golang/github.com/jsummers/gobmp@v0.0.0-20151104160322-e2ba15ffa76e?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/jsummers/gobmp</url>
+        </reference>
+      </externalReferences>
+      <evidence>
+        <licenses>
+          <license>
+            <id>Unlicense</id>
           </license>
         </licenses>
       </evidence>
@@ -208,6 +308,48 @@
         <licenses>
           <license>
             <id>BSD-3-Clause</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+    <component bom-ref="pkg:golang/github.com/tevino/abool@v1.2.0?type=module" type="library">
+      <name>github.com/tevino/abool</name>
+      <version>v1.2.0</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">85e0240a52fc1fac3e98ae6677d773b2ea2129e5c752963b570d1908a5be86e0</hash>
+      </hashes>
+      <purl>pkg:golang/github.com/tevino/abool@v1.2.0?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/tevino/abool</url>
+        </reference>
+      </externalReferences>
+      <evidence>
+        <licenses>
+          <license>
+            <id>MIT</id>
+          </license>
+        </licenses>
+      </evidence>
+    </component>
+    <component bom-ref="pkg:golang/github.com/yuin/goldmark@v1.4.13?type=module" type="library">
+      <name>github.com/yuin/goldmark</name>
+      <version>v1.4.13</version>
+      <scope>required</scope>
+      <hashes>
+        <hash alg="SHA-256">7d5705296bebb2579c39bfed83e09cd39764798c79e34a3416e16dde75150e81</hash>
+      </hashes>
+      <purl>pkg:golang/github.com/yuin/goldmark@v1.4.13?type=module</purl>
+      <externalReferences>
+        <reference type="vcs">
+          <url>https://github.com/yuin/goldmark</url>
+        </reference>
+      </externalReferences>
+      <evidence>
+        <licenses>
+          <license>
+            <id>MIT</id>
           </license>
         </licenses>
       </evidence>
@@ -278,30 +420,49 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module">
-      <dependency ref="pkg:golang/fyne.io/fyne/v2@v2.0.1?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.4?type=module">
+      <dependency ref="pkg:golang/fyne.io/fyne/v2@v2.3.1?type=module"></dependency>
       <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
     </dependency>
-    <dependency ref="pkg:golang/fyne.io/fyne/v2@v2.0.1?type=module">
+    <dependency ref="pkg:golang/fyne.io/fyne/v2@v2.3.1?type=module">
+      <dependency ref="pkg:golang/fyne.io/systray@v1.10.1-0.20230207085535-4a244dbb9d03?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/fredbi/uri@v1.0.0?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/fyne-io/image@v0.0.0-20220602074514-4956b0afb3d2?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20211210172815-726fda9656d6?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20221017161538-93cebf72946b?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/go-text/typesetting@v0.0.0-20221212183139-1eb938670a1f?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20221011165216-be6e8873101c?type=module"></dependency>
       <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module"></dependency>
+      <dependency ref="pkg:golang/github.com/yuin/goldmark@v1.4.13?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
+    </dependency>
+    <dependency ref="pkg:golang/fyne.io/systray@v1.10.1-0.20230207085535-4a244dbb9d03?type=module">
+      <dependency ref="pkg:golang/github.com/tevino/abool@v1.2.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
+    </dependency>
+    <dependency ref="pkg:golang/github.com/benoitkugler/textlayout@v0.3.0?type=module">
       <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
       <dependency ref="pkg:golang/golang.org/x/net@v0.4.0?type=module"></dependency>
-      <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
       <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module"></dependency>
     </dependency>
     <dependency ref="pkg:golang/github.com/fredbi/uri@v1.0.0?type=module"></dependency>
     <dependency ref="pkg:golang/github.com/fsnotify/fsnotify@v1.6.0?type=module">
       <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
     </dependency>
+    <dependency ref="pkg:golang/github.com/fyne-io/image@v0.0.0-20220602074514-4956b0afb3d2?type=module">
+      <dependency ref="pkg:golang/github.com/jsummers/gobmp@v0.0.0-20151104160322-e2ba15ffa76e?type=module"></dependency>
+    </dependency>
     <dependency ref="pkg:golang/github.com/go-gl/gl@v0.0.0-20211210172815-726fda9656d6?type=module"></dependency>
     <dependency ref="pkg:golang/github.com/go-gl/glfw/v3.3/glfw@v0.0.0-20221017161538-93cebf72946b?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/go-text/typesetting@v0.0.0-20221212183139-1eb938670a1f?type=module">
+      <dependency ref="pkg:golang/github.com/benoitkugler/textlayout@v0.3.0?type=module"></dependency>
+      <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
+    </dependency>
     <dependency ref="pkg:golang/github.com/goki/freetype@v0.0.0-20220119013949-7a161fd3728c?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/jsummers/gobmp@v0.0.0-20151104160322-e2ba15ffa76e?type=module"></dependency>
     <dependency ref="pkg:golang/github.com/srwiley/oksvg@v0.0.0-20221011165216-be6e8873101c?type=module">
       <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module"></dependency>
       <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
@@ -311,6 +472,8 @@
     <dependency ref="pkg:golang/github.com/srwiley/rasterx@v0.0.0-20220730225603-2ab79fcdd4ef?type=module">
       <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module"></dependency>
     </dependency>
+    <dependency ref="pkg:golang/github.com/tevino/abool@v1.2.0?type=module"></dependency>
+    <dependency ref="pkg:golang/github.com/yuin/goldmark@v1.4.13?type=module"></dependency>
     <dependency ref="pkg:golang/golang.org/x/image@v0.2.0?type=module">
       <dependency ref="pkg:golang/golang.org/x/text@v0.5.0?type=module"></dependency>
     </dependency>

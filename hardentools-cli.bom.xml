@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:9f3da6f7-81c4-4b8b-9d54-9b2886b8921b" version="1">
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:e79ab98b-1dbc-404a-b68e-36b0203db3e3" version="1">
   <metadata>
-    <timestamp>2022-12-29T12:12:46+01:00</timestamp>
+    <timestamp>2023-02-18T14:23:23+01:00</timestamp>
     <tools>
       <tool>
         <vendor>CycloneDX</vendor>
         <name>cyclonedx-gomod</name>
         <version>v1.3.0</version>
         <hashes>
-          <hash alg="MD5">774046eebfbf3a9780d8c589a748a9c2</hash>
-          <hash alg="SHA-1">96dec365a0363ca4053702f86ade81ec8213aa1f</hash>
-          <hash alg="SHA-256">abbcc1fce0dd518a3f80a846c7c43e40ca9ed0ef4356b3d9552afa87da14f560</hash>
-          <hash alg="SHA-384">cac710aab3d7c014522fcf87596f91de57b567771248327d0f5a543d45ad39f42a5834a7fa96fd221dd6562c3cb7ea2b</hash>
-          <hash alg="SHA-512">5da4f6531f4b762e7d47e657e69726b175a0ad68a80994386291c6e8a037cefb63fcbb36a99fe8a22a001f55433b615a3c60e349f0c44de8686af5b6d3b6578d</hash>
+          <hash alg="MD5">dd2175b52eaaf8f9c104647a8955a075</hash>
+          <hash alg="SHA-1">9f9e5d2a7792bab6be5841d1e45891443ba01cef</hash>
+          <hash alg="SHA-256">a2fbd41851dd34b83201f6d9e9b0af2e5a578642d729f37540f471a028cc7a80</hash>
+          <hash alg="SHA-384">da4e31012db27384d99e07e209f2f4da8e189098745b8b9f0ffc8d83b3c6c778193e9a734f4c6b07d3812ba5b745b0cc</hash>
+          <hash alg="SHA-512">684016de3380cc02afa2e8bcdd8ab3cc602f6ad27e16c89070e45ec0aca2138d7f4394727b3c36ed38d4a430d7e5b8bc29f7d7bf92572b5c92eb331cdefb38f9</hash>
         </hashes>
         <externalReferences>
           <reference type="vcs">
@@ -24,10 +24,10 @@
         </externalReferences>
       </tool>
     </tools>
-    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module" type="application">
+    <component bom-ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.4?type=module" type="application">
       <name>github.com/securitywithoutborders/hardentools</name>
-      <version>v2.3</version>
-      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module</purl>
+      <version>v2.4</version>
+      <purl>pkg:golang/github.com/securitywithoutborders/hardentools@v2.4?type=module</purl>
       <externalReferences>
         <reference type="vcs">
           <url>https://github.com/securitywithoutborders/hardentools</url>
@@ -37,7 +37,7 @@
         <property name="cdx:gomod:build:env:CGO_ENABLED">1</property>
         <property name="cdx:gomod:build:env:GOARCH">386</property>
         <property name="cdx:gomod:build:env:GOOS">windows</property>
-        <property name="cdx:gomod:build:env:GOVERSION">go1.19.2</property>
+        <property name="cdx:gomod:build:env:GOVERSION">go1.20</property>
         <property name="cdx:gomod:build:tag">cli</property>
       </properties>
       <evidence>
@@ -68,7 +68,7 @@
     </component>
   </components>
   <dependencies>
-    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.3?type=module">
+    <dependency ref="pkg:golang/github.com/securitywithoutborders/hardentools@v2.4?type=module">
       <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
     </dependency>
     <dependency ref="pkg:golang/golang.org/x/sys@v0.3.0?type=module"></dependency>
