@@ -33,6 +33,7 @@ var hardenSubjectsForUnprivilegedUsers = []HardenInterface{
 	AdobePDFProtectedView,
 	AdobePDFEnhancedSecurity,
 	ShowFileExt,
+	OneNoteBlockExtensions,
 }
 var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers, []HardenInterface{
 	Autorun,
