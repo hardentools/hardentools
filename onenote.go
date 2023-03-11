@@ -23,8 +23,8 @@ import (
 // OneNoteBlockExtensions blocks certain types of files in OneNote client
 var OneNoteBlockExtensions = &OfficeRegistryRegExSingleDWORD{
 	RootKey:         registry.CURRENT_USER,
-	PathRegEx:       "SOFTWARE\\Policies\\Microsoft\\office\\%s\\%s\\options",
-	ValueName:       "disableembeddedfiles",
+	PathRegEx:       "SOFTWARE\\Microsoft\\Office\\%s\\%s\\Options",
+	ValueName:       "DisableEmbeddedFiles",
 	HardenedValue:   1,
 	OfficeApps:      []string{"onenote"},
 	OfficeVersions:  standardOfficeVersions,
