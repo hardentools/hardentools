@@ -44,6 +44,11 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	WindowsASR,
 	LSA,
 	PUA,
+	LibreOfficeMacroSecurityLevel,
+	LibreOfficeHyperlinksWithCtrlClick,
+	LibreOfficeBlockUntrustedRefererLinks,
+	LibreOfficeUpdateCheck,
+	LibreOfficeDisableUpdateLink,
 }...)
 
 var expertConfig map[string]bool
