@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2021 Security Without Borders
+// Copyright (C) 2017-2023 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,6 +44,11 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	WindowsASR,
 	LSA,
 	PUA,
+	LibreOfficeMacroSecurityLevel,
+	LibreOfficeHyperlinksWithCtrlClick,
+	LibreOfficeBlockUntrustedRefererLinks,
+	LibreOfficeUpdateCheck,
+	LibreOfficeDisableUpdateLink,
 }...)
 
 var expertConfig map[string]bool
