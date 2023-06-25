@@ -68,9 +68,11 @@ var LibreOfficeMacroSecurityLevel = &RegistryMultiValue{
 			description:   "Sets SecureURL overwritable by user.",
 		},
 	},
-	shortName:       "LibreOffice Macro Security",
-	longName:        "LibreOffice Macro Security",
-	description:     "Sets MacroSecurityLevel for LibreOffice to highest level.",
+	shortName: "LibreOffice Macro Security",
+	longName:  "LibreOffice Macro Security",
+	description: "Sets MacroSecurityLevel for LibreOffice to highest\n" +
+		"level, which effectively disables Macros, except\n" +
+		"you add some directories to the exception list.",
 	hardenByDefault: true,
 }
 
@@ -101,9 +103,10 @@ var LibreOfficeHyperlinksWithCtrlClick = &RegistryMultiValue{
 			description:   "Sets HyperlinksWithCtrlClick non-overwritable by user.",
 		},
 	},
-	shortName:       "LibreOffice Ctrl-Click Hyperlinks",
-	longName:        "LibreOffice Ctrl-Click to follow Hyperlinks",
-	description:     "Requires Ctrl-Click to follow Hyperlinks for LibreOffice.",
+	shortName: "LibreOffice Ctrl-Click Hyperlinks",
+	longName:  "LibreOffice Ctrl-Click to follow Hyperlinks",
+	description: "Requires Ctrl-Click to follow Hyperlinks for\n" +
+		"LibreOffice (which is the default).",
 	hardenByDefault: true,
 }
 
@@ -111,8 +114,7 @@ var LibreOfficeHyperlinksWithCtrlClick = &RegistryMultiValue{
 // Defines whether linked images from external sources may be retrieved. A
 // corresponding restriction does not apply to documents stored in trusted
 // locations. The option is only for images. This option does not restrict
-// the retrieval of other media files or linked documents. The option does not
-// restrict retrieval of other media files or linked documents.
+// the retrieval of other media files or linked documents.
 // Default value: Disabled
 // Recommended value: Enabled
 // Setting: org.openoffice.Office.Common/Security/Scripting/BlockUntrustedRefererLinks
@@ -157,6 +159,8 @@ var LibreOfficeBlockUntrustedRefererLinks = &RegistryMultiValue{
 // Default value: Every week
 // Hardened value: Every day (86400)
 // Setting: org.openoffice.Office.Jobs/Jobs/org.openoffice.Office.Jobs:Job['UpdateCheck']/Arguments/CheckInterval
+//
+// Note: CheckInterval seems not to work for LibreOffice 7.5.4
 var LibreOfficeUpdateCheck = &RegistryMultiValue{
 	ArraySingleSZ: []*RegistrySingleValueSZ{
 		{
@@ -196,7 +200,7 @@ var LibreOfficeUpdateCheck = &RegistryMultiValue{
 	},
 	shortName:       "LibreOffice Enforce Update Checks",
 	longName:        "LibreOffice Enforce Update Checks",
-	description:     "Enforces update checks for LibreOffice.",
+	description:     "Enforces regular update checks for LibreOffice.",
 	hardenByDefault: true,
 }
 
@@ -246,8 +250,12 @@ var LibreOfficeDisableUpdateLink = &RegistryMultiValue{
 			description:   "Sets Writer Update Link setting non-overwritable by user.",
 		},
 	},
-	shortName:       "LibreOffice Disable Links",
-	longName:        "LibreOffice Disable Updates from Links",
-	description:     "Disables updates from links for LibreOffice Writer and Calc documents.",
+	shortName: "LibreOffice Disable Links",
+	longName:  "LibreOffice Disable Updates from Links",
+	description: "Disables updates from linked documents for LibreOffice\n" +
+		"Writer and Calc documents upon opening a file. This\n" +
+		"prevents stealing of data using malicious documents.\n" +
+		"Note: Does not work for Writer as of today\n" +
+		" (latest test: LibreOffice 7.5.4)",
 	hardenByDefault: true,
 }
