@@ -22,10 +22,8 @@ endif
 	@mkdir -p $(BUILD_FOLDER)/
 	$(GOPATH)/bin/rsrc -arch 386 -manifest harden.manifest -ico harden.ico -o rsrc.syso
 	$(FLAGS_WINDOWS) go build $(GOFLAGS_WINUI) -o $(BUILD_FOLDER)/hardentools.exe
-	$(FLAGS_WINDOWS) cyclonedx-gomod app -output hardentools.bom.xml -licenses
 	@echo "[builder] Building Windows commandline executable"
 	$(FLAGS_WINDOWS) go build $(GOFLAGS_CLI) -o $(BUILD_FOLDER)/hardentools-cli.exe
-	$(FLAGS_WINDOWS) GOFLAGS=-tags=cli cyclonedx-gomod app -output hardentools-cli.bom.xml -licenses
 	@echo "[builder] Done!"
 
 
