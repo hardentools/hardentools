@@ -92,7 +92,9 @@ func isElevated() bool {
 
 // startWithElevatedPrivs starts progName with elevated privileges
 func startWithElevatedPrivs(progName string) bool {
-	ret := C.ExecuteWithRunas(C.CString(progName))
+	cprogname := C.CString(progName)
+	defer C.free(unsafe.Pointer(cprogname))
+	ret := C.ExecuteWithRunas(cprogname)
 	if ret == 1 {
 		return true
 	}
