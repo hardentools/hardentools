@@ -69,6 +69,7 @@ int ExecuteWithRunas(char execName[]){
 import "C"
 
 import (
+	"unsafe"
 	"fmt"
 	"io"
 	"io/ioutil"
