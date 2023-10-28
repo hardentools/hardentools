@@ -64,11 +64,19 @@ func main() {
 	appl = app.New()
 	appl.Settings().SetTheme(theme.LightTheme())
 	mainWindow = appl.NewWindow("Hardentools")
-	// emptyContainer needed to get minimum window size to be able to show
-	// (elevation) dialog.
-	emptyContainer := container.NewVScroll(widget.NewLabel(""))
-	emptyContainer.SetMinSize(fyne.NewSize(700, 300))
-	mainWindow.SetContent(emptyContainer)
+
+	// Show splash screen since loading takes some time (at least with admin
+	// privileges) due to sequential reading of all the settings.
+	progressBar := widget.NewProgressBarInfinite()
+	progressBar.Show()
+	splashContainer := container.NewVScroll(container.NewVBox(
+		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
+		progressBar))
+
+	// make room for elevation dialog
+	splashContainer.SetMinSize(fyne.NewSize(700, 300))
+
+	mainWindow.SetContent(splashContainer)
 	// set window icon
 	iconContent, _ := base64.StdEncoding.DecodeString(IconBase64)
 	var windowIcon = HardentoolsWindowIconStruct{
