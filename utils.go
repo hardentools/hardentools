@@ -69,7 +69,6 @@ int ExecuteWithRunas(char execName[]){
 import "C"
 
 import (
-	"unsafe"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -78,6 +77,7 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+	"unsafe"
 
 	"golang.org/x/sys/windows/registry"
 )

@@ -46,24 +46,8 @@ func mainGUI() {
 		askElevationDialog()
 	}
 
-	// Show splash screen since loading takes some time (at least with admin
-	// privileges) due to sequential reading of all the settings.
-	showSplash()
-
 	// Show main screen.
 	createMainGUIContent(elevationStatus)
-}
-
-// showSplash shows an splash content during initialization.
-func showSplash() {
-	progressBar := widget.NewProgressBarInfinite()
-	progressBar.Show()
-	splashContent := container.NewVBox(
-		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
-		progressBar)
-	mainWindow.SetContent(splashContent)
-	mainWindow.Resize(fyne.NewSize(550, 80))
-	mainWindow.CenterOnScreen()
 }
 
 // createMainGUIContent shows the main GUI screen that allows to harden or
@@ -74,6 +58,7 @@ func createMainGUIContent(elevationStatus bool) {
 	var enableHardenAdditionalButton bool
 	var buttonFunc func()
 	var expertSettingsCheckBox *widget.Check
+	var mainWindowContainer *fyne.Container
 
 	// Check if we are running with elevated rights.
 	if elevationStatus == false {
@@ -218,19 +203,21 @@ func createMainGUIContent(elevationStatus bool) {
 
 	expertSettingsCheckBox = widget.NewCheck("Show Expert Settings", func(on bool) {
 		if on {
-			mainWindow.SetContent(container.NewVBox(expertTabWidget, mainTabWidget))
+			mainWindowContainer.RemoveAll()
+			mainWindowContainer.AddObject(container.NewVBox(expertTabWidget, mainTabWidget))
 		} else {
 			introTextWidget := widget.NewCard("", "Introduction", introText)
 			introAndHelpContainer := container.NewBorder(nil, nil, nil, help, introTextWidget)
-			mainWindow.SetContent(container.NewVBox(introAndHelpContainer, mainTabWidget))
+			mainWindowContainer.RemoveAll()
+			mainWindowContainer.AddObject(container.NewVBox(introAndHelpContainer, mainTabWidget))
 		}
-		mainWindow.CenterOnScreen()
 	})
 	mainTabContent.Add(expertSettingsCheckBox)
 
 	introTextWidget := widget.NewCard("", "Introduction", introText)
 	introAndHelpContainer := container.NewBorder(nil, nil, nil, help, introTextWidget)
-	mainWindow.SetContent(container.NewVBox(introAndHelpContainer, mainTabWidget))
+	mainWindowContainer = container.NewVBox(introAndHelpContainer, mainTabWidget)
+	mainWindow.SetContent(mainWindowContainer)
 	mainWindow.CenterOnScreen()
 }
 
@@ -339,7 +326,7 @@ func showEventsTextArea() {
 		thirdColumn)
 
 	resultBoxContainer := container.NewVScroll(resultBox)
-	resultBoxContainer.SetMinSize(fyne.NewSize(500, 600))
+	resultBoxContainer.SetMinSize(fyne.NewSize(500, 800))
 	resultBoxGroup := widget.NewCard("", "", resultBoxContainer)
 
 	messageBox = container.NewVBox()
