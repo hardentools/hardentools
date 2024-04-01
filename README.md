@@ -62,6 +62,9 @@ and restore with:
 
     .\hardentools-cli.exe -restore
 
+### Error "Windows ASR rules failed with error"
+
+Windows ASR rules hardening might fail, if you have not enabled Windows Defender antivirus and/or you use a third-party Antivirus solution. In case you use a third-party Antivirus solution either deinstall the third-party solution and activate Windows Defender or disable "Windows ASR rules" hardening item in the Hardentools expert settings dialog. 
 
 ## Credits
 
