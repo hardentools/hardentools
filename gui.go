@@ -138,14 +138,17 @@ func createMainGUIContent(elevationStatus bool) {
 	countExpertSettings := len(expertCompWidgetArray)
 	expertTab1 := container.NewVBox()
 	expertTab2 := container.NewVBox()
+	expertTab3 := container.NewVBox()
 	for i, compWidget := range expertCompWidgetArray {
-		if i < countExpertSettings/2 {
+		if i < countExpertSettings/3 {
 			expertTab1.Add(compWidget)
-		} else {
+		} else if i < countExpertSettings/3*2 {
 			expertTab2.Add(compWidget)
+		} else {
+			expertTab3.Add(compWidget)
 		}
 	}
-	expertSettingsHBox := container.NewHBox(expertTab1, expertTab2)
+	expertSettingsHBox := container.NewHBox(expertTab1, expertTab2, expertTab3)
 	expertTabWidget := widget.NewCard("", "Expert Settings",
 		container.NewVBox(widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{}),
 			expertSettingsHBox))

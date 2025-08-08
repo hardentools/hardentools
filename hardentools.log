@@ -1,0 +1,4 @@
+2025/08/08 19:11:52 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/08/08 19:11:52   From: C:/Users/obsti/Documents/golang-portable-windows/workspace/src/hardentools/gui.go:223
+2025/08/08 19:11:52 *** Error in Fyne call thread, this should have been called in fyne.Do[AndWait] ***
+2025/08/08 19:11:52   From: C:/Users/obsti/Documents/golang-portable-windows/workspace/src/hardentools/gui.go:224
