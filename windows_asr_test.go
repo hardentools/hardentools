@@ -67,7 +67,7 @@ func TestIsHardened(t *testing.T) {
 
 func debugOutput(t *testing.T) {
 	psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
-	ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+	ruleIDsOut, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", psString)
 	if err != nil {
 		t.Logf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
 		t.Logf("ERROR: WindowsASR: Powershell Output was: %s", ruleIDsOut)
@@ -75,7 +75,7 @@ func debugOutput(t *testing.T) {
 	}
 
 	psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
-	ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+	ruleActionsOut, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", psString)
 	if err != nil {
 		t.Logf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
 		t.Logf("ERROR: WindowsASR: Powershell Output was: %s", ruleActionsOut)

@@ -1,3 +1,6 @@
 .vscode/
 build/
 rsrc.syso
+*.log
+*.exe
+*.exe~

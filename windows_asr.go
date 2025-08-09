@@ -138,7 +138,7 @@ func (asr WindowsASRStruct) IsHardened() bool {
 	}
 
 	psString := fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Ids")
-	ruleIDsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+	ruleIDsOut, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", psString)
 	if err != nil {
 		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
 		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleIDsOut)
@@ -147,7 +147,7 @@ func (asr WindowsASRStruct) IsHardened() bool {
 	}
 
 	psString = fmt.Sprintf("$prefs = Get-MpPreference; $prefs.AttackSurfaceReductionRules_Actions")
-	ruleActionsOut, err := executeCommand("PowerShell.exe", "-Command", psString)
+	ruleActionsOut, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", psString)
 	if err != nil {
 		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed.", psString)
 		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", ruleActionsOut)
@@ -205,7 +205,7 @@ func AddMPPreference(ruleID string, enabled bool) error {
 	}
 	psString := fmt.Sprintf("Add-MpPreference -AttackSurfaceReductionRules_Ids %s -AttackSurfaceReductionRules_Actions %s", ruleID, action)
 	Trace.Printf("WindowsASR: Executing Powershell.exe with command \"%s\"", psString)
-	out, err := executeCommand("PowerShell.exe", "-Command", psString)
+	out, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", psString)
 	if err != nil {
 		Info.Printf("ERROR: WindowsASR: Verify if Windows Defender is running. Executing Powershell.exe with command \"%s\" failed. ", psString)
 		Info.Printf("ERROR: WindowsASR: Powershell Output was: %s", out)
@@ -280,7 +280,7 @@ func warnIfWindowsDefenderNotActive() {
 	{
 		command := "(Get-MpPreference).MAPSReporting"
 		expectedValue := "2"
-		out, err := executeCommand("PowerShell.exe", "-Command", command)
+		out, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", command)
 		if err != nil {
 			Info.Printf("Could not verify if Windows Defender Cloud Protection is enabled due to error accessing registry")
 			return
@@ -289,6 +289,8 @@ func warnIfWindowsDefenderNotActive() {
 		out = strings.ReplaceAll(out, "\r\n", "")
 		if out != expectedValue {
 			// show notification
+			Info.Println("Windows Defender Cloud Protection  is not enabled. Return Value = '" +
+				out + "' instead of '2'")
 			showInfoDialog("Windows Defender Cloud Protection  is not enabled.\nSome ASR rules won't work.")
 		}
 	}
@@ -297,7 +299,7 @@ func warnIfWindowsDefenderNotActive() {
 	{
 		command := "(Get-MpPreference).DisableRealtimeMonitoring"
 		expectedValue := "False"
-		out, err := executeCommand("PowerShell.exe", "-Command", command)
+		out, err := executeCommand("PowerShell.exe", "-noprofile", "-Command", command)
 		if err != nil {
 			Info.Printf("Could not verify if Windows Defender Cloud Protection is enabled due to error accessing registry")
 			return
@@ -306,6 +308,8 @@ func warnIfWindowsDefenderNotActive() {
 		out = strings.ReplaceAll(out, "\r\n", "")
 
 		if out != expectedValue {
+			Info.Println("Windows Defender Realtime Protection is not enabled. Return Value = '" +
+				out + "' instead of 'True'")
 			showInfoDialog("Windows Defender Realtime Protection is not enabled.\nASR rules won't work.")
 		}
 	}

@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2023 Security Without Borders
+// Copyright (C) 2017-2025 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ var LibreOfficeMacroSecurityLevel = &RegistryMultiValue{
 	description: "Sets MacroSecurityLevel for LibreOffice to highest\n" +
 		"level, which effectively disables Macros, except\n" +
 		"you add some directories to the exception list.",
-	hardenByDefault: true,
+	hardenByDefault: false,
 }
 
 // LibreOfficeHyperlinksWithCtrlClick sets HyperlinksWithCtrlClick:
@@ -107,7 +107,7 @@ var LibreOfficeHyperlinksWithCtrlClick = &RegistryMultiValue{
 	longName:  "LibreOffice Ctrl-Click to follow Hyperlinks",
 	description: "Requires Ctrl-Click to follow Hyperlinks for\n" +
 		"LibreOffice (which is the default).",
-	hardenByDefault: true,
+	hardenByDefault: false,
 }
 
 // LibreOfficeBlockUntrustedRefererLinks set BlockUntrustedRefererLinks:
@@ -142,7 +142,7 @@ var LibreOfficeBlockUntrustedRefererLinks = &RegistryMultiValue{
 	shortName:       "LibreOffice Block Untrusted Referer Links",
 	longName:        "LibreOffice Block Untrusted Referer Links",
 	description:     "Blocks untrusted referer links for images for LibreOffice.",
-	hardenByDefault: true,
+	hardenByDefault: false,
 }
 
 // LibreOfficeUpdateCheck sets two settings to enforce check for updates
@@ -201,7 +201,7 @@ var LibreOfficeUpdateCheck = &RegistryMultiValue{
 	shortName:       "LibreOffice Enforce Update Checks",
 	longName:        "LibreOffice Enforce Update Checks",
 	description:     "Enforces regular update checks for LibreOffice.",
-	hardenByDefault: true,
+	hardenByDefault: false,
 }
 
 // LibreOfficeDisableUpdateLink (Calc & Writer)
@@ -227,7 +227,7 @@ var LibreOfficeDisableUpdateLink = &RegistryMultiValue{
 			RootKey:       registry.LOCAL_MACHINE,
 			Path:          "SOFTWARE\\Policies\\LibreOffice\\org.openoffice.Office.Writer\\Content\\Update\\Link",
 			ValueName:     "Value",
-			HardenedValue: "0",
+			HardenedValue: "1",
 			shortName:     "LibreOffice Writer Update Link Value",
 			description:   "Sets Writer Update Link for LibreOffice",
 		},
@@ -257,5 +257,5 @@ var LibreOfficeDisableUpdateLink = &RegistryMultiValue{
 		"prevents stealing of data using malicious documents.\n" +
 		"Note: Does not work for Writer as of today\n" +
 		" (latest test: LibreOffice 7.5.4)",
-	hardenByDefault: true,
+	hardenByDefault: false,
 }

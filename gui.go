@@ -138,14 +138,17 @@ func createMainGUIContent(elevationStatus bool) {
 	countExpertSettings := len(expertCompWidgetArray)
 	expertTab1 := container.NewVBox()
 	expertTab2 := container.NewVBox()
+	expertTab3 := container.NewVBox()
 	for i, compWidget := range expertCompWidgetArray {
-		if i < countExpertSettings/2 {
+		if i < countExpertSettings/3 {
 			expertTab1.Add(compWidget)
-		} else {
+		} else if i < countExpertSettings/3*2 {
 			expertTab2.Add(compWidget)
+		} else {
+			expertTab3.Add(compWidget)
 		}
 	}
-	expertSettingsHBox := container.NewHBox(expertTab1, expertTab2)
+	expertSettingsHBox := container.NewHBox(expertTab1, expertTab2, expertTab3)
 	expertTabWidget := widget.NewCard("", "Expert Settings",
 		container.NewVBox(widget.NewLabelWithStyle(expertSettingsText, fyne.TextAlignCenter, fyne.TextStyle{}),
 			expertSettingsHBox))
@@ -217,8 +220,11 @@ func createMainGUIContent(elevationStatus bool) {
 	introTextWidget := widget.NewCard("", "Introduction", introText)
 	introAndHelpContainer := container.NewBorder(nil, nil, nil, help, introTextWidget)
 	mainWindowContainer = container.NewVBox(introAndHelpContainer, mainTabWidget)
-	mainWindow.SetContent(mainWindowContainer)
-	mainWindow.CenterOnScreen()
+	fyne.Do(func() {
+		mainWindow.SetContent(mainWindowContainer)
+		mainWindow.CenterOnScreen()
+	})
+
 }
 
 // showErrorDialog shows an error message.
@@ -242,14 +248,8 @@ func showErrorDialog(errorMessage string) {
 // showInfoDialog shows an info message.
 func showInfoDialog(infoMessage string) {
 	if mainWindow != nil {
-		//ch := make(chan bool)
 		infoDialog := dialog.NewInformation("Information", infoMessage, mainWindow)
-		//infoDialog.SetOnClosed(func() {
-		//	ch <- true
-		//})
 		infoDialog.Show()
-		//<-ch
-		//infoDialog.Hide()
 	} else {
 		// no main windows - seem to be in command line mode.
 		Info.Println("Information: " + infoMessage)
@@ -260,9 +260,10 @@ func showInfoDialog(infoMessage string) {
 func showEndDialog(infoMessage string) {
 	ch := make(chan bool)
 
-	eventsTextAreaProgressBar.Hide()
-	inProgressLabel.Hide()
-
+	fyne.Do(func() {
+		eventsTextAreaProgressBar.Hide()
+		inProgressLabel.Hide()
+	})
 	message := widget.NewLabelWithStyle(infoMessage, fyne.TextAlignCenter, fyne.TextStyle{Monospace: true})
 	messageBox.Add(container.NewVBox(message,
 		widget.NewButton("Close", func() {
@@ -326,7 +327,7 @@ func showEventsTextArea() {
 		thirdColumn)
 
 	resultBoxContainer := container.NewVScroll(resultBox)
-	resultBoxContainer.SetMinSize(fyne.NewSize(500, 800))
+	resultBoxContainer.SetMinSize(fyne.NewSize(500, 600))
 	resultBoxGroup := widget.NewCard("", "", resultBoxContainer)
 
 	messageBox = container.NewVBox()
@@ -337,8 +338,10 @@ func showEventsTextArea() {
 	messageBox.Add(eventsTextAreaProgressBar)
 
 	eventsArea := container.NewVBox(messageBox, resultBoxGroup)
-	mainWindow.SetContent(eventsArea)
-	mainWindow.CenterOnScreen()
+	fyne.Do(func() {
+		mainWindow.SetContent(eventsArea)
+		mainWindow.CenterOnScreen()
+	})
 }
 
 // ShowSuccess sets GUI status of name field to success
@@ -372,13 +375,17 @@ func ShowFailure(name, failureText string) {
 func ShowIsHardened(name string) {
 	label := stateLabels[name]
 	if label != nil {
-		label.SetText("is hardened")
+		fyne.Do(func() {
+			label.SetText("is hardened")
+		})
 	} else {
 		stateLabels[name] = widget.NewLabel("is hardened")
 
-		firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
-		secondColumn.Add(container.NewHBox(widget.NewLabel("not selected")))
-		thirdColumn.Add(container.NewHBox(stateLabels[name]))
+		fyne.Do(func() {
+			firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
+			secondColumn.Add(container.NewHBox(widget.NewLabel("not selected")))
+			thirdColumn.Add(container.NewHBox(stateLabels[name]))
+		})
 	}
 }
 
@@ -386,13 +393,17 @@ func ShowIsHardened(name string) {
 func ShowNotHardened(name string) {
 	label := stateLabels[name]
 	if label != nil {
-		label.SetText("not hardened")
+		fyne.Do(func() {
+			label.SetText("not hardened")
+		})
 	} else {
 		stateLabels[name] = widget.NewLabel("not hardened")
 
-		firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
-		secondColumn.Add(container.NewHBox(widget.NewLabel("not selected")))
-		thirdColumn.Add(container.NewHBox(stateLabels[name]))
+		fyne.Do(func() {
+			firstColumn.Add(container.NewHBox(widget.NewLabel(name)))
+			secondColumn.Add(container.NewHBox(widget.NewLabel("not selected")))
+			thirdColumn.Add(container.NewHBox(stateLabels[name]))
+		})
 	}
 }
 

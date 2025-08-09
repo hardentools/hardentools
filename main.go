@@ -22,12 +22,14 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 )
 
 func init() {
@@ -67,14 +69,15 @@ func main() {
 
 	// Show splash screen since loading takes some time (at least with admin
 	// privileges) due to sequential reading of all the settings.
-	progressBar := widget.NewProgressBarInfinite()
-	progressBar.Show()
-	splashContainer := container.NewVScroll(container.NewVBox(
-		widget.NewLabelWithStyle("Hardentools is starting up. Please wait...", fyne.TextAlignCenter, fyne.TextStyle{Monospace: true}),
-		progressBar))
+	splashText := canvas.NewText("Hardentools is starting up. Please wait...", color.Black)
+	splashText.Alignment = fyne.TextAlignCenter
+	splashText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
+	splashText.TextSize = 22
+	splashContainer := container.NewVScroll(container.New(
+		layout.NewCenterLayout(), splashText))
 
 	// make room for elevation dialog
-	splashContainer.SetMinSize(fyne.NewSize(700, 300))
+	splashContainer.SetMinSize(fyne.NewSize(1000, 400))
 
 	mainWindow.SetContent(splashContainer)
 	// set window icon

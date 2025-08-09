@@ -98,7 +98,7 @@ func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		leftDisallowRunValues := 0
 		values, err := keyDisallow.ReadValueNames(-1)
 		if err != nil {
-			Info.Printf(err.Error())
+			Info.Println(err.Error())
 		} else {
 			newValues := make(map[int]string)
 
@@ -108,7 +108,7 @@ func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 				if err != nil {
 					break
 				}
-				Trace.Printf(value + "=" + content)
+				Trace.Println(value + "=" + content)
 
 				// Saving data.
 				newValues[i+1] = content
@@ -116,7 +116,7 @@ func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 				// Delete old value.
 				err = keyDisallow.DeleteValue(value)
 				if err != nil {
-					Info.Printf(err.Error())
+					Info.Println(err.Error())
 					return errors.New(errorRestoreDisallowRunFailed)
 				}
 			}
@@ -124,7 +124,7 @@ func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 			for key, val := range newValues {
 				err := keyDisallow.SetStringValue(strconv.Itoa(key), val)
 				if err != nil {
-					Info.Printf(err.Error())
+					Info.Println(err.Error())
 					return errors.New(errorRestoreDisallowRunFailed)
 				}
 			}
@@ -139,20 +139,20 @@ func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 			// Delete DisallowRun key if there are values left, otherwise keep it.
 			err := registry.DeleteKey(registry.CURRENT_USER, explorerDisallowRunKey)
 			if err != nil {
-				Info.Printf(err.Error())
+				Info.Println(err.Error())
 				return errors.New(errorRestoreDisallowRunFailed)
 			}
 
 			keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, explorerPoliciesKey, registry.ALL_ACCESS)
 			if err != nil {
-				Info.Printf(err.Error())
+				Info.Println(err.Error())
 				return errors.New(errorRestoreDisallowRunFailed)
 			}
 			defer keyExplorer.Close()
 
 			err = keyExplorer.DeleteValue("DisallowRun")
 			if err != nil {
-				Info.Printf(err.Error())
+				Info.Println(err.Error())
 				return errors.New(errorRestoreDisallowRunFailed)
 			}
 		}
@@ -190,14 +190,14 @@ func (powerShell PowerShellDisallowRunMembers) Harden(harden bool) error {
 		// Create or modify DisallowRun value.
 		keyExplorer, err := registry.OpenKey(registry.CURRENT_USER, explorerPoliciesKey, registry.ALL_ACCESS)
 		if err != nil {
-			Info.Printf(err.Error())
+			Info.Println(err.Error())
 			return errors.New("Could not disable PowerShell due to error " + err.Error())
 		}
 		defer keyExplorer.Close()
 
 		err = keyExplorer.SetDWordValue("DisallowRun", 0x01)
 		if err != nil {
-			Info.Printf(err.Error())
+			Info.Println(err.Error())
 			return errors.New("Could not disable PowerShell due to error " + err.Error())
 		}
 	}
