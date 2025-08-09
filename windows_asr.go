@@ -289,7 +289,7 @@ func warnIfWindowsDefenderNotActive() {
 		out = strings.ReplaceAll(out, "\r\n", "")
 		if out != expectedValue {
 			// show notification
-			Info.Printf("Windows Defender Cloud Protection  is not enabled. Return Value = '" +
+			Info.Println("Windows Defender Cloud Protection  is not enabled. Return Value = '" +
 				out + "' instead of '2'")
 			showInfoDialog("Windows Defender Cloud Protection  is not enabled.\nSome ASR rules won't work.")
 		}
@@ -308,7 +308,7 @@ func warnIfWindowsDefenderNotActive() {
 		out = strings.ReplaceAll(out, "\r\n", "")
 
 		if out != expectedValue {
-			Info.Printf("Windows Defender Realtime Protection is not enabled. Return Value = '" +
+			Info.Println("Windows Defender Realtime Protection is not enabled. Return Value = '" +
 				out + "' instead of 'True'")
 			showInfoDialog("Windows Defender Realtime Protection is not enabled.\nASR rules won't work.")
 		}
