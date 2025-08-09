@@ -5,7 +5,7 @@ set GOARCH=386
 set CGO_ENABLED=1
 set CC=i686-w64-mingw32-gcc
 
-go get -d
+go get
 go mod download
 %GOPATH%/bin/rsrc -manifest harden.manifest -ico harden.ico -o rsrc.syso
 go fmt

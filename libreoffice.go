@@ -227,7 +227,7 @@ var LibreOfficeDisableUpdateLink = &RegistryMultiValue{
 			RootKey:       registry.LOCAL_MACHINE,
 			Path:          "SOFTWARE\\Policies\\LibreOffice\\org.openoffice.Office.Writer\\Content\\Update\\Link",
 			ValueName:     "Value",
-			HardenedValue: "0",
+			HardenedValue: "1",
 			shortName:     "LibreOffice Writer Update Link Value",
 			description:   "Sets Writer Update Link for LibreOffice",
 		},
