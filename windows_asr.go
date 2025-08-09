@@ -62,7 +62,7 @@ var actionsArrayHardended = []bool{true, true, true, true, true, true, true,
 var actionsArrayNotHardended = []bool{false, false, false, false, false, false,
 	false, false, false, false, false, false, false, false, false}
 
-// WindowsASRStruct ist the struct for HardenInterface implementation.
+// WindowsASRStruct is the struct for HardenInterface implementation.
 type WindowsASRStruct struct {
 	shortName       string
 	longName        string
