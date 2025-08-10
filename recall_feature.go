@@ -49,6 +49,9 @@ var Recall = &RecallStruct{
 
 var featureName = "recall"
 
+// TODO: Extensive logging with "Info" log level needs to be reduced after
+// beta testing
+
 // Harden method.
 func (recall RecallStruct) Harden(harden bool) error {
 	psString := ""
@@ -65,14 +68,14 @@ func (recall RecallStruct) Harden(harden bool) error {
 	} else {
 		savedState, err := getSavedHardenState(featureName)
 		if err != nil {
-			// probably no saved state found, so will not restore
+			// no saved state found, so will not restore
 			Info.Println("Recall: No saved state found, so will not restore")
-			return errors.New("No saved state found for Recall, so will not restore")
+			return nil
 		}
 
 		if savedState != "enabled" {
 			Info.Println("Recall: Was not in enabled state before hardening, so will not restore")
-			return errors.New("Recall was not enabled before hardening, so will not restore")
+			return nil
 		}
 
 		// set Powershell-Command
@@ -84,7 +87,7 @@ func (recall RecallStruct) Harden(harden bool) error {
 	if err != nil {
 		Info.Printf("ERROR: Recall: Executing Powershell.exe with command \"%s\" failed", psString)
 		Info.Printf("ERROR: Recall: Powershell Output was: %s", out)
-		return errors.New("Executing powershell command " + psString + " failed")
+		return errors.New("Recall Feature system call failed")
 	}
 
 	isHardened := recall.IsHardened()
@@ -105,7 +108,6 @@ func (recall RecallStruct) Harden(harden bool) error {
 	}
 
 	Info.Println("Recall: Process successfull")
-
 	return nil
 }
 
