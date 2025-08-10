@@ -659,10 +659,9 @@ func getSavedHardenState(feature string) (savedState string, err error) {
 	if err != nil {
 		Trace.Println("Could not retrieve saved state for feature " + feature + " due to error: " + err.Error())
 		return "", err
-	} else {
-		Trace.Println("Retreived saved state for feature " + feature + ":" + savedState)
-		return savedState, nil
 	}
+	Trace.Println("Retreived saved state for feature " + feature + ":" + savedState)
+	return savedState, nil
 }
 
 func deleteSavedHardenState(feature string) error {

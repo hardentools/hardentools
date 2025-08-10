@@ -128,10 +128,9 @@ func (recall RecallStruct) IsHardened() bool {
 	if strings.HasPrefix(out, "Disabled") {
 		Info.Print("Recall: Is hardened")
 		return true
-	} else {
-		Info.Print("Recall: Not hardened")
-		return false
 	}
+	Info.Print("Recall: Not hardened")
+	return false
 }
 
 // Name returns Name.
