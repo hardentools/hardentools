@@ -1,5 +1,5 @@
 // Hardentools
-// Copyright (C) 2017-2023 Security Without Borders
+// Copyright (C) 2017-2025 Security Without Borders
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,6 +41,53 @@ func init() {
 var mainWindow fyne.Window
 var appl fyne.App
 
+// custome theme for a little bit more accessibility / contrast
+type myTheme struct{}
+
+var _ fyne.Theme = (*myTheme)(nil)
+
+// Color adapts the colors for Background and Foreground
+func (m myTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	if name == theme.ColorNameBackground {
+		if variant == theme.VariantLight {
+			return color.White
+		}
+		return color.Black
+	}
+
+	if name == theme.ColorNameForeground {
+		if variant == theme.VariantLight {
+			return color.Black
+		}
+		return color.White
+	}
+
+	// if name == theme.ColorNameButton {
+	// 	return color.RGBA{R: 0x1C, G: 0x1C, B: 0x1C, A: 90}
+	// }
+
+	// if name == theme.ColorNameFocus {
+	// 	return color.RGBA{R: 0x1C, G: 0x1C, B: 0x1C, A: 188}
+	// }
+
+	return theme.DefaultTheme().Color(name, variant)
+}
+
+// Font returns the default font
+func (m myTheme) Font(style fyne.TextStyle) fyne.Resource {
+	return theme.DefaultTheme().Font(style)
+}
+
+// Size returns the default font size
+func (m myTheme) Size(name fyne.ThemeSizeName) float32 {
+	return theme.DefaultTheme().Size(name)
+}
+
+// Icon returns the default icons
+func (m myTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
+	return theme.DefaultTheme().Icon(name)
+}
+
 // Main method for hardentools.
 func main() {
 	// parse command line parameters/flags
@@ -64,12 +111,12 @@ func main() {
 
 	// Init main window.
 	appl = app.New()
-	appl.Settings().SetTheme(theme.LightTheme())
+	appl.Settings().SetTheme(&myTheme{})
 	mainWindow = appl.NewWindow("Hardentools")
 
 	// Show splash screen since loading takes some time (at least with admin
 	// privileges) due to sequential reading of all the settings.
-	splashText := canvas.NewText("Hardentools is starting up. Please wait...", color.Black)
+	splashText := canvas.NewText("Hardentools is starting up. Please wait...", theme.ForegroundColor())
 	splashText.Alignment = fyne.TextAlignCenter
 	splashText.TextStyle = fyne.TextStyle{Monospace: true, Bold: true}
 	splashText.TextSize = 22

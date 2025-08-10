@@ -624,3 +624,58 @@ func restoreSavedRegistryKeys() error {
 
 	return err
 }
+
+// saveHardenState is a helper method for saving non-registry-based harden status
+func saveHardenState(feature, stateToSafe string) error {
+	// Open hardentools root key.
+	hardentoolsKey, _, err := registry.CreateKey(registry.CURRENT_USER,
+		hardentoolsKeyPath, registry.ALL_ACCESS)
+	if err != nil {
+		return err
+	}
+	defer hardentoolsKey.Close()
+
+	// save value
+	Trace.Println("Saving value for feature: " + feature + " with " + stateToSafe)
+	err = hardentoolsKey.SetStringValue("SavedStateNonReg_"+feature, stateToSafe)
+	if err != nil {
+		Info.Println("Could not save state due to error: " + err.Error())
+	}
+
+	return nil
+}
+
+// getSavedHardenState is a helper method for saving non-registry-based harden status
+func getSavedHardenState(feature string) (savedState string, err error) {
+	// Open hardentools root key.
+	hardentoolsKey, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.QUERY_VALUE)
+	if err != nil {
+		return "", err
+	}
+	defer hardentoolsKey.Close()
+
+	// Open registry key.
+	savedState, _, err = hardentoolsKey.GetStringValue("SavedStateNonReg_" + feature)
+	if err != nil {
+		Trace.Println("Could not retrieve saved state for feature " + feature + " due to error: " + err.Error())
+		return "", err
+	}
+	Trace.Println("Retreived saved state for feature " + feature + ":" + savedState)
+	return savedState, nil
+}
+
+func deleteSavedHardenState(feature string) error {
+	// Open hardentools root key.
+	hardentoolsKey, err := registry.OpenKey(registry.CURRENT_USER, hardentoolsKeyPath, registry.QUERY_VALUE)
+	if err != nil {
+		return err
+	}
+	defer hardentoolsKey.Close()
+
+	err = hardentoolsKey.DeleteValue("SavedStateNonReg_" + feature)
+	if err != nil {
+		Info.Printf("Could not delete saved state for feature %s due to error %s",
+			feature, err.Error())
+	}
+	return err
+}

@@ -49,6 +49,7 @@ var hardenSubjectsForPrivilegedUsers = append(hardenSubjectsForUnprivilegedUsers
 	LibreOfficeBlockUntrustedRefererLinks,
 	LibreOfficeUpdateCheck,
 	LibreOfficeDisableUpdateLink,
+	Recall,
 }...)
 
 var expertConfig map[string]bool

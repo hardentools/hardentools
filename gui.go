@@ -214,6 +214,7 @@ func createMainGUIContent(elevationStatus bool) {
 			mainWindowContainer.RemoveAll()
 			mainWindowContainer.AddObject(container.NewVBox(introAndHelpContainer, mainTabWidget))
 		}
+		mainWindow.CenterOnScreen()
 	})
 	mainTabContent.Add(expertSettingsCheckBox)
 
